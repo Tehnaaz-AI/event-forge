@@ -51,8 +51,10 @@ async function cleanAndInit() {
 
     const passwordHash = await bcrypt.hash(adminPassword, 12);
 
+    const adminName = process.env.ADMIN_NAME || 'Platform Administrator';
+
     const superAdmin = await User.create({
-      name: 'Platform Administrator',
+      name: adminName,
       email: adminEmail,
       passwordHash,
       role: 'PLATFORM_ADMIN',
