@@ -1,0 +1,75 @@
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { User, Organization } from '../models/index.js';
+
+export const registerUser = async ({ name, email, password, organizationName, role: requestedRole }) => {
+  const normalizedEmail = email.toLowerCase().trim();
+  if (await User.exists({ email: normalizedEmail })) throw new Error('Email already registered');
+  
+  const org = organizationName ? await Organization.create({ name: organizationName.trim(), contactEmail: normalizedEmail }) : null;
+  const role = requestedRole || (org ? 'ORGANIZER' : 'ATTENDEE');
+  
+  const user = await User.create({
+    name: name.trim(),
+    email: normalizedEmail,
+    passwordHash: await bcrypt.hash(password, 12),
+    role,
+    organization: org?._id
+  });
+
+  const populatedUser = await User.findById(user._id).populate('organization');
+  
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '8h' });
+  return { token, user: populatedUser };
+};
+
+export const loginUser = async ({ email, password }) => {
+  const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+passwordHash').populate('organization');
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    throw new Error('Invalid email or password');
+  }
+  
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '8h' });
+  user.passwordHash = undefined;
+  return { token, user };
+};
+
+export const updateOrganization = async (orgId, data) => {
+  const org = await Organization.findById(orgId);
+  if (!org) throw new Error('Organization not found');
+  if (data.name) org.name = data.name;
+  if (data.contactEmail) org.contactEmail = data.contactEmail;
+  if (data.settings) org.settings = { ...org.settings, ...data.settings };
+  return await org.save();
+};
+
+export const getUserProfile = async (userId) => {
+  const user = await User.findById(userId).populate('organization');
+  if (!user) throw new Error('User not found');
+  return user;
+};
+
+export const updateUserProfile = async (userId, data) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  if (data.name) user.name = data.name;
+  if (data.phone !== undefined) user.phone = data.phone;
+  if (data.avatar !== undefined) user.avatar = data.avatar;
+  if (data.bio !== undefined) user.bio = data.bio;
+
+  await user.save();
+  return await User.findById(userId).populate('organization');
+};
+
+export const changeUserPassword = async (userId, { currentPassword, newPassword }) => {
+  const user = await User.findById(userId).select('+passwordHash');
+  if (!user) throw new Error('User not found');
+
+  const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!isMatch) throw new Error('Current password does not match');
+
+  user.passwordHash = await bcrypt.hash(newPassword, 12);
+  await user.save();
+  return { success: true, message: 'Password updated successfully' };
+};

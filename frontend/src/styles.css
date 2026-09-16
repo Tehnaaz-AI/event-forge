@@ -1,0 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=Dancing+Script:wght@600;700&family=Cinzel:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-cursive: 'Dancing Script', cursive;
+  --font-display: 'Cinzel', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Luxury Warm Beige & Pure Ivory Palette */
+  --color-beige-50: #FDFAF5;
+  --color-beige-100: #F7F3EB;
+  --color-beige-200: #EFE8DA;
+  --color-beige-300: #E2D7C3;
+  --color-beige-400: #CBBCA3;
+  --color-beige-500: #B29F82;
+  --color-beige-600: #8E7B61;
+  --color-beige-700: #6B5C47;
+  --color-beige-800: #4B4031;
+  --color-beige-900: #2C251C;
+
+  /* Brand Accents (Caramel, Warm Bronze & Amber) */
+  --color-brand: #B45309;
+  --color-brand-light: #D97706;
+  --color-brand-dark: #78350F;
+  --color-gold: #C28E27;
+  
+  --color-charcoal: #1C1917;
+  --color-charcoal-light: #292524;
+}
+
+@layer base {
+  body {
+    background-color: #FAF8F5;
+    color: #1C1917;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Cursive Logo */
+.logo-cursive {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* Card Hover & Scroll Micro-Interactions */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 30px -10px rgba(44, 37, 28, 0.08), 0 8px 16px -4px rgba(44, 37, 28, 0.04);
+  border-color: rgba(180, 83, 9, 0.35);
+}
+
+/* Floating Curved Navbar */
+.curved-navbar {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(239, 232, 218, 0.95);
+  box-shadow: 0 10px 30px -5px rgba(44, 37, 28, 0.06), 0 4px 10px -2px rgba(44, 37, 28, 0.03);
+}
+
+/* Warm Beige Glassmorphism */
+.beige-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EFE8DA;
+  box-shadow: 0 4px 20px -2px rgba(44, 37, 28, 0.04), 0 2px 6px -1px rgba(44, 37, 28, 0.02);
+}
+
+.beige-glass {
+  background: rgba(253, 250, 245, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(239, 232, 218, 0.9);
+}
+
+.glow-warm {
+  box-shadow: 0 0 30px -5px rgba(180, 83, 9, 0.25);
+}
+
+/* Scanner Laser Animation */
+@keyframes scanline {
+  0% { top: 0%; }
+  50% { top: 95%; }
+  100% { top: 0%; }
+}
+
+.scanner-laser {
+  animation: scanline 2.2s ease-in-out infinite;
+}
+
+/* Warm Beige Slim Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF8F5;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #EFE8DA;
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B45309;
+}
+
+/* Custom Scrollbar Utility */
+.scrollbar-beige {
+  scrollbar-width: thin;
+  scrollbar-color: #E2D7C3 #FAF8F5;
+}
+
+.scrollbar-beige::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+}
+
+.scrollbar-beige::-webkit-scrollbar-track {
+  background: #FAF8F5;
+  border-radius: 9999px;
+}
+
+.scrollbar-beige::-webkit-scrollbar-thumb {
+  background: #E2D7C3;
+  border-radius: 9999px;
+}
+
+.scrollbar-beige::-webkit-scrollbar-thumb:hover {
+  background: #B45309;
+}
+
+/* Conference Badge Print Styling */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-badge, #printable-badge * {
+    visibility: visible;
+  }
+  #printable-badge {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: none !important;
+    border: 2px solid #1C1917 !important;
+    page-break-inside: avoid;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
