@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
 import AppNavbar from '../components/common/AppNavbar';
 import CookieConsent from '../components/common/CookieConsent';
 import useSiteAnalytics from '../components/common/useSiteAnalytics';
