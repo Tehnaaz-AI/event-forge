@@ -38,8 +38,8 @@ export default function Home() {
           </div>
           
           {/* Editorial Headline with Cursive Accent */}
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-stone-900 leading-[1.25]">
-            Curate, Scale &amp; <span className="cursive-masterpiece font-normal text-[#B45309] text-7xl md:text-9xl inline-block px-2 drop-shadow-xs align-middle">Masterpiece</span> <br />
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-stone-900 leading-[1.25]">
+            Curate, Scale &amp; <span className="cursive-masterpiece font-normal text-[#B45309] text-5xl sm:text-7xl md:text-8xl inline-block px-1.5 align-baseline">Masterpiece</span> <br />
             <span className="font-serif italic font-normal text-stone-800">
               World-Class Conferences
             </span>
@@ -85,44 +85,44 @@ export default function Home() {
           </div>
 
           {/* High-Level Trust Badges */}
-          <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto text-left">
-            <div className="bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold shrink-0">
-                <Calendar size={18} />
+          <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
+            <div className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold shrink-0">
+                <Calendar size={20} />
               </div>
               <div>
-                <p className="text-xs font-bold text-stone-900">Multi-Track</p>
-                <p className="text-[10px] text-stone-500">Zero-conflict scheduling</p>
+                <p className="text-sm font-extrabold text-stone-900">Multi-Track</p>
+                <p className="text-xs text-stone-500 font-medium">Zero-conflict scheduling</p>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
-                <ShieldCheck size={18} />
+            <div className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
+                <ShieldCheck size={20} />
               </div>
               <div>
-                <p className="text-xs font-bold text-stone-900">Optical Scanner</p>
-                <p className="text-[10px] text-stone-500">&lt;150ms check-in latency</p>
+                <p className="text-sm font-extrabold text-stone-900">Optical Scanner</p>
+                <p className="text-xs text-stone-500 font-medium">&lt;150ms check-in latency</p>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
-                <Cpu size={18} />
+            <div className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
+                <Cpu size={20} />
               </div>
               <div>
-                <p className="text-xs font-bold text-stone-900">AI Concierge</p>
-                <p className="text-[10px] text-stone-500">Autonomous synthesis</p>
+                <p className="text-sm font-extrabold text-stone-900">AI Concierge</p>
+                <p className="text-xs text-stone-500 font-medium">Autonomous synthesis</p>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold shrink-0">
-                <TrendingUp size={18} />
+            <div className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold shrink-0">
+                <TrendingUp size={20} />
               </div>
               <div>
-                <p className="text-xs font-bold text-stone-900">Live Analytics</p>
-                <p className="text-[10px] text-stone-500">Real-time gate telemetry</p>
+                <p className="text-sm font-extrabold text-stone-900">Live Analytics</p>
+                <p className="text-xs text-stone-500 font-medium">Real-time gate telemetry</p>
               </div>
             </div>
           </div>
@@ -168,33 +168,33 @@ export default function Home() {
                 {/* Event Card Top Banner in Ivory/Sand */}
                 <div className="p-8 bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="px-3 py-1 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-[10px] font-extrabold uppercase tracking-wider shadow-xs">
+                    <span className="px-3.5 py-1.5 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-xs font-extrabold uppercase tracking-wider shadow-xs">
                       {event.category || 'Technology'}
                     </span>
-                    <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-extrabold uppercase">
+                    <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-extrabold uppercase">
                       Open
                     </span>
                   </div>
 
-                  <h3 className="text-2xl font-extrabold text-stone-900 line-clamp-2 leading-snug group-hover:text-[#B45309] transition-colors">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 line-clamp-2 leading-snug group-hover:text-[#B45309] transition-colors">
                     {event.title}
                   </h3>
 
-                  <p className="text-xs text-stone-600 line-clamp-3 leading-relaxed">
+                  <p className="text-sm text-stone-600 line-clamp-3 leading-relaxed">
                     {event.description}
                   </p>
                 </div>
 
                 {/* Event Card Bottom Body */}
                 <div className="p-6 space-y-5">
-                  <div className="space-y-2 text-xs font-medium text-stone-600">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="text-[#B45309]" size={15} />
+                  <div className="space-y-2.5 text-sm font-semibold text-stone-700">
+                    <div className="flex items-center gap-2.5">
+                      <Calendar className="text-[#B45309]" size={17} />
                       <span>{new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                     {event.venue?.name && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="text-amber-700" size={15} />
+                      <div className="flex items-center gap-2.5">
+                        <MapPin className="text-amber-700" size={17} />
                         <span className="truncate">{event.venue.name}</span>
                       </div>
                     )}
@@ -202,10 +202,10 @@ export default function Home() {
 
                   <Link 
                     to={`/e/${event.slug}`}
-                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-extrabold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm shadow-xs group-hover:shadow-md uppercase tracking-wider"
+                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-extrabold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base shadow-xs group-hover:shadow-md uppercase tracking-wider"
                   >
                     <span>Explore Conference &amp; Passes</span>
-                    <ArrowRight size={15} />
+                    <ArrowRight size={16} />
                   </Link>
                 </div>
               </div>

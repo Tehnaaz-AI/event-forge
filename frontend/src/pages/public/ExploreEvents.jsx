@@ -110,32 +110,32 @@ export default function ExploreEvents() {
               >
                 <div className="p-8 bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="px-3 py-1 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-[10px] font-extrabold uppercase tracking-wider shadow-xs">
+                    <span className="px-3.5 py-1.5 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-xs font-extrabold uppercase tracking-wider shadow-xs">
                       {event.category || 'Executive'}
                     </span>
-                    <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-extrabold uppercase">
+                    <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-extrabold uppercase">
                       Registration Open
                     </span>
                   </div>
 
-                  <h3 className="text-2xl font-extrabold text-stone-900 line-clamp-2 leading-snug">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 line-clamp-2 leading-snug hover:text-[#B45309] transition-colors">
                     {event.title}
                   </h3>
 
-                  <p className="text-xs text-stone-600 line-clamp-3 leading-relaxed">
+                  <p className="text-sm text-stone-600 line-clamp-3 leading-relaxed">
                     {event.description}
                   </p>
                 </div>
 
                 <div className="p-6 space-y-5">
-                  <div className="space-y-2 text-xs font-medium text-stone-600">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="text-[#B45309]" size={15} />
+                  <div className="space-y-2.5 text-sm font-semibold text-stone-700">
+                    <div className="flex items-center gap-2.5">
+                      <Calendar className="text-[#B45309]" size={17} />
                       <span>{new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
                     {event.venue?.name && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="text-amber-700" size={15} />
+                      <div className="flex items-center gap-2.5">
+                        <MapPin className="text-amber-700" size={17} />
                         <span className="truncate">{event.venue.name}</span>
                       </div>
                     )}
@@ -143,10 +143,10 @@ export default function ExploreEvents() {
 
                   <Link 
                     to={`/e/${event.slug}`}
-                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-extrabold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider shadow-xs hover:shadow-md"
+                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-extrabold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base uppercase tracking-wider shadow-xs hover:shadow-md"
                   >
                     <span>Explore Conference &amp; Passes</span>
-                    <ArrowRight size={15} />
+                    <ArrowRight size={16} />
                   </Link>
                 </div>
               </div>
