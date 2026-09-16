@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp, Ticket, Sparkles, Compass } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
 
 export default function FloatingJourneyDock() {
   const [showDock, setShowDock] = useState(false);
@@ -62,6 +63,9 @@ export default function FloatingJourneyDock() {
             <Ticket size={13} />
             <span className="hidden sm:inline">VIP Pass</span>
           </Link>
+
+          {/* Theme Switcher */}
+          <ThemeToggle className="!w-8 !h-8 !border-white/10 !bg-white/10 hover:!bg-white/20 !text-white" />
 
           {/* Scroll to Top with Radial / Numeric Progress */}
           <button

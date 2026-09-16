@@ -5,6 +5,7 @@ import {
   MessageSquare, Settings, LogOut, ArrowRight, Compass, 
   Sparkles, Layers, User, ChevronDown, Plus, ShieldCheck, ShieldAlert, UserCheck
 } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 export default function AppNavbar() {
   const location = useLocation();
@@ -126,8 +127,9 @@ export default function AppNavbar() {
           })}
         </nav>
 
-        {/* Right Controls (Auth & Profile) */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Right Controls (Theme Toggle, Auth & Profile) */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <ThemeToggle />
           {user ? (
             <div className="relative">
               <button

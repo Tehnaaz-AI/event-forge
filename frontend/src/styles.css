@@ -34,6 +34,7 @@
 @layer base {
   html {
     font-size: 16.5px;
+    scroll-behavior: smooth;
   }
   @media (min-width: 1024px) {
     html {
@@ -47,6 +48,7 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
     line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
@@ -86,6 +88,7 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(239, 232, 218, 0.95);
   box-shadow: 0 10px 30px -5px rgba(44, 37, 28, 0.06), 0 4px 10px -2px rgba(44, 37, 28, 0.03);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 /* Warm Beige Glassmorphism */
@@ -163,6 +166,100 @@
   background: #B45309;
 }
 
+/* ==========================================================================
+   🌙 LUXURY OBSIDIAN & CHAMPAGNE GOLD DARK THEME OVERRIDES 🌙
+   ========================================================================== */
+.dark body {
+  background-color: #0F0E0D !important;
+  color: #F5F2EB !important;
+}
+
+.dark .bg-\[\#FAF8F5\] {
+  background-color: #0F0E0D !important;
+  color: #F5F2EB !important;
+}
+
+.dark .curved-navbar {
+  background: rgba(23, 22, 20, 0.92) !important;
+  border-color: rgba(60, 55, 48, 0.8) !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+.dark .bg-white {
+  background-color: #171614 !important;
+  border-color: #2E2A24 !important;
+  color: #F5F2EB !important;
+}
+
+.dark .bg-\[\#FAF8F5\]\/50,
+.dark .bg-\[\#FAF8F5\] {
+  background-color: #1A1815 !important;
+  border-color: #2E2A24 !important;
+}
+
+.dark .from-\[\#FDFAF5\],
+.dark .from-\[\#FAF8F5\],
+.dark .to-\[\#F5F2EB\] {
+  --tw-gradient-from: #141311 !important;
+  --tw-gradient-to: #0F0E0D !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #12110F, var(--tw-gradient-to) !important;
+}
+
+.dark .text-stone-900 {
+  color: #F5F2EB !important;
+}
+
+.dark .text-stone-800,
+.dark .text-stone-700 {
+  color: #E2DDD5 !important;
+}
+
+.dark .text-stone-600,
+.dark .text-stone-500 {
+  color: #A8A196 !important;
+}
+
+.dark .text-stone-400 {
+  color: #7A746B !important;
+}
+
+.dark .border-\[\#EFE8DA\],
+.dark .border-stone-100 {
+  border-color: #2E2A24 !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #1F1D1A !important;
+  border-color: #3C3730 !important;
+  color: #F5F2EB !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6E685E !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #D97706 !important;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25) !important;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0F0E0D;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2E2A24;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #D97706;
+}
+
 /* Conference Badge Print Styling */
 @media print {
   body * {
@@ -184,4 +281,3 @@
     display: none !important;
   }
 }
-
