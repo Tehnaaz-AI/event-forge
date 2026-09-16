@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, MapPin, Sparkles, ArrowRight, ShieldCheck, Cpu, 
   Ticket, TrendingUp, Plus, Clock, MessageSquare, Award,
-  CheckCircle2, Zap, Users, Play, Shield, Layers, RefreshCw,
-  QrCode, Check, Smartphone, CheckCircle, Search
+  CheckCircle2, Zap, Users, Shield, Layers,
+  QrCode, Check, Smartphone, CheckCircle, Search, Star
 } from 'lucide-react';
 import { api } from '../services/api';
 import useDocumentTitle from '../components/common/useDocumentTitle';
@@ -20,78 +20,71 @@ export default function Home() {
   );
 
   const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
-
-  // Interactive Live Command Center Simulation State
-  const [activeSimulatorTab, setActiveSimulatorTab] = useState('optical'); // 'optical' | 'conflict' | 'ai' | 'pass'
-  const [scanCounter, setScanCounter] = useState(1482);
-  const [lastScannedAttendee, setLastScannedAttendee] = useState({ name: 'Elena Rostova', badge: 'VIP All-Access', time: 'Just now' });
-  const [isScanning, setIsScanning] = useState(false);
-  const [conflictResolved, setConflictResolved] = useState(true);
-  const [selectedInterests, setSelectedInterests] = useState(['Generative AI', 'Multi-Track']);
-  const [selectedPersona, setSelectedPersona] = useState('organizer'); // 'organizer' | 'attendee' | 'speaker' | 'staff'
+  const [activeAgendaDay, setActiveAgendaDay] = useState('day1');
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['public-events-list'],
     queryFn: () => api.get('/events')
   });
 
-  const triggerLiveScan = () => {
-    setIsScanning(true);
-    const mockAttendees = [
-      { name: 'Marcus Sterling', badge: 'Keynote Speaker', time: 'Just now' },
-      { name: 'Dr. Evelyn Martinez', badge: 'VIP All-Access', time: 'Just now' },
-      { name: 'Sarah Jenkins', badge: 'Executive Delegate', time: 'Just now' },
-      { name: 'Vikram Chandrasekhar', badge: 'Press / Media', time: 'Just now' },
-      { name: 'Tehnaaz Fathima', badge: 'Platform Admin', time: 'Just now' }
-    ];
-    setTimeout(() => {
-      const random = mockAttendees[Math.floor(Math.random() * mockAttendees.length)];
-      setScanCounter(prev => prev + 1);
-      setLastScannedAttendee(random);
-      setIsScanning(false);
-    }, 450);
-  };
-
-  const toggleInterest = (topic) => {
-    if (selectedInterests.includes(topic)) {
-      setSelectedInterests(selectedInterests.filter(t => t !== topic));
-    } else {
-      setSelectedInterests([...selectedInterests, topic]);
-    }
-  };
-
-  const personaDetails = {
-    organizer: {
-      title: 'Conference Organizer & Executive',
-      badge: 'Architecture & Multi-Track Builder',
-      desc: 'Orchestrate multi-track agendas, assign speakers, configure tiered VIP passes, and broadcast live announcements to attendees in real time.',
-      highlights: ['Zero-conflict agenda matrix', 'Multi-tier pass ticketing & revenue', 'Real-time sponsor deliverables', 'Live attendance broadcast'],
-      actionText: 'Host a Conference',
-      actionLink: user ? '/dashboard/organizer/events/new' : '/login?tab=register'
+  const agendaTracks = {
+    day1: {
+      tag: 'Day 01 • Executive Keynotes & Opening Ceremony',
+      sessions: [
+        {
+          time: '09:00 - 10:30 AM',
+          room: 'Main Grand Auditorium',
+          title: 'Autonomous Enterprise Architecture & AI Transformation',
+          speaker: 'Dr. Evelyn Martinez',
+          role: 'VP AI Research',
+          track: 'Keynote'
+        },
+        {
+          time: '11:00 - 12:30 PM',
+          room: 'Hall A • Executive Stage',
+          title: 'Zero-Trust Infrastructure & Cryptographic Identity',
+          speaker: 'Marcus Sterling',
+          role: 'Chief Security Officer',
+          track: 'Security'
+        },
+        {
+          time: '02:00 - 03:30 PM',
+          room: 'Hall B • Innovation Lab',
+          title: 'High-Concurrency Event Systems at Global Scale',
+          speaker: 'Sarah Jenkins',
+          role: 'Principal Architect',
+          track: 'Infrastructure'
+        }
+      ]
     },
-    attendee: {
-      title: 'Conference Delegate & VIP Attendee',
-      badge: 'Digital Wallet & AI Concierge',
-      desc: 'Seamless 1-click pass checkout, digital QR badges in your wallet, personalized AI agenda matching, and post-session speaker feedback.',
-      highlights: ['Instant holographic wallet pass', 'AI interest-matched itinerary', 'Sub-second optical door entry', 'Session bookmarks & resources'],
-      actionText: 'Explore Flagship Summits',
-      actionLink: '/explore'
-    },
-    speaker: {
-      title: 'Keynote Speaker & Panelist',
-      badge: 'Stage & Session Management',
-      desc: 'Dedicated speaker portals with live session scheduling, room assignment details, audience engagement polls, and presentation materials distribution.',
-      highlights: ['Direct stage & room schedule', 'Live delegate Q&A integration', 'Speaker bio & keynote studio', 'Co-speaker session sync'],
-      actionText: 'View Speaker Lineup',
-      actionLink: '/explore'
-    },
-    staff: {
-      title: 'Door Staff & Venue Gatekeeper',
-      badge: 'Zero-Latency Optical Scanner',
-      desc: 'Ultra high-speed camera scanner with instant Web Audio tone confirmation, offline resilience, and live attendee arrival analytics.',
-      highlights: ['<150ms camera barcode decode', 'Instant duplicate pass rejection', 'Multi-door synchronized arrivals', 'Audio & visual status cues'],
-      actionText: 'Launch Door Scanner',
-      actionLink: user ? '/dashboard/staff' : '/login'
+    day2: {
+      tag: 'Day 02 • Deep-Dive Masterclasses & Workshops',
+      sessions: [
+        {
+          time: '09:30 - 11:00 AM',
+          room: 'Executive Boardroom C',
+          title: 'Multi-Track Conflict Resolution & Dynamic Timelines',
+          speaker: 'Vikram Chandrasekhar',
+          role: 'Head of Engineering',
+          track: 'Masterclass'
+        },
+        {
+          time: '11:30 - 01:00 PM',
+          room: 'Main Grand Auditorium',
+          title: 'Autonomous LLM Agents in Mission-Critical Ops',
+          speaker: 'Elena Rostova',
+          role: 'Director of AI Strategy',
+          track: 'AI Systems'
+        },
+        {
+          time: '02:30 - 04:00 PM',
+          room: 'Innovation Amphitheater',
+          title: 'Sub-Second Optical Gatekeeping & Edge Verification',
+          speaker: 'Alex Morgan',
+          role: 'Lead Systems Architect',
+          track: 'Hardware'
+        }
+      ]
     }
   };
 
@@ -239,388 +232,161 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 🚀 UNIQUE INTERACTIVE SUMMIT COMMAND CENTER SIMULATOR 🚀 */}
+      {/* 🌟 LUXURY SHOWCASE: DIGITAL VIP PASS & INTERACTIVE AGENDA STREAM 🌟 */}
       <section className="max-w-6xl mx-auto px-6 py-16 w-full">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.6 }}
-          className="bg-white rounded-3xl border border-[#EFE8DA] p-6 sm:p-10 shadow-xl overflow-hidden relative"
-        >
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#EFE8DA] pb-6 mb-8">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-[#B45309] rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-amber-200">
-                <Zap size={12} />
-                <span>Interactive Architecture Simulation</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900">
-                Experience EventForge in <span className="cursive-accent font-normal text-[#B45309] text-3xl sm:text-4xl align-middle px-1">Real-Time Action</span>
-              </h2>
-            </div>
-
-            {/* Interactive Simulation Switcher Tabs */}
-            <div className="flex flex-wrap gap-1.5 p-1.5 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA]">
-              <button
-                onClick={() => setActiveSimulatorTab('optical')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeSimulatorTab === 'optical' 
-                    ? 'bg-[#B45309] text-white shadow-sm' 
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
-                }`}
-              >
-                <QrCode size={14} />
-                <span>Optical Scanner</span>
-              </button>
-
-              <button
-                onClick={() => setActiveSimulatorTab('conflict')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeSimulatorTab === 'conflict' 
-                    ? 'bg-[#B45309] text-white shadow-sm' 
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
-                }`}
-              >
-                <Layers size={14} />
-                <span>Conflict Engine</span>
-              </button>
-
-              <button
-                onClick={() => setActiveSimulatorTab('ai')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeSimulatorTab === 'ai' 
-                    ? 'bg-[#B45309] text-white shadow-sm' 
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
-                }`}
-              >
-                <Sparkles size={14} />
-                <span>AI Concierge</span>
-              </button>
-
-              <button
-                onClick={() => setActiveSimulatorTab('pass')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeSimulatorTab === 'pass' 
-                    ? 'bg-[#B45309] text-white shadow-sm' 
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
-                }`}
-              >
-                <Smartphone size={14} />
-                <span>Digital Wallet</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Interactive Simulation Sandbox Views */}
-          <AnimatePresence mode="wait">
-            {activeSimulatorTab === 'optical' && (
-              <motion.div 
-                key="optical"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center"
-              >
-                <div className="lg:col-span-2 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-base font-extrabold text-stone-900">Sub-Second Optical Door Scanner</h4>
-                      <p className="text-xs text-stone-500">Live hardware-accelerated video barcode decodes with zero server lag.</p>
-                    </div>
-                    <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold animate-pulse">
-                      Gate 01 Active
-                    </span>
-                  </div>
-
-                  <div className="bg-[#1C1917] text-white rounded-2xl p-6 relative overflow-hidden font-mono border border-stone-800">
-                    <div className="flex items-center justify-between border-b border-stone-800 pb-3 mb-4 text-xs text-stone-400">
-                      <span>DECODE LATENCY: <strong className="text-emerald-400">114ms</strong></span>
-                      <span>ARRIVAL RATE: <strong className="text-amber-400">42 scans/min</strong></span>
-                      <span>TOTAL CHECKED-IN: <strong className="text-white text-sm">{scanCounter}</strong></span>
-                    </div>
-
-                    <div className="flex items-center gap-4 bg-stone-900/90 p-4 rounded-xl border border-stone-800">
-                      <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                        {isScanning ? <RefreshCw className="animate-spin" size={24} /> : <CheckCircle size={24} />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-stone-400">Latest Validated Pass</p>
-                        <p className="text-base font-bold text-white truncate">{lastScannedAttendee.name}</p>
-                        <div className="flex items-center gap-2 text-[11px] text-stone-400">
-                          <span className="text-[#F59E0B]">{lastScannedAttendee.badge}</span>
-                          <span>•</span>
-                          <span>{lastScannedAttendee.time}</span>
-                        </div>
-                      </div>
-                      <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-bold shrink-0">
-                        ACCESS GRANTED
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-[#FAF8F5] p-6 rounded-2xl border border-[#EFE8DA] text-center space-y-4">
-                  <p className="text-xs font-bold text-stone-700 uppercase tracking-wider">Test Gate Speed</p>
-                  <p className="text-xs text-stone-500 leading-relaxed">
-                    Click below to simulate a rush hour optical pass decode and real-time ledger update.
-                  </p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={triggerLiveScan}
-                    disabled={isScanning}
-                    className="w-full bg-[#B45309] hover:bg-[#92400E] text-white py-3.5 rounded-xl font-bold text-xs shadow-md shadow-[#B45309]/20 flex items-center justify-center gap-2"
-                  >
-                    {isScanning ? (
-                      <>
-                        <RefreshCw className="animate-spin" size={15} />
-                        <span>Decoding Optical QR...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play size={15} />
-                        <span>Simulate Attendee Scan</span>
-                      </>
-                    )}
-                  </motion.button>
-                </div>
-              </motion.div>
-            )}
-
-            {activeSimulatorTab === 'conflict' && (
-              <motion.div 
-                key="conflict"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h4 className="text-base font-extrabold text-stone-900">Zero-Collision Constraint Solver</h4>
-                    <p className="text-xs text-stone-500">Mathematical room and speaker overlap resolution across multi-track stages.</p>
-                  </div>
-                  <button
-                    onClick={() => setConflictResolved(!conflictResolved)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold border border-[#EFE8DA] bg-[#FAF8F5] hover:bg-stone-200/50 transition-colors self-start"
-                  >
-                    {conflictResolved ? 'Inject Simulated Overlap' : 'Auto-Resolve Overlap'}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-[#FAF8F5] border border-[#EFE8DA] p-4 rounded-2xl space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Track 01 • Main Auditorium</span>
-                    <div className="p-3 bg-white rounded-xl border border-[#EFE8DA] space-y-1">
-                      <p className="text-xs font-bold text-stone-900">Keynote: Next-Gen AI Models</p>
-                      <p className="text-[11px] text-stone-500">09:00 - 10:30 AM • Dr. Evelyn Martinez</p>
-                    </div>
-                  </div>
-
-                  <div className={`p-4 rounded-2xl space-y-2 border transition-colors ${
-                    conflictResolved ? 'bg-[#FAF8F5] border-[#EFE8DA]' : 'bg-rose-50 border-rose-300'
-                  }`}>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Track 02 • Breakout Hall A</span>
-                    <div className={`p-3 rounded-xl border space-y-1 ${
-                      conflictResolved ? 'bg-white border-[#EFE8DA]' : 'bg-rose-100 border-rose-300'
-                    }`}>
-                      <p className="text-xs font-bold text-stone-900">
-                        {conflictResolved ? 'Decentralized Identity Workshop' : '🚨 Conflict: Dr. Evelyn Martinez Double-Booked!'}
-                      </p>
-                      <p className="text-[11px] text-stone-500">
-                        {conflictResolved ? '10:45 - 12:00 PM • Alex Vance' : '09:30 - 10:45 AM (Overlap Detected)'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#FAF8F5] border border-[#EFE8DA] p-4 rounded-2xl space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Track 03 • Executive Stage</span>
-                    <div className="p-3 bg-white rounded-xl border border-[#EFE8DA] space-y-1">
-                      <p className="text-xs font-bold text-stone-900">Autonomous Cloud Scaling</p>
-                      <p className="text-[11px] text-stone-500">09:00 - 10:30 AM • Sarah Jenkins</p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeSimulatorTab === 'ai' && (
-              <motion.div 
-                key="ai"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div>
-                  <h4 className="text-base font-extrabold text-stone-900">AI Concierge &amp; Schedule Synthesizer</h4>
-                  <p className="text-xs text-stone-500">Select topics below to generate an instantaneous personalized summit itinerary.</p>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {['Generative AI', 'Multi-Track', 'Quantum Computing', 'Zero-Trust Security', 'Executive Leadership', 'Web3 & Identity'].map(topic => (
-                    <button
-                      key={topic}
-                      onClick={() => toggleInterest(topic)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
-                        selectedInterests.includes(topic)
-                          ? 'bg-[#B45309] text-white shadow-xs'
-                          : 'bg-[#FAF8F5] border border-[#EFE8DA] text-stone-600 hover:border-stone-400'
-                      }`}
-                    >
-                      {selectedInterests.includes(topic) ? '✓ ' : '+ '}{topic}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] p-5 rounded-2xl border border-[#EFE8DA] space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#B45309]">
-                    <Sparkles size={15} />
-                    <span>AI Curated Itinerary Path ({selectedInterests.length} interest clusters matched)</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div className="bg-white p-3 rounded-xl border border-[#EFE8DA] space-y-1">
-                      <span className="text-[10px] font-bold text-[#B45309] uppercase">9:30 AM • Keynote</span>
-                      <p className="font-bold text-stone-900">Enterprise {selectedInterests[0] || 'AI'} in High-Scale Systems</p>
-                      <p className="text-[11px] text-stone-500">98% Match with your selected topics</p>
-                    </div>
-                    <div className="bg-white p-3 rounded-xl border border-[#EFE8DA] space-y-1">
-                      <span className="text-[10px] font-bold text-[#B45309] uppercase">11:15 AM • Workshop</span>
-                      <p className="font-bold text-stone-900">Production {selectedInterests[1] || 'Security'} Architectures</p>
-                      <p className="text-[11px] text-stone-500">Zero overlap with prior session</p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeSimulatorTab === 'pass' && (
-              <motion.div 
-                key="pass"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center"
-              >
-                <div className="space-y-4">
-                  <h4 className="text-base font-extrabold text-stone-900">Holographic Digital Wallet Pass</h4>
-                  <p className="text-xs text-stone-500 leading-relaxed">
-                    Attendees receive dynamic digital passes stored directly in their dashboard and Apple/Google Wallet with signed tamper-proof QR codes.
-                  </p>
-                  <ul className="space-y-2 text-xs text-stone-700">
-                    <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Instant PDF &amp; Lanyard Badge Export</li>
-                    <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Multi-Track Keynote VIP Seating Clearance</li>
-                    <li className="flex items-center gap-2"><Check size={14} className="text-emerald-600" /> Secure 1-Click Ticket Reassignment</li>
-                  </ul>
-                </div>
-
-                <div className="bg-gradient-to-br from-[#1C1917] to-[#292524] text-white p-6 rounded-3xl border border-white/10 shadow-2xl relative space-y-4">
-                  <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                    <span className="text-xs font-bold text-[#C28E27] uppercase tracking-wider">EventForge Executive Pass</span>
-                    <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold">VERIFIED</span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm font-extrabold text-white">FutureTech Global Summit 2026</p>
-                      <p className="text-xs text-stone-400">Attendee: {user?.name || 'Alex Morgan'}</p>
-                    </div>
-                    <div className="w-14 h-14 bg-white p-1 rounded-xl flex items-center justify-center text-stone-900">
-                      <QrCode size={46} />
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-white/10 flex justify-between text-[10px] text-stone-400">
-                    <span>TIER: VIP ALL-ACCESS</span>
-                    <span>GATE: PRIORITY LANE</span>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </section>
-
-      {/* 🧭 INTERACTIVE CHOOSE YOUR PERSONA JOURNEY 🧭 */}
-      <section className="max-w-6xl mx-auto px-6 py-12 w-full space-y-8">
-        <div className="text-center space-y-2">
-          <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest">
-            Tailored Conference Journeys
+        <div className="text-center space-y-3 mb-10">
+          <span className="text-[11px] font-extrabold uppercase tracking-widest bg-amber-50 text-[#B45309] border border-amber-200 px-3.5 py-1 rounded-full inline-block">
+            Seamless Executive Experience
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight">
-            Built for Every <span className="cursive-accent font-normal text-[#B45309] text-3xl md:text-5xl align-middle px-1">Summit Role</span>
+            Designed for <span className="cursive-accent font-normal text-[#B45309] text-3xl md:text-5xl align-middle px-1">Effortless Attendance</span>
           </h2>
-          <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto">
-            Select your role to explore the dedicated tools and workflows engineered for your summit success.
+          <p className="text-xs sm:text-sm text-stone-600 max-w-xl mx-auto leading-relaxed">
+            Experience conflict-free multi-track agendas and instant digital wallet passes engineered for the world's most prestigious summits.
           </p>
         </div>
 
-        {/* Persona Selector Tabs */}
-        <div className="flex justify-center gap-2 flex-wrap">
-          {[
-            { id: 'organizer', label: 'Event Organizer', icon: <Layers size={14} /> },
-            { id: 'attendee', label: 'Attendee Pass', icon: <Ticket size={14} /> },
-            { id: 'speaker', label: 'Keynote Speaker', icon: <Users size={14} /> },
-            { id: 'staff', label: 'Door Staff', icon: <Shield size={14} /> }
-          ].map(persona => (
-            <button
-              key={persona.id}
-              onClick={() => setSelectedPersona(persona.id)}
-              className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
-                selectedPersona === persona.id
-                  ? 'bg-[#1C1917] text-white shadow-md'
-                  : 'bg-white border border-[#EFE8DA] text-stone-600 hover:border-stone-400'
-              }`}
-            >
-              {persona.icon}
-              <span>{persona.label}</span>
-            </button>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left: Interactive Multi-Track Agenda Stream */}
+          <div className="lg:col-span-7 bg-white rounded-3xl border border-[#EFE8DA] p-6 sm:p-8 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EFE8DA] pb-4">
+              <div>
+                <h3 className="text-lg font-extrabold text-stone-900 flex items-center gap-2">
+                  <Calendar size={18} className="text-[#B45309]" />
+                  <span>Curated Summit Agenda</span>
+                </h3>
+                <p className="text-xs text-stone-500">Live synchronized multi-track schedule</p>
+              </div>
 
-        {/* Dynamic Persona Experience Card */}
-        <motion.div
-          key={selectedPersona}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white rounded-3xl border border-[#EFE8DA] p-8 shadow-lg grid grid-cols-1 md:grid-cols-3 gap-8 items-center"
-        >
-          <div className="md:col-span-2 space-y-4">
-            <span className="text-[10px] font-bold text-[#B45309] uppercase tracking-wider bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-              {personaDetails[selectedPersona].badge}
+              {/* Day Switcher */}
+              <div className="flex gap-1.5 bg-[#FAF8F5] p-1 rounded-xl border border-[#EFE8DA] self-start sm:self-auto">
+                <button
+                  onClick={() => setActiveAgendaDay('day1')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    activeAgendaDay === 'day1'
+                      ? 'bg-[#B45309] text-white shadow-xs'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  Day 1 (Keynotes)
+                </button>
+                <button
+                  onClick={() => setActiveAgendaDay('day2')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    activeAgendaDay === 'day2'
+                      ? 'bg-[#B45309] text-white shadow-xs'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  Day 2 (Workshops)
+                </button>
+              </div>
+            </div>
+
+            <span className="text-[11px] font-bold text-[#B45309] uppercase tracking-wider block">
+              {agendaTracks[activeAgendaDay].tag}
             </span>
-            <h3 className="text-2xl font-extrabold text-stone-900">
-              {personaDetails[selectedPersona].title}
-            </h3>
-            <p className="text-sm text-stone-600 leading-relaxed font-light">
-              {personaDetails[selectedPersona].desc}
-            </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-              {personaDetails[selectedPersona].highlights.map((h, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs font-medium text-stone-800">
-                  <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
-                  <span>{h}</span>
+            {/* Session Cards */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeAgendaDay}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-3"
+              >
+                {agendaTracks[activeAgendaDay].sessions.map((session, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] hover:bg-white hover:border-[#B45309]/30 transition-all space-y-2 hover:shadow-sm"
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-[#B45309] flex items-center gap-1.5">
+                        <Clock size={13} />
+                        {session.time}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-white border border-[#EFE8DA] text-[10px] font-bold text-stone-600">
+                        {session.room}
+                      </span>
+                    </div>
+
+                    <h4 className="text-sm font-bold text-stone-900">
+                      {session.title}
+                    </h4>
+
+                    <div className="flex items-center justify-between text-xs pt-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold text-[10px]">
+                          {session.speaker.charAt(0)}
+                        </div>
+                        <span className="text-stone-700 font-medium">{session.speaker}</span>
+                        <span className="text-stone-400 text-[10px]">• {session.role}</span>
+                      </div>
+                      <span className="text-[10px] font-extrabold uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        Zero Conflict
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Right: Holographic VIP Pass Showcase */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-gradient-to-br from-[#1C1917] via-[#292524] to-[#1C1917] text-white rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6 relative overflow-hidden">
+              <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                <div className="flex items-baseline leading-none">
+                  <span className="logo-cursive text-2xl font-extrabold text-[#C28E27] mr-0.5">Event</span>
+                  <span className="font-extrabold text-white text-base tracking-tight uppercase">FORGE</span>
                 </div>
-              ))}
+                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold border border-emerald-500/30">
+                  DIGITAL WALLET PASS
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">CONFERENCE</p>
+                <h4 className="text-lg font-extrabold text-white">Global AI &amp; Enterprise Summit 2026</h4>
+                <p className="text-xs text-[#C28E27] font-medium">Grand Hyatt Conference Center • San Francisco</p>
+              </div>
+
+              <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] text-stone-400 uppercase">DELEGATE</p>
+                  <p className="text-sm font-bold text-white truncate">{user?.name || 'Alex Morgan'}</p>
+                  <p className="text-[11px] text-stone-400">Tier: VIP All-Access</p>
+                </div>
+                <div className="w-16 h-16 bg-white p-1.5 rounded-xl flex items-center justify-center text-stone-900 shrink-0">
+                  <QrCode size={52} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-[10px] text-stone-400 border-t border-white/10 pt-3">
+                <div>
+                  <span className="block text-stone-500 uppercase">GATE VERIFICATION</span>
+                  <strong className="text-white">&lt; 150ms Instant Door Pass</strong>
+                </div>
+                <div>
+                  <span className="block text-stone-500 uppercase">SEAT RESERVATION</span>
+                  <strong className="text-emerald-400">Front Row Keynote Clear</strong>
+                </div>
+              </div>
+
+              <Link
+                to="/explore"
+                className="w-full bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-center"
+              >
+                <span>Browse Passes &amp; Register</span>
+                <ArrowRight size={14} />
+              </Link>
             </div>
           </div>
 
-          <div className="bg-[#FAF8F5] p-6 rounded-2xl border border-[#EFE8DA] text-center space-y-4 flex flex-col justify-center">
-            <p className="text-xs font-bold text-stone-700">Ready to Experience?</p>
-            <Link
-              to={personaDetails[selectedPersona].actionLink}
-              className="bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold py-3.5 px-6 rounded-xl shadow-md transition-all block text-center"
-            >
-              {personaDetails[selectedPersona].actionText} &rarr;
-            </Link>
-          </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Featured Conferences Grid Section */}

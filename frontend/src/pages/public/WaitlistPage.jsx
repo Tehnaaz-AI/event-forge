@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, Clock, CheckCircle, Ticket, Mail, User, 
-  ShieldCheck, ArrowRight, Calendar, BellRing, Zap, Check
+  ShieldCheck, ArrowRight, Calendar, BellRing, Zap, Check, Lock, LogIn, UserPlus
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import Breadcrumbs from '../../components/common/Breadcrumbs';
 import useDocumentTitle from '../../components/common/useDocumentTitle';
@@ -13,11 +13,13 @@ import useDocumentTitle from '../../components/common/useDocumentTitle';
 export default function WaitlistPage() {
   useDocumentTitle('VIP Waitlist & Early Access', 'Join the priority queue for sold-out summits and early bird tiers.');
 
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
+
   const [selectedEvent, setSelectedEvent] = useState('');
   const [joined, setJoined] = useState(false);
   const [queueNumber, setQueueNumber] = useState(14);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: events } = useQuery({
     queryKey: ['public-events-list'],
@@ -26,9 +28,16 @@ export default function WaitlistPage() {
 
   const handleJoin = (e) => {
     e.preventDefault();
-    if (!email.trim() || !name.trim()) return;
-    setQueueNumber(Math.floor(Math.random() * 8) + 7);
-    setJoined(true);
+    if (!user) {
+      navigate('/login?redirect=/waitlist');
+      return;
+    }
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setQueueNumber(Math.floor(Math.random() * 8) + 7);
+      setJoined(true);
+      setIsSubmitting(false);
+    }, 400);
   };
 
   return (
@@ -56,7 +65,39 @@ export default function WaitlistPage() {
           </p>
         </div>
 
-        {joined ? (
+        {/* 🔒 AUTHENTICATION GATE CHECK 🔒 */}
+        {!user ? (
+          <div className="bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] border border-[#EFE8DA] rounded-3xl p-8 max-w-lg mx-auto space-y-5 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center mx-auto">
+              <Lock size={22} />
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-lg font-extrabold text-stone-900">Authentication Required</h3>
+              <p className="text-xs text-stone-600 leading-relaxed font-light">
+                To prevent automated reservation bots and guarantee priority seat reservation under your verified delegate profile, please sign in or create an account.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <Link
+                to="/login?redirect=/waitlist"
+                className="bg-[#B45309] hover:bg-[#92400E] text-white py-3 px-4 rounded-xl text-xs font-bold shadow-md shadow-[#B45309]/20 transition-all flex items-center justify-center gap-2"
+              >
+                <LogIn size={14} />
+                <span>Sign In to Account</span>
+              </Link>
+
+              <Link
+                to="/login?tab=register&redirect=/waitlist"
+                className="bg-white hover:bg-stone-50 border border-[#EFE8DA] text-stone-800 py-3 px-4 rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2"
+              >
+                <UserPlus size={14} className="text-[#B45309]" />
+                <span>Register Account</span>
+              </Link>
+            </div>
+          </div>
+        ) : joined ? (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -72,7 +113,7 @@ export default function WaitlistPage() {
             </div>
 
             <p className="text-xs text-stone-600 leading-relaxed">
-              We've registered <strong>{email}</strong>. When a pass tier unlocks, your private 24-hour reservation code will be emailed immediately.
+              We've registered your verified account <strong>{user.email}</strong>. When a pass tier unlocks, your private 24-hour reservation code will be emailed immediately.
             </p>
 
             <div className="pt-2">
@@ -87,42 +128,27 @@ export default function WaitlistPage() {
           </motion.div>
         ) : (
           <form onSubmit={handleJoin} className="max-w-md mx-auto space-y-4 text-left">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-stone-700">Full Name</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Alex Morgan"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl pl-9 pr-3.5 py-3 text-xs text-stone-900 focus:outline-none focus:border-[#B45309] transition-colors"
-                />
-                <User size={15} className="absolute left-3 top-3.5 text-stone-400" />
+            
+            {/* Verified Account Banner */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck size={18} className="text-emerald-700 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-emerald-900 truncate">Verified: {user.name}</p>
+                  <p className="text-[10px] text-emerald-700 truncate">{user.email}</p>
+                </div>
               </div>
+              <span className="text-[9px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                AUTHENTICATED
+              </span>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-stone-700">Email Address</label>
-              <div className="relative">
-                <input
-                  type="email"
-                  required
-                  placeholder="alex@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl pl-9 pr-3.5 py-3 text-xs text-stone-900 focus:outline-none focus:border-[#B45309] transition-colors"
-                />
-                <Mail size={15} className="absolute left-3 top-3.5 text-stone-400" />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-stone-700">Select Summit (Optional)</label>
+              <label className="text-xs font-bold text-stone-700">Target Summit for VIP Priority</label>
               <select
                 value={selectedEvent}
                 onChange={(e) => setSelectedEvent(e.target.value)}
-                className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl px-3.5 py-3 text-xs text-stone-900 focus:outline-none focus:border-[#B45309] transition-colors"
+                className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl px-3.5 py-3 text-xs text-stone-900 focus:outline-none focus:border-[#B45309] transition-colors font-medium"
               >
                 <option value="">All Upcoming Summits &amp; Keynotes</option>
                 {events?.map((ev) => (
@@ -137,10 +163,11 @@ export default function WaitlistPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
+              disabled={isSubmitting}
               className="w-full bg-[#B45309] hover:bg-[#92400E] text-white py-3.5 rounded-xl text-xs font-bold shadow-md shadow-[#B45309]/20 transition-all flex items-center justify-center gap-2 uppercase tracking-wider mt-4"
             >
               <BellRing size={15} />
-              <span>Claim Priority Queue Spot</span>
+              <span>{isSubmitting ? 'Securing Priority Spot...' : 'Claim VIP Queue Position'}</span>
             </motion.button>
           </form>
         )}
