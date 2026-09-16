@@ -7,6 +7,7 @@
     "start": "node src/server.js",
     "seed": "node seed.js",
     "db:clear": "node clean-db.js",
+    "purge-data": "node src/scripts/purgeAtlasData.js",
     "test": "node --test"
   },
   "dependencies": {
