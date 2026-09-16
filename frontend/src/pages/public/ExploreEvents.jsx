@@ -48,35 +48,35 @@ export default function ExploreEvents() {
             Global Conference Directory
           </span>
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-stone-900">
-            Explore <span className="logo-cursive font-bold text-[#B45309]">Upcoming Summits</span>
+            Explore <span className="cursive-masterpiece font-normal text-[#B45309] text-5xl md:text-7xl align-middle inline-block px-1">Upcoming Summits</span>
           </h1>
-          <p className="text-xs md:text-sm text-stone-600 max-w-xl mx-auto leading-relaxed font-light">
+          <p className="text-sm md:text-base text-stone-600 max-w-xl mx-auto leading-relaxed font-light">
             Discover verified corporate conferences, multi-track exhibitions, and executive masterclasses with digital pass registration.
           </p>
 
           {/* Search & Filter Bar */}
-          <div className="max-w-2xl mx-auto pt-2 space-y-2.5">
+          <div className="max-w-2xl mx-auto pt-3 space-y-3">
             <div className="relative">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Search by conference title, keynote topic, or city..."
-                className="w-full bg-white border border-[#EFE8DA] rounded-2xl pl-11 pr-4 py-3 text-xs text-stone-900 shadow-xs focus:outline-none focus:ring-1 focus:ring-[#B45309]"
+                className="w-full bg-white border border-[#EFE8DA] rounded-2xl pl-12 pr-4 py-3.5 text-sm text-stone-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#B45309]/30"
               />
             </div>
 
             {/* Category Filter Chips */}
-            <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+            <div className="flex flex-wrap justify-center gap-2 pt-1">
               {categories.map(cat => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
                     selectedCategory === cat 
                       ? 'bg-[#B45309] text-white shadow-xs' 
-                      : 'bg-white border border-[#EFE8DA] text-stone-600 hover:border-stone-400'
+                      : 'bg-white border border-[#EFE8DA] text-stone-600 hover:border-stone-400 hover:text-stone-900'
                   }`}
                 >
                   {cat}
@@ -143,9 +143,10 @@ export default function ExploreEvents() {
 
                   <Link 
                     to={`/e/${event.slug}`}
-                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-bold py-3 rounded-2xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-xs"
+                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-extrabold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider shadow-xs hover:shadow-md"
                   >
-                    View Details &amp; Passes <ArrowRight size={14} />
+                    <span>Explore Conference &amp; Passes</span>
+                    <ArrowRight size={15} />
                   </Link>
                 </div>
               </div>

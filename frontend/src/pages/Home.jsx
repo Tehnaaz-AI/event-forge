@@ -38,8 +38,8 @@ export default function Home() {
           </div>
           
           {/* Editorial Headline with Cursive Accent */}
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-stone-900 leading-[1.15]">
-            Curate, Scale &amp; <span className="logo-cursive font-normal text-[#B45309] text-6xl md:text-8xl">Masterpiece</span> <br />
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-stone-900 leading-[1.25]">
+            Curate, Scale &amp; <span className="cursive-masterpiece font-normal text-[#B45309] text-7xl md:text-9xl inline-block px-2 drop-shadow-xs align-middle">Masterpiece</span> <br />
             <span className="font-serif italic font-normal text-stone-800">
               World-Class Conferences
             </span>
@@ -50,18 +50,18 @@ export default function Home() {
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 pt-2">
+          <div className="flex flex-wrap justify-center gap-4 pt-3">
             {user ? (
               <>
                 <Link 
                   to="/dashboard" 
-                  className="bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-[#B45309]/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
+                  className="bg-[#B45309] hover:bg-[#92400E] text-white px-9 py-4 rounded-2xl font-extrabold text-base md:text-lg shadow-xl shadow-[#B45309]/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2.5"
                 >
-                  <Ticket size={18} /> Open {user.role === 'ATTENDEE' ? 'Attendee Hub' : user.role === 'STAFF' ? 'Door Scanner' : 'Organizer Workspace'} <ArrowRight size={16} />
+                  <Ticket size={20} /> Open {user.role === 'ATTENDEE' ? 'Attendee Hub' : user.role === 'STAFF' ? 'Door Scanner' : 'Organizer Workspace'} <ArrowRight size={18} />
                 </Link>
                 <a 
                   href="#featured-events" 
-                  className="bg-white hover:bg-stone-50 text-stone-800 px-8 py-4 rounded-2xl font-bold text-sm border border-[#EFE8DA] transition-all shadow-sm flex items-center gap-2"
+                  className="bg-white hover:bg-stone-50 text-stone-800 px-9 py-4 rounded-2xl font-bold text-base md:text-lg border border-[#EFE8DA] transition-all shadow-sm flex items-center gap-2"
                 >
                   Browse Conferences
                 </a>
@@ -70,13 +70,13 @@ export default function Home() {
               <>
                 <Link 
                   to="/explore" 
-                  className="bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-[#B45309]/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
+                  className="bg-[#B45309] hover:bg-[#92400E] text-white px-9 py-4 rounded-2xl font-extrabold text-base md:text-lg shadow-xl shadow-[#B45309]/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2.5"
                 >
-                  Explore Summits <ArrowRight size={16} />
+                  Explore Conferences <ArrowRight size={18} />
                 </Link>
                 <Link 
                   to="/login?tab=register" 
-                  className="bg-white hover:bg-stone-50 text-stone-800 px-8 py-4 rounded-2xl font-bold text-sm border border-[#EFE8DA] transition-all shadow-sm flex items-center gap-2"
+                  className="bg-white hover:bg-stone-50 text-stone-800 px-9 py-4 rounded-2xl font-bold text-base md:text-lg border border-[#EFE8DA] transition-all shadow-sm flex items-center gap-2"
                 >
                   Host a Conference
                 </Link>
@@ -145,9 +145,10 @@ export default function Home() {
 
           <Link 
             to="/explore"
-            className="text-xs font-bold text-[#B45309] hover:text-[#92400E] flex items-center gap-1 group bg-white border border-[#EFE8DA] px-4 py-2 rounded-xl shadow-xs"
+            className="text-sm sm:text-base font-extrabold text-[#B45309] hover:text-[#92400E] flex items-center gap-2 group bg-white border border-[#EFE8DA] px-5 py-2.5 rounded-xl shadow-xs transition-all hover:shadow-md"
           >
-            Explore All Conferences <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            <span>Explore All Conferences</span>
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -201,9 +202,10 @@ export default function Home() {
 
                   <Link 
                     to={`/e/${event.slug}`}
-                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 text-xs shadow-xs group-hover:shadow-md uppercase tracking-wider"
+                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-extrabold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm shadow-xs group-hover:shadow-md uppercase tracking-wider"
                   >
-                    View Agenda &amp; Book Passes <ArrowRight size={14} />
+                    <span>Explore Conference &amp; Passes</span>
+                    <ArrowRight size={15} />
                   </Link>
                 </div>
               </div>
