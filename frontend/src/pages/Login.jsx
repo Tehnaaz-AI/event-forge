@@ -199,6 +199,20 @@ export default function Login() {
             </div>
           ) : (
             <>
+              {/* Form Title */}
+              <div className="text-center space-y-1 pb-1">
+                <h2 className="text-2xl font-extrabold text-stone-900 tracking-tight">
+                  {isRegister ? (
+                    <>Join the <span className="cursive-accent font-normal text-[#B45309] text-3xl align-middle px-1">Summit Network</span></>
+                  ) : (
+                    <>Welcome to <span className="cursive-accent font-normal text-[#B45309] text-3xl align-middle px-1">EventForge</span></>
+                  )}
+                </h2>
+                <p className="text-xs text-stone-500">
+                  {isRegister ? 'Create your organizer or attendee account' : 'Enter your credentials to access your workspace'}
+                </p>
+              </div>
+
               {/* Toggle Mode Tabs (Sign In vs Register) */}
               <div className="grid grid-cols-2 p-1 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA]">
                 <button

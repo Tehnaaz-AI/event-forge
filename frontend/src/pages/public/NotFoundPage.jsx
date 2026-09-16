@@ -21,7 +21,7 @@ export default function NotFoundPage() {
             HTTP 404 ERROR
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold text-stone-900 tracking-tight">
-            Summit Not Found
+            Summit <span className="cursive-accent font-normal text-[#B45309] text-5xl md:text-6xl align-middle px-1.5">Not Found</span>
           </h1>
           <p className="text-sm md:text-base text-stone-600 max-w-md mx-auto leading-relaxed">
             The page, pass checkout, or conference session you were trying to reach has moved or is no longer active.

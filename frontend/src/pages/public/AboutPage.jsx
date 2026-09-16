@@ -57,7 +57,7 @@ export default function AboutPage() {
           
           <h1 className="text-4xl sm:text-6xl font-extrabold text-stone-900 tracking-tight leading-tight">
             The Operating System for <br />
-            <span className="logo-cursive font-bold text-[#B45309] text-5xl sm:text-7xl block mt-1">
+            <span className="cursive-accent font-normal text-[#B45309] text-5xl sm:text-7xl block mt-1">
               World-Class Summits
             </span>
           </h1>
@@ -76,7 +76,7 @@ export default function AboutPage() {
           <div className="space-y-6">
             <span className="text-[11px] font-bold text-[#B45309] uppercase tracking-widest">Engineering Mission</span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight leading-snug">
-              Precision Infrastructure for High-Stakes Summits
+              Precision <span className="cursive-accent font-normal text-[#B45309] text-3xl sm:text-4xl align-middle px-1">Infrastructure</span> for High-Stakes Summits
             </h2>
             <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
               When enterprises, academic institutions, and global organizations convene thousands of delegates, software latency and scheduling confusion cannot happen. EventForge couples AI curation with high-throughput transactional backends to deliver unified conference execution.
@@ -160,7 +160,7 @@ export default function AboutPage() {
               <span>Core Platform Pillars</span>
             </div>
             <h3 className="text-3xl font-extrabold text-stone-900 tracking-tight">
-              Engineered for Speed, Scale &amp; Reliability
+              Engineered for <span className="cursive-accent font-normal text-[#B45309] text-3xl sm:text-4xl align-middle px-1">Speed, Scale &amp; Reliability</span>
             </h3>
             <p className="text-sm text-stone-600 max-w-xl mx-auto">
               Everything required to plan, promote, ticket, and operate conferences with zero friction.

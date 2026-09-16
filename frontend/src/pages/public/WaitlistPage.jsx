@@ -39,7 +39,7 @@ export default function WaitlistPage() {
             Early Access &amp; Sold-Out Pass Notification
           </span>
           <h1 className="text-3xl md:text-5xl font-extrabold text-stone-900 tracking-tight">
-            Join the Priority Summit Waitlist
+            Join the <span className="cursive-accent font-normal text-[#B45309] text-4xl md:text-6xl align-middle px-1.5">Priority Waitlist</span>
           </h1>
           <p className="text-sm md:text-base text-stone-600 max-w-xl mx-auto leading-relaxed">
             Never miss out on sold-out keynotes, executive workshops, or limited early bird allocations. When spots unlock, waitlisted attendees receive instant first-priority checkout links.

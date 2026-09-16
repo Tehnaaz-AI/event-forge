@@ -50,29 +50,16 @@
   }
 }
 
-/* Custom Cursive Script for Masterpiece & Brand Accents */
-.logo-cursive {
-  font-family: 'Satisfy', cursive;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* Thin, Flowing Calligraphy Exclusively for Masterpiece */
-.cursive-masterpiece {
-  font-family: 'Alex Brush', 'Allura', 'Pinyon Script', cursive;
-  font-weight: 400;
-  letter-spacing: 1px;
-  line-height: 1.1;
-  -webkit-font-smoothing: subpixel-antialiased;
-}
-
-/* Expressive Accent Script for Section Headers & Words Across Pages */
+/* Unified Expressive Cursive Script for Logos, Masterpiece, and Accent Headings */
+.logo-cursive,
+.cursive-masterpiece,
 .cursive-accent {
   font-family: 'Satisfy', cursive;
   font-weight: 400;
   letter-spacing: 0.5px;
   line-height: 1.2;
   display: inline-block;
+  -webkit-font-smoothing: antialiased;
 }
 
 .font-editorial-italic {

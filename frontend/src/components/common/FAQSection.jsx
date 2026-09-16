@@ -39,7 +39,7 @@ export default function FAQSection() {
           <span>Frequently Asked Questions</span>
         </div>
         <h2 className="text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight">
-          Everything You Need to Know
+          Everything You Need to <span className="cursive-accent font-normal text-[#B45309] text-4xl md:text-5xl align-middle px-1.5">Know</span>
         </h2>
         <p className="text-sm text-stone-600 max-w-xl mx-auto">
           Clear answers about ticketing, badges, AI concierge, schedule management, and enterprise hosting.

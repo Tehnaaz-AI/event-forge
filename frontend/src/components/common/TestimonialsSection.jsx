@@ -37,7 +37,7 @@ export default function TestimonialsSection() {
           <span>Verified Attendee &amp; Organizer Reviews</span>
         </div>
         <h2 className="text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight">
-          Trusted by Leaders Worldwide
+          Trusted by <span className="cursive-accent font-normal text-[#B45309] text-4xl md:text-5xl align-middle px-1.5">Leaders Worldwide</span>
         </h2>
         <p className="text-sm text-stone-600 max-w-lg mx-auto">
           See how leading executives, keynote speakers, and attendees experience summits powered by EventForge.

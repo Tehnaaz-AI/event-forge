@@ -49,9 +49,9 @@ export default function FeaturesPage() {
             Architecture &amp; Capabilities
           </span>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-stone-900">
-            Enterprise Event Infrastructure
+            Enterprise Event <span className="cursive-accent font-normal text-[#B45309] text-5xl md:text-7xl align-middle px-1.5">Infrastructure</span>
           </h1>
-          <p className="text-sm md:text-base text-stone-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-stone-600 max-w-2xl mx-auto leading-relaxed font-light">
             Engineered from the ground up for high-scale corporate conferences, multi-track exhibitions, and global summits.
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function FeaturesPage() {
             Ready to Plan Your Next Summit?
           </span>
           <h2 className="text-3xl font-extrabold text-stone-900 tracking-tight">
-            Launch Your Conference Workspace in Minutes
+            Launch Your <span className="cursive-accent font-normal text-[#B45309] text-4xl md:text-5xl align-middle px-1">Conference Workspace</span> in Minutes
           </h2>
           <div className="flex justify-center gap-4">
             <Link
