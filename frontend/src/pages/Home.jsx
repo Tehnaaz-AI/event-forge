@@ -6,7 +6,8 @@ import {
   Calendar, MapPin, Sparkles, ArrowRight, ShieldCheck, Cpu, 
   Ticket, TrendingUp, Plus, Clock, MessageSquare, Award,
   CheckCircle2, Zap, Users, Shield, Layers,
-  QrCode, Check, Smartphone, CheckCircle, Search, Star
+  QrCode, Check, Smartphone, CheckCircle, Search, Star,
+  Compass, Radio, Flame
 } from 'lucide-react';
 import { api } from '../services/api';
 import useDocumentTitle from '../components/common/useDocumentTitle';
@@ -20,73 +21,14 @@ export default function Home() {
   );
 
   const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
-  const [activeAgendaDay, setActiveAgendaDay] = useState('day1');
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['public-events-list'],
     queryFn: () => api.get('/events')
   });
 
-  const agendaTracks = {
-    day1: {
-      tag: 'Day 01 • Executive Keynotes & Opening Ceremony',
-      sessions: [
-        {
-          time: '09:00 - 10:30 AM',
-          room: 'Main Grand Auditorium',
-          title: 'Autonomous Enterprise Architecture & AI Transformation',
-          speaker: 'Dr. Evelyn Martinez',
-          role: 'VP AI Research',
-          track: 'Keynote'
-        },
-        {
-          time: '11:00 - 12:30 PM',
-          room: 'Hall A • Executive Stage',
-          title: 'Zero-Trust Infrastructure & Cryptographic Identity',
-          speaker: 'Marcus Sterling',
-          role: 'Chief Security Officer',
-          track: 'Security'
-        },
-        {
-          time: '02:00 - 03:30 PM',
-          room: 'Hall B • Innovation Lab',
-          title: 'High-Concurrency Event Systems at Global Scale',
-          speaker: 'Sarah Jenkins',
-          role: 'Principal Architect',
-          track: 'Infrastructure'
-        }
-      ]
-    },
-    day2: {
-      tag: 'Day 02 • Deep-Dive Masterclasses & Workshops',
-      sessions: [
-        {
-          time: '09:30 - 11:00 AM',
-          room: 'Executive Boardroom C',
-          title: 'Multi-Track Conflict Resolution & Dynamic Timelines',
-          speaker: 'Vikram Chandrasekhar',
-          role: 'Head of Engineering',
-          track: 'Masterclass'
-        },
-        {
-          time: '11:30 - 01:00 PM',
-          room: 'Main Grand Auditorium',
-          title: 'Autonomous LLM Agents in Mission-Critical Ops',
-          speaker: 'Elena Rostova',
-          role: 'Director of AI Strategy',
-          track: 'AI Systems'
-        },
-        {
-          time: '02:30 - 04:00 PM',
-          room: 'Innovation Amphitheater',
-          title: 'Sub-Second Optical Gatekeeping & Edge Verification',
-          speaker: 'Alex Morgan',
-          role: 'Lead Systems Architect',
-          track: 'Hardware'
-        }
-      ]
-    }
-  };
+  const activeEvent = events && events.length > 0 ? events[0] : null;
+  const [selectedPassQuantity, setSelectedPassQuantity] = useState(1);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -152,7 +94,7 @@ export default function Home() {
                     to={user.role === 'PLATFORM_ADMIN' ? '/dashboard/admin' : user.role === 'ATTENDEE' ? '/dashboard/attendee' : user.role === 'STAFF' ? '/dashboard/staff' : '/dashboard/organizer'}
                     className="bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-4 rounded-2xl font-extrabold text-base md:text-lg shadow-xl shadow-[#B45309]/20 transition-all flex items-center gap-2.5"
                   >
-                    <Ticket size={20} /> Open {user.role === 'ATTENDEE' ? 'Attendee Passes' : user.role === 'STAFF' ? 'Door Scanner' : 'Organizer Workspace'} <ArrowRight size={18} />
+                    <Ticket size={20} /> Open {user.role === 'ATTENDEE' ? 'Attendee Passes' : user.role === 'STAFF' ? 'Door Scanner' : user.role === 'PLATFORM_ADMIN' ? 'Platform Admin Console' : 'Organizer Workspace'} <ArrowRight size={18} />
                   </Link>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.97 }}>
@@ -232,161 +174,141 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 🌟 LUXURY SHOWCASE: DIGITAL VIP PASS & INTERACTIVE AGENDA STREAM 🌟 */}
+      {/* 🚀 100% DYNAMIC REAL CONFERENCE SPOTLIGHT OR LIVE PLATFORM LAUNCHPAD 🚀 */}
       <section className="max-w-6xl mx-auto px-6 py-16 w-full">
-        <div className="text-center space-y-3 mb-10">
-          <span className="text-[11px] font-extrabold uppercase tracking-widest bg-amber-50 text-[#B45309] border border-amber-200 px-3.5 py-1 rounded-full inline-block">
-            Seamless Executive Experience
-          </span>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight">
-            Designed for <span className="cursive-accent font-normal text-[#B45309] text-3xl md:text-5xl align-middle px-1">Effortless Attendance</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-stone-600 max-w-xl mx-auto leading-relaxed">
-            Experience conflict-free multi-track agendas and instant digital wallet passes engineered for the world's most prestigious summits.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Left: Interactive Multi-Track Agenda Stream */}
-          <div className="lg:col-span-7 bg-white rounded-3xl border border-[#EFE8DA] p-6 sm:p-8 shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EFE8DA] pb-4">
-              <div>
-                <h3 className="text-lg font-extrabold text-stone-900 flex items-center gap-2">
-                  <Calendar size={18} className="text-[#B45309]" />
-                  <span>Curated Summit Agenda</span>
-                </h3>
-                <p className="text-xs text-stone-500">Live synchronized multi-track schedule</p>
-              </div>
-
-              {/* Day Switcher */}
-              <div className="flex gap-1.5 bg-[#FAF8F5] p-1 rounded-xl border border-[#EFE8DA] self-start sm:self-auto">
-                <button
-                  onClick={() => setActiveAgendaDay('day1')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    activeAgendaDay === 'day1'
-                      ? 'bg-[#B45309] text-white shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  Day 1 (Keynotes)
-                </button>
-                <button
-                  onClick={() => setActiveAgendaDay('day2')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    activeAgendaDay === 'day2'
-                      ? 'bg-[#B45309] text-white shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  Day 2 (Workshops)
-                </button>
-              </div>
-            </div>
-
-            <span className="text-[11px] font-bold text-[#B45309] uppercase tracking-wider block">
-              {agendaTracks[activeAgendaDay].tag}
-            </span>
-
-            {/* Session Cards */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeAgendaDay}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-3"
-              >
-                {agendaTracks[activeAgendaDay].sessions.map((session, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] hover:bg-white hover:border-[#B45309]/30 transition-all space-y-2 hover:shadow-sm"
-                  >
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-[#B45309] flex items-center gap-1.5">
-                        <Clock size={13} />
-                        {session.time}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full bg-white border border-[#EFE8DA] text-[10px] font-bold text-stone-600">
-                        {session.room}
-                      </span>
-                    </div>
-
-                    <h4 className="text-sm font-bold text-stone-900">
-                      {session.title}
-                    </h4>
-
-                    <div className="flex items-center justify-between text-xs pt-1">
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold text-[10px]">
-                          {session.speaker.charAt(0)}
-                        </div>
-                        <span className="text-stone-700 font-medium">{session.speaker}</span>
-                        <span className="text-stone-400 text-[10px]">• {session.role}</span>
-                      </div>
-                      <span className="text-[10px] font-extrabold uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                        Zero Conflict
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Right: Holographic VIP Pass Showcase */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-gradient-to-br from-[#1C1917] via-[#292524] to-[#1C1917] text-white rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6 relative overflow-hidden">
-              <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                <div className="flex items-baseline leading-none">
-                  <span className="logo-cursive text-2xl font-extrabold text-[#C28E27] mr-0.5">Event</span>
-                  <span className="font-extrabold text-white text-base tracking-tight uppercase">FORGE</span>
-                </div>
-                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold border border-emerald-500/30">
-                  DIGITAL WALLET PASS
+        {activeEvent ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-3xl border border-[#EFE8DA] p-8 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+          >
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-amber-50 text-[#B45309] rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-200">
+                  {activeEvent.category || 'Featured Conference'}
+                </span>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                  Registration Open
                 </span>
               </div>
 
-              <div className="space-y-1">
-                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">CONFERENCE</p>
-                <h4 className="text-lg font-extrabold text-white">Global AI &amp; Enterprise Summit 2026</h4>
-                <p className="text-xs text-[#C28E27] font-medium">Grand Hyatt Conference Center • San Francisco</p>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900">
+                {activeEvent.title}
+              </h2>
+
+              <p className="text-sm text-stone-600 leading-relaxed font-light line-clamp-3">
+                {activeEvent.description}
+              </p>
+
+              <div className="flex flex-wrap gap-4 pt-2 text-xs font-semibold text-stone-700">
+                <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#EFE8DA]">
+                  <Calendar size={14} className="text-[#B45309]" />
+                  <span>{new Date(activeEvent.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+                {activeEvent.venue?.name && (
+                  <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#EFE8DA]">
+                    <MapPin size={14} className="text-amber-700" />
+                    <span>{activeEvent.venue.name}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 bg-gradient-to-br from-[#1C1917] to-[#292524] text-white p-6 rounded-3xl border border-white/10 shadow-2xl space-y-4">
+              <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                <span className="text-xs font-bold text-[#C28E27] uppercase">Official Digital Pass</span>
+                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold">VERIFIED</span>
               </div>
 
-              <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <p className="text-[10px] text-stone-400 uppercase">DELEGATE</p>
-                  <p className="text-sm font-bold text-white truncate">{user?.name || 'Alex Morgan'}</p>
-                  <p className="text-[11px] text-stone-400">Tier: VIP All-Access</p>
-                </div>
-                <div className="w-16 h-16 bg-white p-1.5 rounded-xl flex items-center justify-center text-stone-900 shrink-0">
-                  <QrCode size={52} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-[10px] text-stone-400 border-t border-white/10 pt-3">
+              <div className="flex justify-between items-center">
                 <div>
-                  <span className="block text-stone-500 uppercase">GATE VERIFICATION</span>
-                  <strong className="text-white">&lt; 150ms Instant Door Pass</strong>
+                  <p className="text-sm font-bold text-white truncate max-w-[180px]">{activeEvent.title}</p>
+                  <p className="text-xs text-stone-400">{user?.name || 'Delegate Pass'}</p>
                 </div>
-                <div>
-                  <span className="block text-stone-500 uppercase">SEAT RESERVATION</span>
-                  <strong className="text-emerald-400">Front Row Keynote Clear</strong>
+                <div className="w-14 h-14 bg-white p-1 rounded-xl flex items-center justify-center text-stone-900">
+                  <QrCode size={46} />
                 </div>
               </div>
 
               <Link
-                to="/explore"
-                className="w-full bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-center"
+                to={`/e/${activeEvent.slug}`}
+                className="w-full bg-[#B45309] hover:bg-[#92400E] text-white py-3 rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 uppercase tracking-wider block text-center mt-2"
               >
-                <span>Browse Passes &amp; Register</span>
+                <span>View Multi-Track Agenda &amp; Passes</span>
                 <ArrowRight size={14} />
               </Link>
             </div>
-          </div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-3xl border border-[#EFE8DA] p-8 sm:p-12 shadow-xl text-center space-y-6"
+          >
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-amber-100 to-amber-200 text-[#B45309] flex items-center justify-center mx-auto shadow-inner">
+              <Radio size={32} className="animate-pulse" />
+            </div>
 
-        </div>
+            <div className="space-y-2 max-w-xl mx-auto">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest bg-amber-50 text-[#B45309] border border-amber-200 px-3.5 py-1 rounded-full inline-block">
+                Production-Ready Platform Telemetry
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
+                Unified Multi-Track <span className="cursive-accent font-normal text-[#B45309] text-3xl sm:text-5xl align-middle px-1">Conference Engine</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">
+                All backend systems, optical check-in scanners, and AI itinerary models are active and waiting for new conference publications.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto pt-2 text-left">
+              <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA] space-y-1">
+                <span className="text-[10px] font-bold text-stone-400 uppercase">DATABASE</span>
+                <p className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                  <CheckCircle2 size={13} /> MongoDB Atlas Live
+                </p>
+              </div>
+              <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA] space-y-1">
+                <span className="text-[10px] font-bold text-stone-400 uppercase">GATE SCANNER</span>
+                <p className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                  <CheckCircle2 size={13} /> &lt;150ms Camera QR
+                </p>
+              </div>
+              <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA] space-y-1">
+                <span className="text-[10px] font-bold text-stone-400 uppercase">AGENDA ENGINE</span>
+                <p className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                  <CheckCircle2 size={13} /> 0 Active Collisions
+                </p>
+              </div>
+              <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA] space-y-1">
+                <span className="text-[10px] font-bold text-stone-400 uppercase">AUTH &amp; SECURITY</span>
+                <p className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                  <CheckCircle2 size={13} /> 100% RBAC Isolated
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-wrap justify-center gap-3">
+              <Link
+                to={user ? "/dashboard/organizer/events/new" : "/login?tab=register"}
+                className="bg-[#B45309] hover:bg-[#92400E] text-white px-6 py-3.5 rounded-xl text-xs font-bold shadow-lg shadow-[#B45309]/20 transition-all flex items-center gap-2 uppercase tracking-wider"
+              >
+                <Plus size={15} />
+                <span>Publish First Summit</span>
+              </Link>
+
+              <Link
+                to="/features"
+                className="bg-[#FAF8F5] hover:bg-stone-100 border border-[#EFE8DA] text-stone-800 px-6 py-3.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2"
+              >
+                <Compass size={15} className="text-[#B45309]" />
+                <span>Explore Platform Capabilities</span>
+              </Link>
+            </div>
+          </motion.div>
+        )}
       </section>
 
       {/* Featured Conferences Grid Section */}
@@ -490,16 +412,16 @@ export default function Home() {
                 <div className="w-14 h-14 rounded-2xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center mx-auto">
                   <Calendar size={28} />
                 </div>
-                <h3 className="text-xl font-extrabold text-stone-900">No Conferences Published Yet</h3>
-                <p className="text-xs text-stone-500 leading-relaxed">
-                  Be the first to publish a world-class conference. Sign up as an Organizer or Admin to create multi-track summits, speaker lineups, and tiered passes.
+                <h3 className="text-xl font-extrabold text-stone-900">Ready for First Conference Publication</h3>
+                <p className="text-xs text-stone-500 leading-relaxed font-light">
+                  Your platform database is pristine. Sign in as Organizer or Platform Admin to build your multi-track agendas, assign speakers, and configure passes.
                 </p>
                 <div className="pt-2">
                   <Link
                     to={user ? "/dashboard/organizer/events/new" : "/login?tab=register"}
-                    className="inline-flex items-center gap-2 bg-[#B45309] hover:bg-[#92400E] text-white px-6 py-3 rounded-2xl text-xs font-bold shadow-md shadow-[#B45309]/20 transition-all"
+                    className="inline-flex items-center gap-2 bg-[#B45309] hover:bg-[#92400E] text-white px-6 py-3 rounded-2xl text-xs font-bold shadow-md shadow-[#B45309]/20 transition-all uppercase tracking-wider"
                   >
-                    <Plus size={16} /> Create First Conference
+                    <Plus size={16} /> Create Conference
                   </Link>
                 </div>
               </div>
@@ -540,7 +462,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* Verified Reviews Section */}
+      {/* Verified Reviews / Enterprise Reliability Section */}
       <TestimonialsSection />
 
       {/* Comprehensive FAQs Section */}

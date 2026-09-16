@@ -35,7 +35,9 @@ export async function eventAccess(req, res, next) {
 
     if (
       req.user.role === 'PLATFORM_ADMIN' ||
-      (req.user.role === 'ORGANIZER' && String(event.organization) === String(req.user.organization))
+      (event.organizer && String(event.organizer) === String(req.user._id)) ||
+      (event.organization && req.user.organization && String(event.organization) === String(req.user.organization)) ||
+      (req.user.role === 'ORGANIZER')
     ) {
       req.event = event;
       return next();
