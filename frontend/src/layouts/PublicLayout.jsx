@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
 import AppNavbar from '../components/common/AppNavbar';
 import CookieConsent from '../components/common/CookieConsent';
 import useSiteAnalytics from '../components/common/useSiteAnalytics';
+import ScrollProgressBar from '../components/common/ScrollProgressBar';
+import FloatingJourneyDock from '../components/common/FloatingJourneyDock';
 import { Calendar, CheckCircle2, LayoutDashboard, Ticket, Shield, ShieldAlert, User, LogOut } from 'lucide-react';
 
 export default function PublicLayout() {
@@ -42,8 +42,11 @@ export default function PublicLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans selection:bg-[#B45309] selection:text-white">
+    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative">
       
+      {/* Scroll Physics Progress Bar */}
+      <ScrollProgressBar />
+
       {/* Floating Curved Navbar */}
       <AppNavbar />
 
@@ -51,6 +54,9 @@ export default function PublicLayout() {
       <main className="flex-1 w-full relative">
         <Outlet />
       </main>
+
+      {/* Interactive Floating Dock */}
+      <FloatingJourneyDock />
 
       {/* Cookie Consent Banner */}
       <CookieConsent />
