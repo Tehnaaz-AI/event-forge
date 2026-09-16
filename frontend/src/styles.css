@@ -57,13 +57,22 @@
   letter-spacing: 0.5px;
 }
 
-/* Thin, Flowing Calligraphy for Masterpiece */
+/* Thin, Flowing Calligraphy Exclusively for Masterpiece */
 .cursive-masterpiece {
   font-family: 'Alex Brush', 'Allura', 'Pinyon Script', cursive;
   font-weight: 400;
   letter-spacing: 1px;
   line-height: 1.1;
   -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Expressive Accent Script for Section Headers & Words Across Pages */
+.cursive-accent {
+  font-family: 'Satisfy', cursive;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  display: inline-block;
 }
 
 .font-editorial-italic {

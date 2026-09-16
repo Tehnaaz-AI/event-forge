@@ -20,4 +20,8 @@ r.delete('/events/:id', c.deleteEvent);
 // Platform Analytics & Stats
 r.get('/stats', c.getStats);
 
+// Helpdesk & Inquiries
+r.get('/inquiries', c.getInquiries);
+r.patch('/inquiries/:id', c.updateInquiry);
+
 export default r;

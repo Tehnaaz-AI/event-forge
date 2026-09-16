@@ -5,7 +5,7 @@ import {
   ShieldCheck, Users, Calendar, DollarSign, Building, Trash2, 
   UserPlus, Search, Filter, ShieldAlert, CheckCircle2, AlertCircle, 
   ExternalLink, Sparkles, RefreshCw, X, Edit3, UserCheck, Eye, 
-  Tag, MapPin, Key, Plus, ArrowRight, Layers
+  Tag, MapPin, Key, Plus, ArrowRight, Layers, Mail, MessageSquare, Check
 } from 'lucide-react';
 import AppNavbar from '../../components/common/AppNavbar';
 
@@ -13,10 +13,11 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const currentUser = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
 
-  const [activeTab, setActiveTab] = useState('users'); // 'users' | 'events' | 'orgs'
+  const [activeTab, setActiveTab] = useState('users'); // 'users' | 'events' | 'inquiries'
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [events, setEvents] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -60,18 +61,30 @@ export default function AdminDashboard() {
   const loadAllAdminData = async () => {
     setLoading(true);
     try {
-      const [statsData, usersData, eventsData] = await Promise.all([
+      const [statsData, usersData, eventsData, inquiriesData] = await Promise.all([
         api.get('/admin/stats').catch(() => null),
         api.get('/admin/users').catch(() => []),
-        api.get('/admin/events').catch(() => [])
+        api.get('/admin/events').catch(() => []),
+        api.get('/admin/inquiries').catch(() => [])
       ]);
       if (statsData) setStats(statsData);
       if (usersData) setUsers(usersData);
       if (eventsData) setEvents(eventsData);
+      if (inquiriesData) setInquiries(inquiriesData);
     } catch (err) {
       setFeedbackMsg({ type: 'error', text: err.message || 'Failed to load platform data.' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateInquiryStatus = async (id, status) => {
+    try {
+      await api.patch(`/admin/inquiries/${id}`, { status });
+      setInquiries(prev => prev.map(inq => inq._id === id ? { ...inq, status } : inq));
+      showToast('success', `Inquiry status marked as ${status}`);
+    } catch (err) {
+      showToast('error', err.message || 'Failed to update inquiry status');
     }
   };
 
@@ -307,6 +320,20 @@ export default function AdminDashboard() {
             }`}
           >
             <Calendar size={16} /> Global Conferences Roster ({events.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab('inquiries')}
+            className={`pb-3 flex items-center gap-2 transition-all relative ${
+              activeTab === 'inquiries' ? 'text-[#B45309] border-b-2 border-[#B45309]' : 'text-stone-500 hover:text-stone-900'
+            }`}
+          >
+            <Mail size={16} /> Inquiries &amp; Messages ({inquiries.length})
+            {inquiries.filter(i => i.status === 'NEW').length > 0 && (
+              <span className="px-2 py-0.5 bg-[#B45309] text-white rounded-full text-[10px] font-extrabold shadow-xs">
+                {inquiries.filter(i => i.status === 'NEW').length} New
+              </span>
+            )}
           </button>
         </div>
 
@@ -592,6 +619,107 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* TAB 3: INQUIRIES & HELPDESK MESSAGES */}
+        {activeTab === 'inquiries' && (
+          <div className="space-y-4">
+            
+            <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-xs">
+              <div className="space-y-0.5">
+                <h3 className="text-sm font-extrabold text-stone-900">Direct User Inquiries &amp; Support Messages</h3>
+                <p className="text-xs text-stone-500">Messages submitted through the public Contact page routed to the Platform Administrator.</p>
+              </div>
+              <button
+                onClick={loadAllAdminData}
+                className="text-xs font-bold text-[#B45309] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <RefreshCw size={12} /> Refresh Messages
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {inquiries.length === 0 ? (
+                <div className="bg-white p-12 text-center rounded-3xl border border-[#EFE8DA] text-stone-400 space-y-2">
+                  <Mail size={28} className="mx-auto text-stone-300" />
+                  <p className="font-bold text-stone-600 text-sm">No Inquiries Received Yet</p>
+                  <p className="text-xs text-stone-400">Public contact form submissions will appear here in real-time.</p>
+                </div>
+              ) : (
+                inquiries.map((inq) => (
+                  <div 
+                    key={inq._id} 
+                    className={`bg-white rounded-3xl p-6 border shadow-xs transition-all space-y-4 ${
+                      inq.status === 'NEW' ? 'border-[#B45309]/50 ring-1 ring-[#B45309]/20' : 'border-[#EFE8DA]'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold text-sm">
+                          {inq.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-stone-900 text-sm">{inq.name}</h4>
+                          <a href={`mailto:${inq.email}`} className="text-xs text-[#B45309] hover:underline font-medium">
+                            {inq.email}
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                          inq.status === 'NEW' 
+                            ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                            : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        }`}>
+                          {inq.status}
+                        </span>
+                        <span className="text-[11px] text-stone-400">
+                          {new Date(inq.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-stone-800">Subject: <span className="font-semibold text-stone-700">{inq.subject}</span></p>
+                      <p className="text-xs text-stone-600 bg-[#FAF8F5] p-4 rounded-2xl border border-[#EFE8DA] leading-relaxed whitespace-pre-wrap">
+                        {inq.message}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 text-xs">
+                      <span className="text-[10px] font-mono text-stone-400">ID: {inq._id}</span>
+                      <div className="flex items-center gap-2">
+                        <a 
+                          href={`mailto:${inq.email}?subject=Re: ${encodeURIComponent(inq.subject)}&body=Hi ${encodeURIComponent(inq.name)},%0D%0A%0D%0AThank you for contacting EventForge administration.`}
+                          className="bg-stone-900 hover:bg-stone-800 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors"
+                        >
+                          <Mail size={12} /> Reply by Email
+                        </a>
+
+                        {inq.status === 'NEW' ? (
+                          <button
+                            onClick={() => handleUpdateInquiryStatus(inq._id, 'RESOLVED')}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Check size={12} /> Mark Resolved
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleUpdateInquiryStatus(inq._id, 'NEW')}
+                            className="bg-stone-100 hover:bg-stone-200 text-stone-700 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-colors cursor-pointer"
+                          >
+                            Reopen
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
           </div>

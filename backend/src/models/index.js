@@ -13,3 +13,4 @@ export * from './Feedback.js';
 export * from './Coupon.js';
 export * from './EventStaff.js';
 export * from './SessionRegistration.js';
+export * from './Inquiry.js';

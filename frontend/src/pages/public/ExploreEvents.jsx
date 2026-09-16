@@ -48,7 +48,7 @@ export default function ExploreEvents() {
             Global Conference Directory
           </span>
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-stone-900">
-            Explore <span className="cursive-masterpiece font-normal text-[#B45309] text-5xl md:text-7xl align-middle inline-block px-1">Upcoming Summits</span>
+            Explore <span className="cursive-accent font-normal text-[#B45309] text-4xl md:text-6xl align-middle inline-block px-1.5">Upcoming Events</span>
           </h1>
           <p className="text-sm md:text-base text-stone-600 max-w-xl mx-auto leading-relaxed font-light">
             Discover verified corporate conferences, multi-track exhibitions, and executive masterclasses with digital pass registration.

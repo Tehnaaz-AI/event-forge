@@ -68,3 +68,22 @@ export const getStats = async (req, res, next) => {
     next(e);
   }
 };
+
+export const getInquiries = async (req, res, next) => {
+  try {
+    const inquiries = await adminService.getAllInquiries();
+    ok(res, inquiries);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const updateInquiry = async (req, res, next) => {
+  try {
+    const result = await adminService.updateInquiryStatus(req.params.id, req.body.status, req.body.adminNotes);
+    ok(res, result, 'Inquiry updated successfully');
+  } catch (e) {
+    if (e.message.includes('not found')) return fail(res, e.message, 404);
+    next(e);
+  }
+};

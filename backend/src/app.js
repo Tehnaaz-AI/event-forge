@@ -12,6 +12,7 @@ import aiRoutes from './routes/ai.js';
 import announcementRoutes from './routes/announcements.js';
 import analyticsRoutes from './routes/analytics.js';
 import adminRoutes from './routes/admin.js';
+import contactRoutes from './routes/contact.js';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.get('/api/health', (req, res) => {
 // Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/events/:eventId/sponsors', sponsorRoutes);
 app.use('/api/events/:eventId/ai', aiRoutes);

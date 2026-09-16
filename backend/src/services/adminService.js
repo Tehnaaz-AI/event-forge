@@ -175,3 +175,18 @@ export const getPlatformStats = async () => {
     totalRevenue: revenueAgg[0]?.total || 0
   };
 };
+
+export const getAllInquiries = async () => {
+  const { Inquiry } = await import('../models/index.js');
+  return await Inquiry.find().sort({ createdAt: -1 }).lean();
+};
+
+export const updateInquiryStatus = async (id, status, adminNotes) => {
+  const { Inquiry } = await import('../models/index.js');
+  const inquiry = await Inquiry.findById(id);
+  if (!inquiry) throw new Error('Inquiry not found');
+  if (status) inquiry.status = status;
+  if (adminNotes !== undefined) inquiry.adminNotes = adminNotes;
+  await inquiry.save();
+  return inquiry;
+};

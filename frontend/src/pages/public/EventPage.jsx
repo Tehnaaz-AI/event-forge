@@ -134,13 +134,13 @@ export default function EventPage() {
       <section className="max-w-5xl mx-auto px-6 mt-16 space-y-8">
         <div className="border-b border-[#EFE8DA] pb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
           <div>
-            <h2 className="text-2xl font-extrabold text-stone-900 tracking-tight">
-              Conference Passes &amp; Admission
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+              Conference <span className="cursive-accent font-normal text-[#B45309] text-3xl sm:text-4xl align-middle px-1">Passes &amp; Admission</span>
             </h2>
-            <p className="text-xs text-stone-500 mt-1">Select your pass tier for instant digital QR badge issuance</p>
+            <p className="text-xs sm:text-sm text-stone-500 mt-1">Select your pass tier for instant digital QR badge issuance</p>
           </div>
-          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5">
-            <ShieldCheck size={14} /> Official Authorized Registration
+          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs">
+            <ShieldCheck size={15} /> Official Authorized Registration
           </span>
         </div>
 
@@ -224,10 +224,10 @@ export default function EventPage() {
         {/* Left Column: Multi-Track Schedule */}
         <div className="md:col-span-2 space-y-8">
           <div className="border-b border-[#EFE8DA] pb-4">
-            <h2 className="text-2xl font-extrabold text-stone-900 tracking-tight">
-              Conference Itinerary &amp; Keynotes
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+              Conference <span className="cursive-accent font-normal text-[#B45309] text-3xl sm:text-4xl align-middle px-1">Itinerary &amp; Keynotes</span>
             </h2>
-            <p className="text-xs text-stone-500 mt-1">Multi-track sessions, masterclasses, and executive panels</p>
+            <p className="text-xs sm:text-sm text-stone-500 mt-1">Multi-track sessions, masterclasses, and executive panels</p>
           </div>
 
           <div className="space-y-4">
