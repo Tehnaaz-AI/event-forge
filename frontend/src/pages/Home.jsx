@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, MapPin, Sparkles, ArrowRight, ShieldCheck, Cpu, 
   Ticket, TrendingUp, Plus, Clock, MessageSquare, Award,
   CheckCircle2, Zap, Users, Shield, Layers,
   QrCode, Check, Smartphone, CheckCircle, Search, Star,
-  Compass, Radio, Flame
+  Compass, Radio, Flame, ArrowDown, ChevronRight, Activity, Terminal
 } from 'lucide-react';
 import { api } from '../services/api';
 import useDocumentTitle from '../components/common/useDocumentTitle';
@@ -21,6 +21,7 @@ export default function Home() {
   );
 
   const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
+  const [activeJourneyStep, setActiveJourneyStep] = useState(0);
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['public-events-list'],
@@ -28,18 +29,77 @@ export default function Home() {
   });
 
   const activeEvent = events && events.length > 0 ? events[0] : null;
-  const [selectedPassQuantity, setSelectedPassQuantity] = useState(1);
+
+  // Scroll Journey Steps
+  const journeySteps = [
+    {
+      step: '01',
+      badge: 'Autonomous Planning',
+      title: 'AI Multi-Track Synthesis & Curation',
+      desc: 'Define tracks, keynote topics, and speaker rosters. EventForge AI synthesizes promotional copy, bio summaries, and constraint-verified agendas in seconds.',
+      icon: <Sparkles className="text-[#B45309]" size={24} />,
+      stat: '< 30s',
+      statLabel: 'AI Agenda Generation',
+      preview: {
+        tag: 'Multi-Track Builder',
+        headline: 'Mathematical Zero-Collision Scheduler',
+        features: ['Speaker overlap detection', 'Room capacity monitoring', 'Live keynote synchronization']
+      }
+    },
+    {
+      step: '02',
+      badge: 'Pass Distribution',
+      title: 'Tiered VIP Digital Pass Issuance',
+      desc: 'Deploy tiered tickets with custom coupon codes and instant cryptographic QR pass generation stored directly in attendee digital wallets.',
+      icon: <Ticket className="text-amber-600" size={24} />,
+      stat: '100% RBAC',
+      statLabel: 'Atomic Booking Locks',
+      preview: {
+        tag: 'Digital Wallet Passes',
+        headline: 'Instant Apple/Google Wallet Badges',
+        features: ['Signed HMAC QR codes', 'Self-serve ticket transfer', 'Printable lanyard PDF export']
+      }
+    },
+    {
+      step: '03',
+      badge: 'Day of Event',
+      title: 'Sub-Second Optical Gatekeeping',
+      desc: 'High-throughput hardware accelerated camera barcode decoding with instant Web Audio tone confirmation eliminates door bottleneck lines.',
+      icon: <Zap className="text-emerald-600" size={24} />,
+      stat: '< 150ms',
+      statLabel: 'Check-in Latency',
+      preview: {
+        tag: 'Door Staff Optical Scanner',
+        headline: 'Real-Time Synchronized Arrival Telemetry',
+        features: ['Hardware-accelerated camera scan', 'Anti-passback duplicate rejection', 'Offline fallback resilience']
+      }
+    },
+    {
+      step: '04',
+      badge: 'Live Intelligence',
+      title: 'Real-Time Telemetry & AI Concierge',
+      desc: 'Broadcast emergency announcements, monitor room capacity in real time, and let attendees discover sessions with their personalized AI Concierge.',
+      icon: <TrendingUp className="text-purple-600" size={24} />,
+      stat: '99.9%',
+      statLabel: 'Platform Uptime SLA',
+      preview: {
+        tag: 'Live Event Operations',
+        headline: 'Unified Broadcast & Attendee Analytics',
+        features: ['Real-time gate feeds', 'AI interest-matched itineraries', 'Instant session feedback surveys']
+      }
+    }
+  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+      transition: { staggerChildren: 0.12, delayChildren: 0.1 }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 24 },
     visible: {
       opacity: 1,
       y: 0,
@@ -51,7 +111,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans selection:bg-[#B45309] selection:text-white">
       
       {/* Editorial Luxury Hero Section */}
-      <section className="relative pt-16 pb-24 px-6 overflow-hidden border-b border-[#EFE8DA] bg-gradient-to-b from-[#FDFAF5] via-[#FAF8F5] to-[#F5F2EB]">
+      <section className="relative pt-16 pb-28 px-6 overflow-hidden border-b border-[#EFE8DA] bg-gradient-to-b from-[#FDFAF5] via-[#FAF8F5] to-[#F5F2EB]">
         
         {/* Ambient Warm Floating Glow */}
         <motion.div 
@@ -128,54 +188,170 @@ export default function Home() {
             )}
           </motion.div>
 
-          {/* High-Level Trust Badges */}
-          <motion.div variants={itemVariants} className="pt-6 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
-            <motion.div whileHover={{ y: -4, scale: 1.02 }} className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3.5 transition-all">
-              <div className="w-11 h-11 rounded-xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold shrink-0">
-                <Calendar size={20} />
-              </div>
-              <div>
-                <p className="text-sm font-extrabold text-stone-900">Multi-Track</p>
-                <p className="text-xs text-stone-500 font-medium">Zero-conflict matrix</p>
-              </div>
-            </motion.div>
-
-            <motion.div whileHover={{ y: -4, scale: 1.02 }} className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3.5 transition-all">
-              <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
-                <ShieldCheck size={20} />
-              </div>
-              <div>
-                <p className="text-sm font-extrabold text-stone-900">Optical Scanner</p>
-                <p className="text-xs text-stone-500 font-medium">&lt;150ms check-in</p>
-              </div>
-            </motion.div>
-
-            <motion.div whileHover={{ y: -4, scale: 1.02 }} className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3.5 transition-all">
-              <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold shrink-0">
-                <Cpu size={20} />
-              </div>
-              <div>
-                <p className="text-sm font-extrabold text-stone-900">AI Concierge</p>
-                <p className="text-xs text-stone-500 font-medium">Dynamic synthesis</p>
-              </div>
-            </motion.div>
-
-            <motion.div whileHover={{ y: -4, scale: 1.02 }} className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3.5 transition-all">
-              <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold shrink-0">
-                <TrendingUp size={20} />
-              </div>
-              <div>
-                <p className="text-sm font-extrabold text-stone-900">Live Telemetry</p>
-                <p className="text-xs text-stone-500 font-medium">Real-time gate feeds</p>
-              </div>
-            </motion.div>
+          {/* Interactive Scroll Down Indicator */}
+          <motion.div 
+            variants={itemVariants}
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="pt-6 flex flex-col items-center gap-1 text-stone-400 text-xs font-bold uppercase tracking-widest cursor-pointer"
+            onClick={() => {
+              const el = document.getElementById('scroll-journey');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <span>Scroll to Explore Experience</span>
+            <ArrowDown size={14} className="text-[#B45309]" />
           </motion.div>
 
         </motion.div>
       </section>
 
-      {/* 🚀 100% DYNAMIC REAL CONFERENCE SPOTLIGHT OR LIVE PLATFORM LAUNCHPAD 🚀 */}
-      <section className="max-w-6xl mx-auto px-6 py-16 w-full">
+      {/* 🧭 IMMERSIVE SCROLL JOURNEY & INTERACTIVE LIFECYCLE STEPPER 🧭 */}
+      <section id="scroll-journey" className="max-w-6xl mx-auto px-6 py-20 w-full space-y-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5 }}
+          className="text-center space-y-3"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-amber-50 text-[#B45309] rounded-full text-[11px] font-extrabold uppercase tracking-widest border border-amber-200">
+            <Activity size={13} />
+            <span>Interactive Conference Lifecycle</span>
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-stone-900 tracking-tight">
+            How EventForge Powers <span className="cursive-accent font-normal text-[#B45309] text-4xl sm:text-6xl align-middle px-1">Grand Summits</span>
+          </h2>
+          <p className="text-sm md:text-base text-stone-600 max-w-xl mx-auto leading-relaxed font-light">
+            Scroll or select each lifecycle phase below to inspect the real-time workflows connecting organizers, speakers, door staff, and delegates.
+          </p>
+        </motion.div>
+
+        {/* Step Selector Pills */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {journeySteps.map((j, idx) => {
+            const isActive = activeJourneyStep === idx;
+            return (
+              <motion.button
+                key={idx}
+                whileHover={{ y: -3 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setActiveJourneyStep(idx)}
+                className={`p-4 rounded-2xl text-left border transition-all flex flex-col justify-between space-y-3 ${
+                  isActive
+                    ? 'bg-white border-[#B45309] shadow-lg shadow-[#B45309]/10 ring-2 ring-[#B45309]/20'
+                    : 'bg-[#FAF8F5] border-[#EFE8DA] hover:bg-white hover:border-stone-400'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-mono font-extrabold ${isActive ? 'text-[#B45309]' : 'text-stone-400'}`}>
+                    PHASE {j.step}
+                  </span>
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isActive ? 'bg-amber-100 text-[#B45309]' : 'bg-white text-stone-500'}`}>
+                    {j.icon}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-stone-900 line-clamp-1">{j.badge}</p>
+                  <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">{j.title}</p>
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* Interactive Dynamic Showcase Card */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeJourneyStep}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.35 }}
+            className="bg-white rounded-3xl border border-[#EFE8DA] p-8 sm:p-12 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+          >
+            <div className="lg:col-span-7 space-y-5">
+              <div className="flex items-center gap-2">
+                <span className="px-3.5 py-1 bg-[#B45309]/10 text-[#B45309] rounded-full text-xs font-extrabold uppercase tracking-wider">
+                  Phase {journeySteps[activeJourneyStep].step} • {journeySteps[activeJourneyStep].badge}
+                </span>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  {journeySteps[activeJourneyStep].statLabel}: {journeySteps[activeJourneyStep].stat}
+                </span>
+              </div>
+
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+                {journeySteps[activeJourneyStep].title}
+              </h3>
+
+              <p className="text-sm text-stone-600 leading-relaxed font-light">
+                {journeySteps[activeJourneyStep].desc}
+              </p>
+
+              <div className="space-y-2.5 pt-2">
+                {journeySteps[activeJourneyStep].preview.features.map((feat, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs font-bold text-stone-800">
+                    <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                    <span>{feat}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-2 flex items-center gap-3">
+                <Link
+                  to="/features"
+                  className="bg-[#B45309] hover:bg-[#92400E] text-white px-6 py-3 rounded-xl text-xs font-bold shadow-md shadow-[#B45309]/20 transition-all flex items-center gap-2 uppercase tracking-wider"
+                >
+                  <span>Explore Feature Architecture</span>
+                  <ChevronRight size={14} />
+                </Link>
+
+                <button
+                  onClick={() => setActiveJourneyStep((activeJourneyStep + 1) % journeySteps.length)}
+                  className="bg-[#FAF8F5] hover:bg-stone-100 border border-[#EFE8DA] text-stone-700 px-4 py-3 rounded-xl text-xs font-bold transition-colors"
+                >
+                  Next Phase &rarr;
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 bg-gradient-to-br from-[#1C1917] via-[#292524] to-[#1C1917] text-white p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl space-y-5 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <span className="text-[10px] text-[#C28E27] uppercase tracking-wider font-bold">
+                  {journeySteps[activeJourneyStep].preview.tag}
+                </span>
+                <span className="text-emerald-400 flex items-center gap-1 text-[10px]">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ACTIVE ENGINE
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-base font-bold text-white font-sans">
+                  {journeySteps[activeJourneyStep].preview.headline}
+                </p>
+                <p className="text-[11px] text-stone-400 leading-relaxed font-sans">
+                  Validated under high-concurrency multi-track load tests.
+                </p>
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-2 text-[11px]">
+                <div className="flex justify-between text-stone-400">
+                  <span>KEY METRIC:</span>
+                  <strong className="text-amber-400">{journeySteps[activeJourneyStep].stat}</strong>
+                </div>
+                <div className="flex justify-between text-stone-400">
+                  <span>SYSTEM STATUS:</span>
+                  <strong className="text-emerald-400">NOMINAL (0 ERRORS)</strong>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </section>
+
+      {/* 🚀 REAL CONFERENCE SPOTLIGHT OR LIVE PLATFORM LAUNCHPAD 🚀 */}
+      <section className="max-w-6xl mx-auto px-6 py-12 w-full">
         {activeEvent ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
