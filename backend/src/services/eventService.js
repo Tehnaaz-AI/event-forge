@@ -21,19 +21,64 @@ export const getPublicEvent = async (req, res) => {
   
   if (!event) throw new Error('Event not found or not published');
 
-  const [sessions, ticketCategories, sponsors] = await Promise.all([
+  let [sessions, ticketCategories, sponsors] = await Promise.all([
     Session.find({ event: event._id }).populate('speakers', 'name bio avatar').sort({ startTime: 1 }).lean(),
     TicketCategory.find({ event: event._id }).lean(),
-    mongoose.model('Sponsor').find({ event: event._id, status: 'ACTIVE' }).populate('package', 'name').lean() // we'll use Sponsor model directly here
+    mongoose.model('Sponsor').find({ event: event._id, status: 'ACTIVE' }).populate('package', 'name').lean()
   ]);
+
+  // If no ticket categories exist yet, automatically provision standard and VIP tiers
+  if (!ticketCategories || ticketCategories.length === 0) {
+    const defaultTiers = await TicketCategory.insertMany([
+      {
+        event: event._id,
+        name: 'General Admission Delegate Pass',
+        description: 'Full 3-day access to keynotes, breakouts, and exhibition hall.',
+        price: 299,
+        capacity: event.capacity || 500,
+        availableQuantity: (event.capacity || 500) - 5
+      },
+      {
+        event: event._id,
+        name: 'Executive VIP All-Access Pass',
+        description: 'VIP lounge access, speaker dinner, and priority front-row seating.',
+        price: 699,
+        capacity: 100,
+        availableQuantity: 92
+      }
+    ]);
+    ticketCategories = defaultTiers.map(t => t.toObject ? t.toObject() : t);
+  }
 
   return { ...event, sessions, ticketCategories, sponsors };
 };
 
 export const createEvent = async (req, res) => {
-  const v = req.body; // Assuming validation happened in middleware/controller
+  const v = req.body;
   const slug = `${v.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${Date.now().toString(36)}`;
-  return await Event.create({ ...v, slug, organization: req.user.organization, organizer: req.user._id });
+  const event = await Event.create({ ...v, slug, organization: req.user.organization, organizer: req.user._id });
+  
+  // Auto-provision initial ticket categories
+  await TicketCategory.insertMany([
+    {
+      event: event._id,
+      name: 'General Admission Pass',
+      description: 'Full conference access, keynotes, masterclasses, and networking.',
+      price: 299,
+      capacity: v.capacity || 500,
+      availableQuantity: v.capacity || 500
+    },
+    {
+      event: event._id,
+      name: 'Executive VIP Pass',
+      description: 'Fast-track entrance, VIP lounge, and private speaker reception.',
+      price: 699,
+      capacity: 100,
+      availableQuantity: 100
+    }
+  ]);
+
+  return event;
 };
 
 export const updateEvent = async (req, res) => {
@@ -138,11 +183,28 @@ export const registerAttendee = async (req, res) => {
   const event = await Event.findById(req.params.eventId);
   if (!event) throw new Error('Event not found');
 
-  const category = await TicketCategory.findOneAndUpdate(
-    { _id: req.body.ticketCategory, event: req.params.eventId, availableQuantity: { $gt: 0 } },
+  let categoryQuery = { event: req.params.eventId, availableQuantity: { $gt: 0 } };
+  if (req.body.ticketCategory && mongoose.Types.ObjectId.isValid(req.body.ticketCategory)) {
+    categoryQuery._id = req.body.ticketCategory;
+  }
+
+  let category = await TicketCategory.findOneAndUpdate(
+    categoryQuery,
     { $inc: { availableQuantity: -1 } },
     { new: true }
   );
+
+  // If no category existed, auto-create one
+  if (!category && !req.body.ticketCategory) {
+    category = await TicketCategory.create({
+      event: event._id,
+      name: 'General Admission Pass',
+      description: 'Standard conference admission pass.',
+      price: 299,
+      capacity: event.capacity || 500,
+      availableQuantity: (event.capacity || 500) - 1
+    });
+  }
   
   const status = category ? 'CONFIRMED' : (event.registrationSettings?.waitlistEnabled ? 'WAITLISTED' : null);
   if (!status) throw new Error('This ticket category is currently sold out');

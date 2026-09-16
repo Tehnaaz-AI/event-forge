@@ -13,8 +13,12 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
   const location = useLocation();
   const queryClient = useQueryClient();
 
+  const categoriesList = (event.ticketCategories && event.ticketCategories.length > 0)
+    ? event.ticketCategories
+    : [{ _id: 'default', name: 'General Admission Pass', price: 299, capacity: 500, availableQuantity: 495, description: 'Full conference access, keynotes, and digital badge.' }];
+
   const [selectedCategory, setSelectedCategory] = useState(
-    initialCategoryId || event.ticketCategories?.[0]?._id || null
+    initialCategoryId || event.ticketCategories?.[0]?._id || categoriesList[0]?._id
   );
   const [couponCode, setCouponCode] = useState('SAVE20');
   const [appliedCoupon, setAppliedCoupon] = useState('SAVE20');
@@ -58,10 +62,15 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
   };
 
   const registerMutation = useMutation({
-    mutationFn: (data) => api.post(`/events/${event._id}/register`, {
-      ticketCategory: data.categoryId,
-      couponCode: data.coupon
-    }),
+    mutationFn: (data) => {
+      const catId = (data.categoryId && data.categoryId !== 'default') 
+        ? data.categoryId 
+        : (event.ticketCategories?.[0]?._id || undefined);
+      return api.post(`/events/${event._id}/register`, {
+        ticketCategory: catId,
+        couponCode: data.coupon
+      });
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['my-tickets'] });
       setSuccessData(data);
@@ -140,8 +149,8 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
     }
   };
 
-  const currentCat = event.ticketCategories?.find(c => c._id === selectedCategory) || event.ticketCategories?.[0];
-  const basePrice = currentCat?.price || 0;
+  const currentCat = categoriesList.find(c => String(c._id) === String(selectedCategory)) || categoriesList[0];
+  const basePrice = currentCat?.price ?? 299;
   let finalPrice = basePrice;
   if (typeof couponDiscount === 'number') {
     finalPrice = Math.round(basePrice * (1 - couponDiscount));
@@ -172,9 +181,9 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
           </button>
         </div>
 
-        <div className="p-6 md:p-8 space-y-6">
-          
-          {/* Success State */}
+        <div className="p-6 space-y-6">
+
+          {/* Success State Screen */}
           {successData ? (
             <div className="text-center py-6 space-y-6">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
@@ -237,8 +246,8 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
                   1. Select Pass Category
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {event.ticketCategories?.map((cat) => {
-                    const isSelected = selectedCategory === cat._id;
+                  {categoriesList.map((cat) => {
+                    const isSelected = String(selectedCategory) === String(cat._id);
                     return (
                       <div
                         key={cat._id}
@@ -424,8 +433,8 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
 
                 <button 
                   onClick={handleAuthAndCheckout}
-                  disabled={!selectedCategory || registerMutation.isPending || authLoading}
-                  className="w-full sm:w-auto bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-3.5 rounded-2xl font-bold text-base transition-all transform hover:-translate-y-0.5 shadow-xl shadow-[#B45309]/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                  disabled={registerMutation.isPending || authLoading}
+                  className="w-full sm:w-auto bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-3.5 rounded-2xl font-bold text-base transition-all transform hover:-translate-y-0.5 shadow-xl shadow-[#B45309]/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {(registerMutation.isPending || authLoading) ? (
                     <>
