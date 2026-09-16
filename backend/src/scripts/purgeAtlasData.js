@@ -18,9 +18,9 @@ async function purgeAtlasData() {
     process.exit(1);
   }
 
-  const adminEmail = (process.env.ADMIN_EMAIL || 'tehnaazfathima@gmail.com').trim().toLowerCase();
-  const adminPassword = (process.env.ADMIN_PASSWORD || '12345678').trim();
-  const adminName = (process.env.ADMIN_NAME || 'Tehnaaz Fathima').trim();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@eventforge.com').trim().toLowerCase();
+  const adminPassword = (process.env.ADMIN_PASSWORD || 'Admin@12345').trim();
+  const adminName = (process.env.ADMIN_NAME || 'Platform Administrator').trim();
 
   console.log(`🛡️ Preserving Master Admin: ${adminName} (${adminEmail})`);
 

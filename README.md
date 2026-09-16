@@ -126,9 +126,9 @@ JWT_EXPIRES_IN=8h
 CLIENT_URL=http://localhost:5173
 
 # Super Admin Bootstrap Credentials
-ADMIN_NAME=Tehnaaz Fathima
-ADMIN_EMAIL=tehnaaz@mail.com
-ADMIN_PASSWORD=12345678
+ADMIN_NAME=Platform Administrator
+ADMIN_EMAIL=admin@eventforge.com
+ADMIN_PASSWORD=change_this_password_123!
 
 # AI Engine Configuration (Gemini, OpenAI, Groq, or OpenRouter)
 AI_PROVIDER=auto

@@ -109,8 +109,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="font-bold text-stone-900">Platform Super Admin</p>
-                  <a href="mailto:tehnaazfathima@gmail.com" className="text-stone-500 hover:text-[#B45309] font-medium">
-                    tehnaazfathima@gmail.com
+                  <a href="mailto:support@eventforge.com" className="text-stone-500 hover:text-[#B45309] font-medium">
+                    support@eventforge.com
                   </a>
                 </div>
               </div>

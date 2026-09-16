@@ -15,7 +15,7 @@ r.post('/', async (req, res, next) => {
       });
     }
 
-    const adminRecipient = process.env.ADMIN_EMAIL || 'tehnaaz@mail.com';
+    const adminRecipient = process.env.ADMIN_EMAIL || 'admin@eventforge.com';
 
     const inquiry = await Inquiry.create({
       name: name.trim(),
