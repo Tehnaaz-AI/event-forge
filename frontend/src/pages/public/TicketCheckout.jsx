@@ -149,6 +149,14 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
     }
   };
 
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   const currentCat = categoriesList.find(c => String(c._id) === String(selectedCategory)) || categoriesList[0];
   const basePrice = currentCat?.price ?? 299;
   let finalPrice = basePrice;
@@ -159,29 +167,31 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
   }
 
   return (
-    <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="bg-[#FAF8F5] border border-[#EFE8DA] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto text-stone-900 animate-in fade-in zoom-in-95">
+    <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden animate-in fade-in duration-200">
+      <div className="bg-[#FAF8F5] border border-[#EFE8DA] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden text-stone-900 animate-in zoom-in-95 duration-200 relative">
         
-        {/* Header */}
-        <div className="sticky top-0 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#EFE8DA] px-6 py-4 flex items-center justify-between z-10">
+        {/* Fixed Header */}
+        <div className="bg-white border-b border-[#EFE8DA] px-6 py-4 flex items-center justify-between shrink-0 z-10">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold">
               <TicketIcon size={18} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-stone-900">Conference Pass Checkout</h2>
-              <p className="text-xs text-stone-500 truncate max-w-xs">{event.title}</p>
+              <h2 className="text-base sm:text-lg font-extrabold text-stone-900">Conference Pass Checkout</h2>
+              <p className="text-[11px] text-stone-500 truncate max-w-xs">{event.title}</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="p-2 text-stone-400 hover:text-stone-700 rounded-full hover:bg-stone-200/50 transition-colors"
+            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-full hover:bg-stone-100 transition-colors"
+            aria-label="Close pass checkout"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        {/* Scrollable Modal Body */}
+        <div className="p-6 space-y-6 flex-1 overflow-y-auto scrollbar-beige">
 
           {/* Success State Screen */}
           {successData ? (
@@ -204,7 +214,7 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
                 <div className="bg-white p-6 rounded-2xl border border-[#EFE8DA] shadow-md max-w-sm mx-auto space-y-3">
                   <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 inline-block">
                     {successData.ticket.qrCode ? (
-                      <img src={successData.ticket.qrCode} alt="QR Ticket" className="w-40 h-40 mx-auto" />
+                      <img src={successData.ticket.qrCode} alt="QR Entrance Ticket" className="w-40 h-40 mx-auto" />
                     ) : (
                       <QrCode size={120} className="mx-auto text-stone-400" />
                     )}
@@ -415,44 +425,56 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
                         />
                       </div>
                     </div>
+
+                    <div className="pt-2 text-center">
+                      <Link
+                        to={`/login?from=/e/${event.slug}?checkout=true`}
+                        className="text-[11px] font-bold text-[#B45309] hover:underline"
+                      >
+                        Prefer full login page? Sign In / Register &amp; Continue &rarr;
+                      </Link>
+                    </div>
                   </div>
                 )}
-              </div>
-
-              {/* Total Summary & Checkout Button */}
-              <div className="pt-4 border-t border-[#EFE8DA] flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs text-stone-500 font-medium">Total Payable Amount</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold text-stone-900">${finalPrice}</span>
-                    {finalPrice < basePrice && (
-                      <span className="text-sm line-through text-stone-400 font-medium">${basePrice}</span>
-                    )}
-                  </div>
-                </div>
-
-                <button 
-                  onClick={handleAuthAndCheckout}
-                  disabled={registerMutation.isPending || authLoading}
-                  className="w-full sm:w-auto bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-3.5 rounded-2xl font-bold text-base transition-all transform hover:-translate-y-0.5 shadow-xl shadow-[#B45309]/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-                >
-                  {(registerMutation.isPending || authLoading) ? (
-                    <>
-                      <RefreshCw size={18} className="animate-spin" />
-                      <span>Processing Pass...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>{currentUser ? 'Confirm & Secure Pass' : (authMode === 'REGISTER' ? 'Create Account & Secure Pass' : 'Sign In & Secure Pass')}</span>
-                      <ArrowRight size={18} />
-                    </>
-                  )}
-                </button>
               </div>
             </>
           )}
 
         </div>
+
+        {/* Fixed Footer with Price & Action Button (Only in Form State) */}
+        {!successData && (
+          <div className="bg-white border-t border-[#EFE8DA] px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0 z-10">
+            <div>
+              <p className="text-[11px] text-stone-500 font-semibold uppercase tracking-wider">Total Payable Amount</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl sm:text-3xl font-extrabold text-stone-900">${finalPrice}</span>
+                {finalPrice < basePrice && (
+                  <span className="text-xs sm:text-sm line-through text-stone-400 font-medium">${basePrice}</span>
+                )}
+              </div>
+            </div>
+
+            <button 
+              onClick={handleAuthAndCheckout}
+              disabled={registerMutation.isPending || authLoading}
+              className="w-full sm:w-auto bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-3.5 rounded-2xl font-bold text-sm sm:text-base transition-all transform hover:-translate-y-0.5 shadow-xl shadow-[#B45309]/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+            >
+              {(registerMutation.isPending || authLoading) ? (
+                <>
+                  <RefreshCw size={18} className="animate-spin" />
+                  <span>Processing Pass...</span>
+                </>
+              ) : (
+                <>
+                  <span>{currentUser ? 'Confirm & Secure Pass' : (authMode === 'REGISTER' ? 'Create Account & Secure Pass' : 'Sign In & Secure Pass')}</span>
+                  <ArrowRight size={18} />
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );

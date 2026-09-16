@@ -75,12 +75,12 @@ export default function Login() {
         localStorage.setItem('eventforge_token', res.token);
         localStorage.setItem('eventforge_user', JSON.stringify(res.user));
         
-        // Redirect based on role or previous target
-        const targetRedirect = location.state?.from
+        // Redirect based on query param, state, or role
+        const targetRedirect = searchParams.get('from') || (location.state?.from
           ? (typeof location.state.from === 'string' 
               ? location.state.from 
               : (location.state.from.pathname + (location.state.from.search || '')))
-          : null;
+          : null);
 
         if (targetRedirect) {
           navigate(targetRedirect, { replace: true });
@@ -100,11 +100,11 @@ export default function Login() {
         localStorage.setItem('eventforge_user', JSON.stringify(res.user));
         
         // Role based routing or previous target
-        const targetRedirect = location.state?.from
+        const targetRedirect = searchParams.get('from') || (location.state?.from
           ? (typeof location.state.from === 'string' 
               ? location.state.from 
               : (location.state.from.pathname + (location.state.from.search || '')))
-          : null;
+          : null);
 
         if (targetRedirect) {
           navigate(targetRedirect, { replace: true });
