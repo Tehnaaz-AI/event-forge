@@ -64,7 +64,7 @@ export default function PublicLayout() {
       <CookieConsent />
 
       {/* Enterprise Luxury Footer */}
-      <footer className="bg-[#1C1917] border-t border-white/10 text-stone-400 pt-16 pb-12 mt-auto">
+      <footer className="bg-[#1C1917] border-t border-[#EFE8DA] text-stone-400 pt-16 pb-12 mt-auto">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-10">
           
           <div className="md:col-span-2 space-y-4">

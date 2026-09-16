@@ -167,7 +167,7 @@
 }
 
 /* ==========================================================================
-   🌙 LUXURY OBSIDIAN & CHAMPAGNE GOLD DARK THEME OVERRIDES 🌙
+   🌙 LUXURY OBSIDIAN THEME WITH TWILIGHT SAPPHIRE NAVBAR & FOOTER 🌙
    ========================================================================== */
 .dark body {
   background-color: #0F0E0D !important;
@@ -179,10 +179,11 @@
   color: #F5F2EB !important;
 }
 
+/* 🌌 Distinct Non-Black Luxury Deep Twilight Indigo-Navy Navbar 🌌 */
 .dark .curved-navbar {
-  background: rgba(23, 22, 20, 0.92) !important;
-  border-color: rgba(60, 55, 48, 0.8) !important;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6) !important;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.96) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 12px 35px -5px rgba(15, 23, 42, 0.8), 0 0 15px rgba(245, 158, 11, 0.15) !important;
 }
 
 .dark .bg-white {
@@ -258,6 +259,26 @@
 
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #D97706;
+}
+
+/* 🌟 Distinct Non-Black Luxury Twilight Sapphire Footer in Dark Mode 🌟 */
+.dark footer {
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 50%, #080D1A 100%) !important;
+  border-top: 1px solid rgba(245, 158, 11, 0.45) !important;
+  color: #CBD5E1 !important;
+  box-shadow: 0 -12px 40px -10px rgba(15, 23, 42, 0.9) !important;
+}
+
+.dark footer .text-white {
+  color: #F8FAFC !important;
+}
+
+.dark footer .text-stone-400 {
+  color: #94A3B8 !important;
+}
+
+.dark footer a:hover {
+  color: #FBBF24 !important;
 }
 
 /* Conference Badge Print Styling */
