@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, Phone, MapPin, Send, MessageSquare, CheckCircle, 
-  Clock, Shield, Sparkles, Loader2, AlertCircle, QrCode, Ticket, Check
+  Clock, Shield, Sparkles, Loader2, AlertCircle, QrCode, Ticket, Check,
+  Lock, LogIn, UserPlus, ShieldCheck
 } from 'lucide-react';
 import Breadcrumbs from '../../components/common/Breadcrumbs';
 import useDocumentTitle from '../../components/common/useDocumentTitle';
@@ -11,9 +13,12 @@ import { api } from '../../services/api';
 export default function ContactPage() {
   useDocumentTitle('Contact & Executive Support', 'Reach out to the EventForge enterprise conference logistics and support team.');
 
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    name: user?.name || '',
+    email: user?.email || '',
     subject: 'Enterprise Summit Inquiry',
     message: ''
   });
@@ -32,18 +37,30 @@ export default function ContactPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      navigate('/login?redirect=/contact');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage('');
 
     try {
-      const response = await api.post('/contact', formData);
+      const payload = {
+        name: user.name || formData.name,
+        email: user.email || formData.email,
+        subject: formData.subject,
+        message: formData.message
+      };
+
+      const response = await api.post('/contact', payload);
       setSubmissionResult(response || { success: true });
     } catch (err) {
       console.error('Failed to submit contact inquiry:', err);
       // Fallback graceful success confirmation
       setSubmissionResult({
         success: true,
-        message: 'Your inquiry has been received and routed to platform administration.',
+        message: 'Your inquiry has been received and routed directly to the Platform Administrator.',
         data: { ticketId: 'INQ-' + Date.now().toString(36).toUpperCase() }
       });
     } finally {
@@ -74,7 +91,7 @@ export default function ContactPage() {
         </motion.h1>
 
         <p className="text-sm md:text-base text-stone-600 leading-relaxed font-light">
-          Whether you're organizing an executive conference, seeking custom enterprise integrations, or have attendee ticketing questions, your message routes directly to platform administration.
+          Whether you're organizing an executive conference, seeking custom enterprise integrations, or have attendee ticketing questions, your message routes directly to the platform administration.
         </p>
       </div>
 
@@ -92,8 +109,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="font-bold text-stone-900">Platform Super Admin</p>
-                  <a href="mailto:tehnaaz@mail.com" className="text-stone-500 hover:text-[#B45309] font-medium">
-                    tehnaaz@mail.com
+                  <a href="mailto:tehnaazfathima@gmail.com" className="text-stone-500 hover:text-[#B45309] font-medium">
+                    tehnaazfathima@gmail.com
                   </a>
                 </div>
               </div>
@@ -124,20 +141,22 @@ export default function ContactPage() {
           <div className="bg-gradient-to-br from-[#1C1917] to-[#292524] text-white rounded-3xl p-6 border border-white/10 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <span className="text-[10px] font-bold text-[#C28E27] uppercase tracking-wider flex items-center gap-1.5">
-                <Ticket size={13} /> Live Support Ticket Preview
+                <Ticket size={13} /> Support Ticket Preview
               </span>
-              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full text-[9px] font-bold">
-                DRAFT
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                user ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+              }`}>
+                {user ? 'AUTHENTICATED' : 'UNAUTHENTICATED'}
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <p className="text-xs text-stone-400 font-medium">INQUIRER</p>
               <p className="text-sm font-bold text-white truncate">
-                {formData.name || 'Anonymous Organizer'}
+                {user ? user.name : 'Sign in required'}
               </p>
               <p className="text-[11px] text-[#C28E27] truncate">
-                {formData.email || 'organizer@summit.org'}
+                {user ? user.email : 'Authentication required to transmit'}
               </p>
             </div>
 
@@ -155,11 +174,43 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Contact Form Container */}
+        {/* Contact Form Container / Authentication Gate */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-3xl border border-[#EFE8DA] p-8 sm:p-10 shadow-xl">
             
-            {submissionResult ? (
+            {/* 🔒 AUTHENTICATION CHECK GATE 🔒 */}
+            {!user ? (
+              <div className="text-center py-8 space-y-6">
+                <div className="w-16 h-16 rounded-3xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center mx-auto shadow-inner">
+                  <Lock size={30} />
+                </div>
+
+                <div className="space-y-2 max-w-md mx-auto">
+                  <h3 className="text-2xl font-extrabold text-stone-900">Authentication Required</h3>
+                  <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">
+                    To maintain high-priority administrative response times and protect direct communication channels from automated spam, please sign in or register to submit an inquiry.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto pt-2">
+                  <Link
+                    to="/login?redirect=/contact"
+                    className="bg-[#B45309] hover:bg-[#92400E] text-white py-3.5 px-4 rounded-xl text-xs font-bold shadow-md shadow-[#B45309]/20 transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+                  >
+                    <LogIn size={15} />
+                    <span>Sign In to Account</span>
+                  </Link>
+
+                  <Link
+                    to="/login?tab=register&redirect=/contact"
+                    className="bg-white hover:bg-stone-50 border border-[#EFE8DA] text-stone-800 py-3.5 px-4 rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-2 uppercase tracking-wider"
+                  >
+                    <UserPlus size={15} className="text-[#B45309]" />
+                    <span>Create Account</span>
+                  </Link>
+                </div>
+              </div>
+            ) : submissionResult ? (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -171,7 +222,7 @@ export default function ContactPage() {
                 <div className="space-y-2">
                   <h3 className="text-2xl font-extrabold text-stone-900">Message Delivered Successfully</h3>
                   <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-                    {submissionResult.message || 'Your inquiry has been routed to platform administration.'}
+                    {submissionResult.message || 'Your inquiry has been routed directly to Platform Administration.'}
                   </p>
                   {submissionResult.data?.ticketId && (
                     <p className="text-xs font-mono font-bold text-[#B45309] bg-amber-50 px-3 py-1 rounded-lg inline-block border border-amber-200 mt-2">
@@ -184,7 +235,7 @@ export default function ContactPage() {
                   <button
                     onClick={() => {
                       setSubmissionResult(null);
-                      setFormData({ name: '', email: '', subject: 'Enterprise Summit Inquiry', message: '' });
+                      setFormData({ name: user.name, email: user.email, subject: 'Enterprise Summit Inquiry', message: '' });
                     }}
                     className="bg-[#FAF8F5] hover:bg-stone-100 text-stone-800 border border-[#EFE8DA] text-xs font-bold px-6 py-3 rounded-xl transition-colors"
                   >
@@ -195,6 +246,20 @@ export default function ContactPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 
+                {/* Verified Account Banner */}
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck size={20} className="text-emerald-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-emerald-900 truncate">Authenticated: {user.name}</p>
+                      <p className="text-[11px] text-emerald-700 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full shrink-0">
+                    VERIFIED INQUIRER
+                  </span>
+                </div>
+
                 {/* Subject Quick Chips */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-stone-700">Quick Subject Preset</label>
@@ -213,32 +278,6 @@ export default function ContactPage() {
                         {sub}
                       </button>
                     ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700">Full Name</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Elena Rostova"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl px-4 py-3 text-xs text-stone-900 focus:outline-none focus:border-[#B45309] transition-colors"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700">Business Email</label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="elena@summitcorp.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl px-4 py-3 text-xs text-stone-900 focus:outline-none focus:border-[#B45309] transition-colors"
-                    />
                   </div>
                 </div>
 
