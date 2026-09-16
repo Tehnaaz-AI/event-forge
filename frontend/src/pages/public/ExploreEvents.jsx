@@ -6,8 +6,12 @@ import {
   ArrowRight, Users, CheckCircle2 
 } from 'lucide-react';
 import { api } from '../../services/api';
+import Breadcrumbs from '../../components/common/Breadcrumbs';
+import useDocumentTitle from '../../components/common/useDocumentTitle';
 
 export default function ExploreEvents() {
+  useDocumentTitle('Explore Global Summits & Conferences', 'Discover and filter upcoming multi-track conferences, AI symposiums, and executive leadership events.');
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
@@ -34,7 +38,11 @@ export default function ExploreEvents() {
     <div className="min-h-screen bg-[#FAF8F5] pb-24 text-stone-900 font-sans">
       
       {/* Header Banner in Luxury Warm Sand */}
-      <section className="bg-gradient-to-b from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] pt-12 pb-10 px-6">
+      <section className="bg-gradient-to-b from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] pt-6 pb-10 px-6">
+        <div className="max-w-5xl mx-auto px-4 mb-4">
+          <Breadcrumbs items={[{ label: 'Explore Summits' }]} />
+        </div>
+
         <div className="max-w-4xl mx-auto text-center space-y-3">
           <span className="px-3.5 py-1 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-[10px] font-extrabold uppercase tracking-widest inline-block shadow-xs">
             Global Conference Directory

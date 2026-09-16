@@ -8,12 +8,14 @@ import {
 } from 'lucide-react';
 import { api } from '../../services/api';
 
-export default function TicketCheckout({ event, onClose }) {
+export default function TicketCheckout({ event, initialCategoryId = null, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  const [selectedCategory, setSelectedCategory] = useState(event.ticketCategories?.[0]?._id || null);
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialCategoryId || event.ticketCategories?.[0]?._id || null
+  );
   const [couponCode, setCouponCode] = useState('SAVE20');
   const [appliedCoupon, setAppliedCoupon] = useState('SAVE20');
   const [couponDiscount, setCouponDiscount] = useState(0.2); // 20%
@@ -205,18 +207,25 @@ export default function TicketCheckout({ event, onClose }) {
                 </div>
               )}
 
-              <div className="flex justify-center gap-3 pt-4">
+              <div className="flex flex-wrap justify-center gap-3 pt-4">
+                <button
+                  onClick={() => navigate('/thank-you', { state: { orderData: successData, event } })}
+                  className="bg-[#B45309] hover:bg-[#92400E] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+                >
+                  <span>Order Receipt &amp; Pass</span>
+                  <ArrowRight size={13} />
+                </button>
                 <button
                   onClick={() => navigate('/dashboard/attendee')}
-                  className="bg-[#B45309] hover:bg-[#92400E] text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
+                  className="bg-stone-900 hover:bg-stone-800 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all"
                 >
-                  View in My Passes
+                  My Passes Portal
                 </button>
                 <button
                   onClick={onClose}
-                  className="bg-white border border-[#EFE8DA] hover:bg-stone-50 text-stone-700 px-6 py-2.5 rounded-xl font-bold text-xs transition-all"
+                  className="bg-white border border-[#EFE8DA] hover:bg-stone-50 text-stone-700 px-4 py-2.5 rounded-xl font-bold text-xs transition-all"
                 >
-                  Done
+                  Close
                 </button>
               </div>
             </div>

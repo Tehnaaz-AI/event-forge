@@ -28,6 +28,10 @@ import EventPage from './pages/public/EventPage';
 import ExploreEvents from './pages/public/ExploreEvents';
 import FeaturesPage from './pages/public/FeaturesPage';
 import AboutPage from './pages/public/AboutPage';
+import ContactPage from './pages/public/ContactPage';
+import WaitlistPage from './pages/public/WaitlistPage';
+import ThankYouPage from './pages/public/ThankYouPage';
+import NotFoundPage from './pages/public/NotFoundPage';
 
 import ScrollToTop from './components/common/ScrollToTop';
 
@@ -51,12 +55,20 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<ExploreEvents />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/waitlist" element={<WaitlistPage />} />
           <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/e/:slug" element={<EventPage />} />
         </Route>
         
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
+
+        {/* 404 Route */}
+        <Route element={<PublicLayout />}>
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
 
         {/* Platform Master Admin Console */}
         <Route element={<ProtectedRoute allowedRoles={['PLATFORM_ADMIN']} />}>

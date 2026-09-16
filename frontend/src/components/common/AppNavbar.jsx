@@ -37,9 +37,11 @@ export default function AppNavbar() {
   // Build role-differentiated navigation links
   const getNavLinks = () => {
     const common = [
-      { label: 'Home', path: '/' },
-      { label: 'Explore Conferences', path: '/explore' },
-      { label: 'Platform Features', path: '/features' }
+      { label: 'Explore Summits', path: '/explore' },
+      { label: 'Platform Features', path: '/features' },
+      { label: 'About & Team', path: '/about' },
+      { label: 'VIP Waitlist', path: '/waitlist' },
+      { label: 'Contact', path: '/contact' }
     ];
 
     if (!user) {

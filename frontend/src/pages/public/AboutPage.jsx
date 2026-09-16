@@ -2,16 +2,54 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ShieldCheck, Cpu, Calendar, Users, Award, Sparkles, 
-  ArrowRight, CheckCircle2, Globe, Building, Zap, Lock 
+  ArrowRight, CheckCircle2, Globe, Building, Zap, Lock,
+  Linkedin, Twitter, Github
 } from 'lucide-react';
+import Breadcrumbs from '../../components/common/Breadcrumbs';
+import useDocumentTitle from '../../components/common/useDocumentTitle';
 
 export default function AboutPage() {
+  useDocumentTitle('About EventForge & Engineering Leadership', 'Learn about our mission, leadership team, and enterprise conference infrastructure.');
+
+  const leadershipTeam = [
+    {
+      name: 'Alexander Sterling',
+      role: 'Chief Executive Officer & Co-Founder',
+      bio: 'Former VP of Enterprise Events at GlobalCon with 15+ years orchestrating Tier-1 tech summits.',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop',
+      linkedin: 'https://linkedin.com/'
+    },
+    {
+      name: 'Eleanor Vance',
+      role: 'Chief Technology Officer',
+      bio: 'Pioneered zero-latency distributed check-in architectures and autonomous AI agenda curation.',
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop',
+      linkedin: 'https://linkedin.com/'
+    },
+    {
+      name: 'Marcus Holloway',
+      role: 'Head of Product & Experience',
+      bio: 'Specialist in attendee engagement telemetry, badge security, and accessible conference UX.',
+      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop',
+      linkedin: 'https://linkedin.com/'
+    },
+    {
+      name: 'Dr. Priya Shah',
+      role: 'VP of AI Research & Concierge',
+      bio: 'PhD in NLP & Multi-Agent Systems. Leads the AI session matching and schedule optimization engine.',
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop',
+      linkedin: 'https://linkedin.com/'
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-stone-900 font-sans selection:bg-[#B45309] selection:text-white pb-24">
       
       {/* Luxury Hero Banner */}
-      <section className="bg-gradient-to-b from-[#FDFAF5] via-[#FAF8F5] to-[#F5F2EB] border-b border-[#EFE8DA] pt-20 pb-24 px-6 text-center relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#B45309]/5 rounded-full blur-[140px] pointer-events-none"></div>
+      <section className="bg-gradient-to-b from-[#FDFAF5] via-[#FAF8F5] to-[#F5F2EB] border-b border-[#EFE8DA] pt-12 pb-24 px-6 text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 mb-6">
+          <Breadcrumbs items={[{ label: 'About Us & Leadership' }]} />
+        </div>
 
         <div className="max-w-4xl mx-auto relative z-10 space-y-6">
           <span className="px-4 py-1.5 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-[10px] font-extrabold uppercase tracking-widest inline-block shadow-xs">
@@ -71,7 +109,7 @@ export default function AboutPage() {
                   <CheckCircle2 size={13} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-stone-900">Autonomous AI Content Studio & Matchmaking</h4>
+                  <h4 className="text-xs font-bold text-stone-900">Autonomous AI Content Studio &amp; Matchmaking</h4>
                   <p className="text-[11px] text-stone-500">Instant generation of promotional copy, session descriptions, and attendee interest-matched itineraries.</p>
                 </div>
               </div>
@@ -112,6 +150,50 @@ export default function AboutPage() {
               <span>Security &amp; Tenant Isolation</span>
               <span className="text-emerald-600 flex items-center gap-1"><ShieldCheck size={14} /> SOC2 / JWT Verified</span>
             </div>
+          </div>
+        </div>
+
+        {/* Executive Leadership Team Section */}
+        <div className="space-y-10 pt-10">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-[#B45309] rounded-full text-[11px] font-extrabold uppercase tracking-widest">
+              <Users size={13} />
+              <span>Leadership Team</span>
+            </div>
+            <h3 className="text-3xl font-extrabold text-stone-900 tracking-tight">
+              Crafted by Conference Pioneers
+            </h3>
+            <p className="text-sm text-stone-600 max-w-xl mx-auto">
+              Meet the technologists, event designers, and systems architects behind EventForge.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {leadershipTeam.map((member, idx) => (
+              <div 
+                key={idx}
+                className="bg-white rounded-3xl p-5 border border-[#EFE8DA] shadow-sm hover:shadow-md transition-shadow text-center space-y-4"
+              >
+                <img
+                  src={member.image}
+                  alt={`Portrait photograph of ${member.name}, ${member.role}`}
+                  className="w-24 h-24 rounded-2xl mx-auto object-cover border border-[#EFE8DA] shadow-sm"
+                />
+                <div>
+                  <h4 className="text-sm font-extrabold text-stone-900">{member.name}</h4>
+                  <p className="text-[11px] font-bold text-[#B45309] mt-0.5">{member.role}</p>
+                  <p className="text-[11px] text-stone-500 leading-relaxed mt-2 text-left">{member.bio}</p>
+                </div>
+                <div className="pt-2 border-t border-stone-100 flex justify-center gap-3 text-stone-400">
+                  <a href={member.linkedin} target="_blank" rel="noreferrer" className="hover:text-[#B45309] transition-colors" aria-label={`${member.name} LinkedIn Profile`}>
+                    <Linkedin size={15} />
+                  </a>
+                  <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-[#B45309] transition-colors" aria-label={`${member.name} Twitter Profile`}>
+                    <Twitter size={15} />
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

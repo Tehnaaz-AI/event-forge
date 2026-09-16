@@ -3,11 +3,16 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Calendar, MapPin, Sparkles, ArrowRight, ShieldCheck, Cpu, 
-  Ticket, TrendingUp, Plus 
+  Ticket, TrendingUp, Plus, Clock, MessageSquare, Award
 } from 'lucide-react';
 import { api } from '../services/api';
+import useDocumentTitle from '../components/common/useDocumentTitle';
+import FAQSection from '../components/common/FAQSection';
+import TestimonialsSection from '../components/common/TestimonialsSection';
 
 export default function Home() {
+  useDocumentTitle('Premier Multi-Track Conference Operating System', 'Curate, scale, and orchestrate world-class enterprise conferences with zero-conflict scheduling and high-speed QR check-in.');
+
   const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
 
   const { data: events, isLoading } = useQuery({
@@ -64,16 +69,16 @@ export default function Home() {
             ) : (
               <>
                 <Link 
-                  to="/login?tab=register" 
+                  to="/explore" 
                   className="bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-[#B45309]/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
                 >
-                  Get Started as Organizer <ArrowRight size={16} />
+                  Explore Summits <ArrowRight size={16} />
                 </Link>
                 <Link 
-                  to="/login" 
+                  to="/login?tab=register" 
                   className="bg-white hover:bg-stone-50 text-stone-800 px-8 py-4 rounded-2xl font-bold text-sm border border-[#EFE8DA] transition-all shadow-sm flex items-center gap-2"
                 >
-                  Sign In to Account
+                  Host a Conference
                 </Link>
               </>
             )}
@@ -93,31 +98,31 @@ export default function Home() {
 
             <div className="bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
-                <Cpu size={18} />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-stone-900">AI Synthesis</p>
-                <p className="text-[10px] text-stone-500">Agendas &amp; Content</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold shrink-0">
                 <ShieldCheck size={18} />
               </div>
               <div>
-                <p className="text-xs font-bold text-stone-900">Optical Check-In</p>
-                <p className="text-[10px] text-stone-500">Live Camera Scanner</p>
+                <p className="text-xs font-bold text-stone-900">Optical Scanner</p>
+                <p className="text-[10px] text-stone-500">&lt;150ms check-in latency</p>
               </div>
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center font-bold shrink-0">
-                <TrendingUp size={18} className="text-[#C28E27]" />
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
+                <Cpu size={18} />
               </div>
               <div>
-                <p className="text-xs font-bold text-stone-900">Live Telemetry</p>
-                <p className="text-[10px] text-stone-500">Real-time attendance</p>
+                <p className="text-xs font-bold text-stone-900">AI Concierge</p>
+                <p className="text-[10px] text-stone-500">Autonomous synthesis</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-sm flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold shrink-0">
+                <TrendingUp size={18} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-stone-900">Live Analytics</p>
+                <p className="text-[10px] text-stone-500">Real-time gate telemetry</p>
               </div>
             </div>
           </div>
@@ -125,27 +130,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Conferences Grid in Warm Ivory */}
-      <section id="featured-events" className="max-w-7xl mx-auto px-6 py-24 w-full">
-        
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-          <div>
-            <span className="text-[11px] font-bold text-[#B45309] uppercase tracking-widest block mb-1">
-              Curated Portfolio
+      {/* Featured Conferences Grid Section */}
+      <section id="featured-events" className="max-w-6xl mx-auto px-6 py-20 w-full space-y-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-[#EFE8DA] pb-6">
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-[#B45309] uppercase tracking-widest">
+              Upcoming Flagship Summits
             </span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight">
-              Featured Flagship <span className="logo-cursive font-normal text-[#B45309] text-4xl md:text-5xl">Conferences</span>
+              Featured Global Gatherings
             </h2>
-            <p className="text-stone-500 text-xs md:text-sm mt-1">
-              Explore upcoming corporate conferences with live registration, tiered passes, and speaker lineups
-            </p>
+            <p className="text-xs text-stone-500">Curated conferences with verified speakers and multi-track agendas</p>
           </div>
 
           <Link 
             to="/explore"
-            className="text-xs font-bold text-[#B45309] hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-[#B45309] hover:text-[#92400E] flex items-center gap-1 group bg-white border border-[#EFE8DA] px-4 py-2 rounded-xl shadow-xs"
           >
-            Explore All Conferences &rarr;
+            Explore All Conferences <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -229,6 +231,36 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {/* Priority Waitlist & Early Bird Banner */}
+      <section className="max-w-6xl mx-auto px-6 py-8 w-full">
+        <div className="bg-gradient-to-r from-stone-900 via-stone-800 to-[#1C1917] text-white rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-stone-700">
+          <div className="space-y-2 max-w-lg">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#F59E0B] bg-amber-500/10 px-3 py-1 rounded-full inline-block">
+              VIP Priority Access
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Looking for Sold-Out Keynotes &amp; Early Bird Passes?
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-300 leading-relaxed">
+              Join the priority waitlist to receive instant checkout invitations when executive allocations release.
+            </p>
+          </div>
+          <Link
+            to="/waitlist"
+            className="shrink-0 bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-[#B45309]/30 transition-all flex items-center gap-2 uppercase tracking-wider"
+          >
+            <Clock size={16} />
+            <span>Join VIP Waitlist</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* Verified Reviews Section */}
+      <TestimonialsSection />
+
+      {/* Comprehensive FAQs Section */}
+      <FAQSection />
 
     </div>
   );
