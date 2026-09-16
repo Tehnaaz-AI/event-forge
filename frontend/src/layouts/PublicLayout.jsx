@@ -79,7 +79,7 @@ export default function PublicLayout() {
             <ul className="space-y-2 text-xs">
               <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
               <li><Link to="/explore" className="hover:text-white transition-colors">Explore Summits</Link></li>
-              <li><Link to="/about" className="hover:text-white transition-colors">About &amp; Team</Link></li>
+              <li><Link to="/about" className="hover:text-white transition-colors">About EventForge</Link></li>
               <li><Link to="/features" className="hover:text-white transition-colors">Platform Features</Link></li>
               <li><Link to="/waitlist" className="hover:text-white transition-colors">VIP Waitlist</Link></li>
               <li><Link to="/contact" className="hover:text-white transition-colors">Contact &amp; Helpdesk</Link></li>

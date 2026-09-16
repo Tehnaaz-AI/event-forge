@@ -39,7 +39,7 @@ export default function AppNavbar() {
     const common = [
       { label: 'Explore Summits', path: '/explore' },
       { label: 'Platform Features', path: '/features' },
-      { label: 'About & Team', path: '/about' },
+      { label: 'About EventForge', path: '/about' },
       { label: 'VIP Waitlist', path: '/waitlist' },
       { label: 'Contact', path: '/contact' }
     ];
