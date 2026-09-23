@@ -7,6 +7,7 @@ import {
   Mic, Award, ArrowRight 
 } from 'lucide-react';
 import AppNavbar from '../components/common/AppNavbar';
+import AppFooter from '../components/common/AppFooter';
 
 export default function DashboardLayout() {
   const location = useLocation();
@@ -76,6 +77,9 @@ export default function DashboardLayout() {
         {/* Dynamic Nested Route Content */}
         <Outlet />
       </main>
+
+      {/* Universal Enterprise Luxury Footer */}
+      <AppFooter />
 
     </div>
   );

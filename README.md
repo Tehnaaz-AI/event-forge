@@ -91,21 +91,22 @@ Accessed via `/dashboard/organizer` and `/dashboard/organizer/events/:id`:
 
 ---
 
-## 🤖 Real Generative AI Engine
+## 🤖 Real Multi-Model AI Engine
 
-EventForge features a multi-provider AI engine ([`backend/src/services/aiService.js`](file:///d:/Projects/EventForge/backend/src/services/aiService.js)):
-- **Supported Providers**: Google Gemini REST (`v1beta/models`), OpenAI (`gpt-4o-mini`), Groq (`llama-3.3-70b`), and OpenRouter.
-- **Dynamic Model Resolution**: Automatically evaluates Google Gemini candidate models:
-  - `gemini-2.5-flash`
-  - `gemini-3.6-flash`
-  - `gemini-1.5-flash`
-  - `gemini-flash-latest`
+EventForge features an enterprise multi-provider AI engine ([`backend/src/services/aiService.js`](file:///d:/Projects/EventForge/backend/src/services/aiService.js)):
+- **Supported Providers & Models**:
+  - **Google Gemini**: `gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-2.5-flash`, `gemini-flash-latest`
+  - **Anthropic Claude**: `claude-3-5-sonnet-20241022`, `claude-3-haiku-20240307`
+  - **OpenAI**: `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo`
+  - **Groq Cloud**: `llama-3.3-70b-versatile`, `mixtral-8x7b-32768`
+  - **DeepSeek AI**: `deepseek-chat`, `deepseek-reasoner`
+  - **OpenRouter & BIOS Cloud**: Multi-model routing gateways
 - **Purpose-Driven Synthesis Pipelines**:
   1. 🚀 **Marketing Copywriter**: Synthesizes social posts (X/Twitter), LinkedIn executive announcements, and targeted email invitations.
   2. 💡 **Multi-Track Ideation**: Generates 3 comprehensive breakout sessions with learning objectives and speaker profiles.
-  3. 🎙️ **Keynote Speaker Abstracts**: Formats bios and keynote topic briefs.
-  4. 🎯 **Attendee Matchmaker**: Recommends personalized event agendas based on attendee interests.
-- **Fault-Tolerant Fallback**: If an API key encounters quota limits or project authorization restrictions, EventForge automatically falls back to its local high-fidelity synthesis engine without crashing the UI.
+  3. 🎙️ **Keynote Speech & Q&A Coach**: Creates minute-by-minute stage pacing, teleprompter cue notes, and predicted audience Q&A.
+  4. 🎯 **Attendee Matchmaker**: Recommends personalized event agendas based on attendee interests with scrollable summaries.
+- **Fault-Tolerant Fallback**: If an API key is not configured or encounters network issues, EventForge automatically executes its local high-fidelity synthesis engine without crashing the UI.
 
 ---
 
@@ -113,14 +114,14 @@ EventForge features a multi-provider AI engine ([`backend/src/services/aiService
 
 ### Prerequisites
 - Node.js (v20 or higher)
-- MongoDB running locally or on Atlas (`mongodb://127.0.0.1:27017/eventforge`)
+- MongoDB Atlas Cloud Database connection
 
 ### 1. Environment Setup
 
 #### Backend (`backend/.env`):
 ```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/eventforge
+PORT=3100
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/eventforge?retryWrites=true&w=majority
 JWT_SECRET=your_super_secret_jwt_key_here
 JWT_EXPIRES_IN=8h
 CLIENT_URL=http://localhost:5173
@@ -128,17 +129,17 @@ CLIENT_URL=http://localhost:5173
 # Super Admin Bootstrap Credentials
 ADMIN_NAME=Platform Administrator
 ADMIN_EMAIL=admin@eventforge.com
-ADMIN_PASSWORD=change_this_password_123!
+ADMIN_PASSWORD=Password123!
 
-# AI Engine Configuration (Gemini, OpenAI, Groq, or OpenRouter)
-AI_PROVIDER=auto
+# AI Engine Configuration
+AI_PROVIDER=gemini
 GEMINI_API_KEY=your_gemini_api_key_here
-AI_MODEL=gemini-2.5-flash
+AI_MODEL=gemini-1.5-flash
 ```
 
 #### Frontend (`frontend/.env`):
 ```env
-VITE_API_URL=http://127.0.0.1:5000/api
+VITE_API_URL=http://localhost:3100/api
 ```
 
 ---
@@ -151,7 +152,7 @@ cd backend
 npm install
 npm run dev
 ```
-*Backend runs on `http://127.0.0.1:5000` (Health check: `http://127.0.0.1:5000/api/health`)*
+*Backend runs on `http://localhost:3100` (Health check: `http://localhost:3100/api/health`)*
 
 #### Start the Frontend Web Application:
 ```bash
@@ -161,24 +162,23 @@ npm run dev
 ```
 *Frontend runs on `http://localhost:5173`*
 
----
+#### Run Automated Unit Tests:
+```bash
+cd backend
+npm test
+```
 
-### 3. Database Utility Commands
-- **Wipe All Data for Clean Deployment**:
-  ```bash
-  cd backend
-  npm run db:clear
-  ```
-- **Build Production Bundle**:
-  ```bash
-  cd frontend
-  npm run build
-  ```
+#### Build Production Bundle:
+```bash
+cd frontend
+npm run build
+```
 
 ---
 
 ## 🔒 Security & Data Integrity
+- **MongoDB Atlas Cloud Persistence**: Production cloud database storage with zero local mock data dependencies.
 - **Defensive Route Ordering**: Static sub-routes precede parameterized paths to prevent Mongoose CastErrors.
 - **Atomic Booking**: MongoDB transactions ensure ticket categories never oversell beyond total capacity.
-- **Defensive ID Validation**: Mongoose `ObjectId.isValid()` guards prevent unhandled server exceptions.
-- **Role-Based Access Control**: Strict middleware verification for `PLATFORM_ADMIN`, `ORGANIZER`, `STAFF`, `SPEAKER`, and `ATTENDEE`.
+- **Role-Based Access Control**: Strict middleware verification for `PLATFORM_ADMIN`, `ORGANIZER`, `STAFF`, and `ATTENDEE`.
+- **QR Code Cryptographic Signatures**: Gate check-in parses JSON payloads, `EVENTFORGE:...` signatures, and ticket identifiers.

@@ -13,6 +13,7 @@ import { api } from '../services/api';
 import useDocumentTitle from '../components/common/useDocumentTitle';
 import FAQSection from '../components/common/FAQSection';
 import TestimonialsSection from '../components/common/TestimonialsSection';
+import BrandLogo from '../components/common/BrandLogo';
 
 export default function Home() {
   useDocumentTitle(
@@ -219,8 +220,8 @@ export default function Home() {
             <Activity size={13} />
             <span>Interactive Conference Lifecycle</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-stone-900 tracking-tight">
-            How EventForge Powers <span className="cursive-accent font-normal text-[#B45309] text-4xl sm:text-6xl align-middle px-1">Grand Summits</span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-stone-900 tracking-tight flex items-center justify-center gap-2.5 flex-wrap">
+            <span>How</span> <BrandLogo asSpan={true} showIcon={false} size="large" /> <span>Powers</span> <span className="cursive-accent font-normal text-[#B45309] text-4xl sm:text-6xl align-middle px-1">Grand Summits</span>
           </h2>
           <p className="text-sm md:text-base text-stone-600 max-w-xl mx-auto leading-relaxed font-light">
             Scroll or select each lifecycle phase below to inspect the real-time workflows connecting organizers, speakers, door staff, and delegates.

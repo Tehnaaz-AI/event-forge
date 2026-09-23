@@ -8,6 +8,7 @@ import {
   Tag, MapPin, Key, Plus, ArrowRight, Layers, Mail, MessageSquare, Check
 } from 'lucide-react';
 import AppNavbar from '../../components/common/AppNavbar';
+import AppFooter from '../../components/common/AppFooter';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -373,7 +374,7 @@ export default function AdminDashboard() {
 
             {/* Users Table */}
             <div className="bg-white border border-[#EFE8DA] rounded-3xl overflow-hidden shadow-md">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[520px] overflow-y-auto scrollbar-beige">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#FAF8F5] border-b border-[#EFE8DA] text-stone-600 font-bold uppercase tracking-wider text-[10px]">
                     <tr>
@@ -522,7 +523,7 @@ export default function AdminDashboard() {
 
             {/* Conferences Table */}
             <div className="bg-white border border-[#EFE8DA] rounded-3xl overflow-hidden shadow-md">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[520px] overflow-y-auto scrollbar-beige">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#FAF8F5] border-b border-[#EFE8DA] text-stone-600 font-bold uppercase tracking-wider text-[10px]">
                     <tr>
@@ -641,7 +642,7 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[540px] overflow-y-auto scrollbar-beige pr-1">
               {inquiries.length === 0 ? (
                 <div className="bg-white p-12 text-center rounded-3xl border border-[#EFE8DA] text-stone-400 space-y-2">
                   <Mail size={28} className="mx-auto text-stone-300" />
@@ -969,6 +970,8 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Universal Enterprise Luxury Footer */}
+      <AppFooter />
     </div>
   );
 }

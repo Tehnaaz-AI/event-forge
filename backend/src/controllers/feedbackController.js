@@ -20,9 +20,9 @@ export const submitFeedback = async (req, res, next) => {
     if (!event) return fail(res, 'Event not found', 404);
 
     const now = new Date();
-    const hasStarted = new Date(event.startDate) <= now || ['LIVE', 'COMPLETED'].includes(event.status);
-    if (!hasStarted) {
-      return fail(res, `Conference reviews and ratings open after the event commences on ${new Date(event.startDate).toLocaleDateString()}.`, 400);
+    const hasConcluded = new Date(event.endDate) <= now || event.status === 'COMPLETED';
+    if (!hasConcluded) {
+      return fail(res, `Conference reviews and attendee ratings unlock only after the event concludes on ${new Date(event.endDate).toLocaleDateString()}.`, 400);
     }
 
     const isRegistered = await Registration.exists({

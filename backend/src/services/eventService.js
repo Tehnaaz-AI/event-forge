@@ -297,11 +297,49 @@ export const registerAttendee = async (req, res) => {
   return { registration, ticket };
 };
 
+// Helper to extract clean ticket number or registration ID from any QR payload
+function extractTicketQuery(input) {
+  if (!input) return null;
+  let raw = String(input).trim();
+
+  // 1. Check if JSON payload (e.g. from QRCode.toDataURL)
+  if (raw.startsWith('{') && raw.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed.ticketNumber) return { ticketNumber: parsed.ticketNumber.trim().toUpperCase() };
+      if (parsed.registration && mongoose.Types.ObjectId.isValid(parsed.registration)) {
+        return { registration: parsed.registration };
+      }
+    } catch (e) {}
+  }
+
+  // 2. Check if EVENTFORGE:eventId:regId:ticketNum format
+  if (raw.includes(':')) {
+    const parts = raw.split(':').map(p => p.trim()).filter(Boolean);
+    const lastPart = parts[parts.length - 1];
+    if (lastPart.startsWith('EF-') || lastPart.length >= 6) {
+      return { ticketNumber: lastPart.toUpperCase() };
+    }
+    // Check if any part is a valid ObjectId
+    for (const part of parts) {
+      if (mongoose.Types.ObjectId.isValid(part)) {
+        return { $or: [{ ticketNumber: raw.toUpperCase() }, { registration: part }] };
+      }
+    }
+  }
+
+  // 3. Direct ticket number (e.g. EF-2026-AI-...)
+  return { ticketNumber: raw.toUpperCase() };
+}
+
 export const checkInTicket = async (req, res) => {
-  const ticket = await Ticket.findOne({ ticketNumber: req.body.ticketNumber }).populate('registration');
+  const query = extractTicketQuery(req.body.ticketNumber || req.body.code);
+  if (!query) throw new Error('Valid ticket code or QR payload is required');
+
+  const ticket = await Ticket.findOne(query).populate('registration');
   if (!ticket || String(ticket.registration.event) !== String(req.event._id)) throw new Error('Invalid ticket for this event');
   if (ticket.status !== 'ACTIVE') throw new Error('Ticket is not active');
-  if (ticket.checkedInAt) throw new Error('This ticket has already been checked in');
+  if (ticket.checkedInAt) throw new Error(`Already checked in on ${new Date(ticket.checkedInAt).toLocaleTimeString()}`);
   
   ticket.checkedInAt = new Date();
   return await ticket.save();
@@ -346,17 +384,26 @@ export const getMyTickets = async (req, res) => {
 };
 
 export const checkInAnyTicket = async (req, res) => {
-  const { ticketNumber } = req.body;
-  if (!ticketNumber) throw new Error('Ticket number is required');
+  const rawInput = req.body.ticketNumber || req.body.code || req.body.qrData;
+  if (!rawInput) throw new Error('Ticket number or scanned QR data is required');
 
-  const ticket = await Ticket.findOne({ ticketNumber: ticketNumber.trim().toUpperCase() }).populate({
+  const query = extractTicketQuery(rawInput);
+  if (!query) throw new Error('Invalid QR format or ticket number');
+
+  const ticket = await Ticket.findOne(query).populate({
     path: 'registration',
-    populate: [{ path: 'event' }, { path: 'attendee', select: 'name email' }, { path: 'ticketCategory' }]
+    populate: [
+      { path: 'event', select: 'title startDate endDate venue organization' },
+      { path: 'attendee', select: 'name email role phone avatar' },
+      { path: 'ticketCategory', select: 'name price description' }
+    ]
   });
 
-  if (!ticket) throw new Error('Ticket not found. Check the ticket code.');
-  if (ticket.status !== 'ACTIVE') throw new Error('This ticket is not active');
-  if (ticket.checkedInAt) throw new Error(`Already checked in on ${new Date(ticket.checkedInAt).toLocaleTimeString()}`);
+  if (!ticket) throw new Error('Ticket not found in platform records. Check the code or scan again.');
+  if (ticket.status !== 'ACTIVE') throw new Error('This ticket has been cancelled or deactivated');
+  if (ticket.checkedInAt) {
+    throw new Error(`Duplicate Badge Warning: Already checked in at ${new Date(ticket.checkedInAt).toLocaleTimeString()}`);
+  }
 
   ticket.checkedInAt = new Date();
   await ticket.save();

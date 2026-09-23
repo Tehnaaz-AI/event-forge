@@ -1,6 +1,6 @@
 import { Event, Organization } from '../models/index.js';
 
-// Real Multi-Provider AI Engine (Gemini, OpenAI, Groq, OpenRouter, BIOS)
+// Real Multi-Provider AI Engine (Gemini, OpenAI, Anthropic, Groq, DeepSeek, OpenRouter, BIOS)
 async function callGeminiAPI(apiKey, prompt, systemInstruction, model = null) {
   const candidateModels = model ? [model] : ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-flash-latest'];
   let lastError = null;
@@ -42,6 +42,36 @@ async function callGeminiAPI(apiKey, prompt, systemInstruction, model = null) {
   throw lastError || new Error('No content returned from Gemini API');
 }
 
+async function callAnthropicAPI(apiKey, prompt, systemInstruction, model = 'claude-3-5-sonnet-20241022') {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    signal: AbortSignal.timeout(9000),
+    body: JSON.stringify({
+      model: model || 'claude-3-5-sonnet-20241022',
+      max_tokens: 2048,
+      system: systemInstruction,
+      messages: [
+        { role: 'user', content: prompt }
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || `Anthropic API returned HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data?.content?.[0]?.text;
+  if (!text) throw new Error('No content returned from Anthropic model');
+  return text;
+}
+
 async function callOpenAICompatibleAPI(apiUrl, apiKey, prompt, systemInstruction, model = 'gpt-4o-mini') {
   const response = await fetch(apiUrl, {
     method: 'POST',
@@ -76,7 +106,9 @@ async function generateWithAI(event, prompt, systemInstruction, fallbackGenerato
   let apiKey = event?.organization?.settings?.aiApiKey || 
                process.env.GEMINI_API_KEY || 
                process.env.OPENAI_API_KEY || 
+               process.env.ANTHROPIC_API_KEY ||
                process.env.GROQ_API_KEY || 
+               process.env.DEEPSEEK_API_KEY ||
                process.env.AI_API_KEY;
                
   let provider = event?.organization?.settings?.aiProvider || process.env.AI_PROVIDER || 'auto';
@@ -91,18 +123,17 @@ async function generateWithAI(event, prompt, systemInstruction, fallbackGenerato
       if (provider === 'auto' || !provider) {
         if (apiKey.startsWith('AIza') || apiKey.includes('AIzaSy')) {
           provider = 'gemini';
-        } else if (apiKey.startsWith('gsk_')) {
-          provider = 'groq';
         } else if (apiKey.startsWith('sk-ant-')) {
           provider = 'anthropic';
+        } else if (apiKey.startsWith('gsk_')) {
+          provider = 'groq';
         } else if (apiKey.startsWith('sk-or-')) {
           provider = 'openrouter';
-        } else if (apiKey.startsWith('sk-')) {
+        } else if (apiKey.startsWith('sk-') && apiKey.length > 50) {
           provider = 'openai';
         } else if (apiKey.startsWith('bios-')) {
           provider = 'bios';
         } else {
-          // Default to gemini or openai compatible
           provider = 'gemini';
         }
       }
@@ -111,12 +142,20 @@ async function generateWithAI(event, prompt, systemInstruction, fallbackGenerato
         return await callGeminiAPI(apiKey, prompt, systemInstruction, model || null);
       }
 
+      if (provider === 'anthropic') {
+        return await callAnthropicAPI(apiKey, prompt, systemInstruction, model || 'claude-3-5-sonnet-20241022');
+      }
+
       if (provider === 'openai') {
         return await callOpenAICompatibleAPI('https://api.openai.com/v1/chat/completions', apiKey, prompt, systemInstruction, model || 'gpt-4o-mini');
       }
 
       if (provider === 'groq') {
         return await callOpenAICompatibleAPI('https://api.groq.com/openai/v1/chat/completions', apiKey, prompt, systemInstruction, model || 'llama-3.3-70b-versatile');
+      }
+
+      if (provider === 'deepseek') {
+        return await callOpenAICompatibleAPI('https://api.deepseek.com/chat/completions', apiKey, prompt, systemInstruction, model || 'deepseek-chat');
       }
 
       if (provider === 'openrouter') {
@@ -324,21 +363,57 @@ _Keep your movement deliberate: deliver the hook from center stage, walk stage-l
 };
 
 // Test AI Key Connection
-export const testAIConnection = async (apiKey, provider = 'gemini', model = null) => {
+export const testAIConnection = async (apiKey, provider = 'auto', model = null) => {
   if (!apiKey) throw new Error('API key is required');
+  apiKey = apiKey.trim();
   
   const testPrompt = 'Respond with exactly: "EventForge AI connection verified successfully."';
   const systemInstruction = 'You are an AI diagnostic assistant. Follow the prompt exactly.';
 
-  if (apiKey.startsWith('AIza') || provider === 'gemini') {
+  let resolvedProvider = provider;
+  if (resolvedProvider === 'auto' || !resolvedProvider) {
+    if (apiKey.startsWith('AIza') || apiKey.includes('AIzaSy')) {
+      resolvedProvider = 'gemini';
+    } else if (apiKey.startsWith('sk-ant-')) {
+      resolvedProvider = 'anthropic';
+    } else if (apiKey.startsWith('gsk_')) {
+      resolvedProvider = 'groq';
+    } else if (apiKey.startsWith('sk-or-')) {
+      resolvedProvider = 'openrouter';
+    } else if (apiKey.startsWith('sk-')) {
+      resolvedProvider = 'openai';
+    } else if (apiKey.startsWith('bios-')) {
+      resolvedProvider = 'bios';
+    } else {
+      resolvedProvider = 'gemini';
+    }
+  }
+
+  if (resolvedProvider === 'gemini') {
     return await callGeminiAPI(apiKey, testPrompt, systemInstruction, model || null);
   }
 
-  if (apiKey.startsWith('gsk_') || provider === 'groq') {
+  if (resolvedProvider === 'anthropic') {
+    return await callAnthropicAPI(apiKey, testPrompt, systemInstruction, model || 'claude-3-5-sonnet-20241022');
+  }
+
+  if (resolvedProvider === 'groq') {
     return await callOpenAICompatibleAPI('https://api.groq.com/openai/v1/chat/completions', apiKey, testPrompt, systemInstruction, model || 'llama-3.3-70b-versatile');
   }
 
-  if (apiKey.startsWith('sk-') || provider === 'openai') {
+  if (resolvedProvider === 'deepseek') {
+    return await callOpenAICompatibleAPI('https://api.deepseek.com/chat/completions', apiKey, testPrompt, systemInstruction, model || 'deepseek-chat');
+  }
+
+  if (resolvedProvider === 'openrouter') {
+    return await callOpenAICompatibleAPI('https://openrouter.ai/api/v1/chat/completions', apiKey, testPrompt, systemInstruction, model || 'google/gemini-2.0-flash-exp:free');
+  }
+
+  if (resolvedProvider === 'bios') {
+    return await callOpenAICompatibleAPI('https://api.bios.run/v1/chat/completions', apiKey, testPrompt, systemInstruction, model || 'gemini-2.5-pro');
+  }
+
+  if (resolvedProvider === 'openai') {
     return await callOpenAICompatibleAPI('https://api.openai.com/v1/chat/completions', apiKey, testPrompt, systemInstruction, model || 'gpt-4o-mini');
   }
 

@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { 
   Sparkles, Lock, Mail, User, Building, ShieldCheck, 
-  ArrowRight, Eye, EyeOff, CheckCircle2, UserCheck, Calendar 
+  ArrowRight, Eye, EyeOff, CheckCircle2, UserCheck, Calendar,
+  Ticket, Check, Star, Zap
 } from 'lucide-react';
 import { api } from '../services/api';
 import AppNavbar from '../components/common/AppNavbar';
+import AppFooter from '../components/common/AppFooter';
+import BrandLogo from '../components/common/BrandLogo';
 
 export default function Login() {
   const [searchParams] = useSearchParams();
@@ -27,7 +30,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [organizationName, setOrganizationName] = useState('');
-  const [roleType, setRoleType] = useState('ORGANIZER'); // 'ORGANIZER' | 'ATTENDEE'
+  const [roleType, setRoleType] = useState('ATTENDEE'); // Default to Attendee for delegate convenience
   const [showPassword, setShowPassword] = useState(false);
   
   const [loading, setLoading] = useState(false);
@@ -154,56 +157,50 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] flex flex-col text-stone-900 font-sans selection:bg-[#B45309] selection:text-white relative">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0C0A09] flex flex-col text-stone-900 dark:text-stone-100 font-sans selection:bg-[#B45309] selection:text-white relative transition-colors duration-300">
       
       {/* Universal Floating Navbar */}
       <AppNavbar />
 
-      <div className="flex-1 flex flex-col justify-center items-center px-4 py-8 relative overflow-hidden">
-        {/* Ambient Warm Glow */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-[#B45309]/5 rounded-full blur-[140px] pointer-events-none"></div>
+      <div className="flex-1 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
+        {/* Ambient Warm Golden Glow */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[380px] bg-[#B45309]/10 dark:bg-[#B45309]/15 rounded-full blur-[140px] pointer-events-none"></div>
 
         {/* Brand Header */}
-        <div className="text-center mb-8 relative z-10 space-y-2">
-          <Link to="/" className="inline-flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#B45309] to-[#D97706] flex items-center justify-center text-white shadow-md shadow-[#B45309]/20 group-hover:scale-105 transition-transform">
-              <Calendar size={22} className="font-bold" />
-            </div>
-            <div className="flex items-baseline leading-none">
-              <span className="logo-cursive text-4xl font-extrabold text-[#B45309] mr-0.5 tracking-normal">Event</span>
-              <span className="font-extrabold text-stone-900 text-2xl tracking-tight uppercase">FORGE</span>
-            </div>
-          </Link>
-          <p className="text-xs text-stone-500 uppercase tracking-widest font-bold">Executive Portal Access</p>
+        <div className="text-center mb-8 relative z-10 space-y-2 flex flex-col items-center">
+          <BrandLogo to="/" size="hero" />
+          <p className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest font-bold">
+            {isRegister ? 'New Member Registration' : 'Executive Portal Access'}
+          </p>
         </div>
 
-        {/* Main Ivory Card */}
-        <div className="bg-white border border-[#EFE8DA] rounded-3xl p-8 max-w-md w-full shadow-xl relative z-10 space-y-6">
+        {/* Main Ivory / Slate Card */}
+        <div className="bg-white dark:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-7 sm:p-9 max-w-lg w-full shadow-2xl shadow-stone-900/5 dark:shadow-black/80 relative z-10 space-y-6">
           
           {currentUser ? (
             /* Logged in state view */
             <div className="space-y-6 text-center animate-in fade-in">
-              <div className="w-16 h-16 rounded-3xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center mx-auto shadow-inner">
+              <div className="w-16 h-16 rounded-3xl bg-[#B45309]/10 dark:bg-amber-950/40 text-[#B45309] flex items-center justify-center mx-auto shadow-inner">
                 <CheckCircle2 size={32} />
               </div>
 
               <div className="space-y-1.5">
-                <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
+                <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 uppercase tracking-wider">
                   Active Session Authenticated
                 </span>
-                <h3 className="text-xl font-extrabold text-stone-900 tracking-tight">
+                <h3 className="text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">
                   Welcome Back, {currentUser.name}
                 </h3>
-                <p className="text-xs text-stone-500">
-                  Signed in as <span className="font-bold text-stone-800">{currentUser.email}</span> ({currentUser.role})
+                <p className="text-xs text-stone-500 dark:text-stone-400">
+                  Signed in as <span className="font-bold text-stone-800 dark:text-stone-200">{currentUser.email}</span> ({currentUser.role})
                 </p>
               </div>
 
-              <div className="space-y-2.5 pt-2">
+              <div className="space-y-3 pt-2">
                 <button
                   type="button"
                   onClick={() => navigate(getDashboardPathForUser(currentUser))}
-                  className="w-full bg-[#B45309] hover:bg-[#92400E] text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-[#B45309]/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
+                  className="w-full bg-[#B45309] hover:bg-[#92400E] text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-[#B45309]/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
                 >
                   <span>Go to My Dashboard</span>
                   <ArrowRight size={15} />
@@ -211,7 +208,7 @@ export default function Login() {
 
                 <Link
                   to="/profile"
-                  className="w-full bg-[#FAF8F5] hover:bg-stone-100 text-stone-700 font-bold py-3 rounded-2xl border border-[#EFE8DA] transition-all flex items-center justify-center gap-2 text-xs"
+                  className="w-full bg-[#FAF8F5] dark:bg-[#292524] hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 font-bold py-3 rounded-2xl border border-[#EFE8DA] dark:border-stone-700 transition-all flex items-center justify-center gap-2 text-xs"
                 >
                   <User size={14} /> View Account Profile
                 </Link>
@@ -219,7 +216,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={handleSwitchAccount}
-                  className="w-full text-stone-400 hover:text-rose-600 text-xs font-bold py-2 transition-colors"
+                  className="w-full text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-bold py-2 transition-colors cursor-pointer"
                 >
                   Sign Out &amp; Switch Account
                 </button>
@@ -227,27 +224,28 @@ export default function Login() {
             </div>
           ) : (
             <>
-              {/* Form Title */}
-              <div className="text-center space-y-1 pb-1">
-                <h2 className="text-2xl font-extrabold text-stone-900 tracking-tight">
-                  {isRegister ? (
-                    <>Join the <span className="cursive-accent font-normal text-[#B45309] text-3xl align-middle px-1">Summit Network</span></>
-                  ) : (
-                    <>Welcome to <span className="cursive-accent font-normal text-[#B45309] text-3xl align-middle px-1">EventForge</span></>
-                  )}
-                </h2>
-                <p className="text-xs text-stone-500">
-                  {isRegister ? 'Create your organizer or attendee account' : 'Enter your credentials to access your workspace'}
+              {/* Form Title with Identical Brand Logo */}
+              <div className="text-center space-y-2 pb-1 flex flex-col items-center">
+                <div className="flex items-center justify-center gap-2 flex-wrap text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white tracking-tight">
+                  <span>{isRegister ? 'Join' : 'Welcome to'}</span>
+                  <BrandLogo to="/" size="default" showIcon={false} asSpan={true} />
+                </div>
+                <p className="text-xs text-stone-500 dark:text-stone-400 max-w-sm mx-auto">
+                  {isRegister 
+                    ? 'Join verified attendees and organizers worldwide for executive conferences & summits.' 
+                    : 'Enter your credentials to access your multi-track workspace and passes.'}
                 </p>
               </div>
 
-              {/* Toggle Mode Tabs (Sign In vs Register) */}
-              <div className="grid grid-cols-2 p-1 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA]">
+              {/* Mode Switcher Tabs (Sign In vs Register) */}
+              <div className="grid grid-cols-2 p-1.5 bg-stone-100 dark:bg-[#292524] rounded-2xl border border-stone-200 dark:border-stone-800">
                 <button
                   type="button"
                   onClick={() => { setIsRegister(false); setError(''); }}
-                  className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    !isRegister ? 'bg-[#B45309] text-white shadow-md shadow-[#B45309]/25' : 'text-stone-500 hover:text-stone-900'
+                  className={`py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    !isRegister 
+                      ? 'bg-white dark:bg-[#1C1917] text-[#B45309] dark:text-amber-400 shadow-sm border border-stone-200 dark:border-stone-700' 
+                      : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white'
                   }`}
                 >
                   Sign In
@@ -255,148 +253,196 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => { setIsRegister(true); setError(''); }}
-                  className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    isRegister ? 'bg-[#B45309] text-white shadow-md shadow-[#B45309]/25' : 'text-stone-500 hover:text-stone-900'
+                  className={`py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                    isRegister 
+                      ? 'bg-white dark:bg-[#1C1917] text-[#B45309] dark:text-amber-400 shadow-sm border border-stone-200 dark:border-stone-700' 
+                      : 'text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white'
                   }`}
                 >
                   Create Account
                 </button>
               </div>
 
-              {/* One-Click Role Quick Fill & Instant Sign In */}
-              <div className="space-y-2.5 pb-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                    <Sparkles size={12} className="text-[#B45309]" /> One-Click Role Demo Access
+              {/* One-Click Role Quick Fill Demo Section (In Sign-In mode) */}
+              {!isRegister && (
+                <div className="space-y-2.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-[#B45309]" /> One-Click Demo Access
+                    </span>
+                    <span className="text-[10px] font-mono text-stone-400 dark:text-stone-500">Pass: Password123!</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Super Admin */}
+                    <button
+                      type="button"
+                      onClick={() => handleQuickLogin('admin@eventforge.com', 'Password123!')}
+                      className="p-3 rounded-2xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-[10px] font-extrabold text-rose-800 dark:text-rose-400 uppercase tracking-wider">Super Admin</span>
+                        <span className="text-[9px] bg-rose-200/80 dark:bg-rose-900 text-rose-900 dark:text-rose-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                      </div>
+                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Platform Admin</p>
+                      <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">admin@eventforge.com</p>
+                    </button>
+
+                    {/* Organizer */}
+                    <button
+                      type="button"
+                      onClick={() => handleQuickLogin('organizer@eventforge.com', 'Password123!')}
+                      className="p-3 rounded-2xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-[10px] font-extrabold text-[#B45309] dark:text-amber-400 uppercase tracking-wider">Organizer</span>
+                        <span className="text-[9px] bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                      </div>
+                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Elena Rostova</p>
+                      <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">organizer@eventforge.com</p>
+                    </button>
+
+                    {/* Door Staff */}
+                    <button
+                      type="button"
+                      onClick={() => handleQuickLogin('staff@eventforge.com', 'Password123!')}
+                      className="p-3 rounded-2xl border border-orange-200 dark:border-orange-900/40 bg-orange-50/60 dark:bg-orange-950/20 hover:bg-orange-100 dark:hover:bg-orange-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-[10px] font-extrabold text-orange-800 dark:text-orange-400 uppercase tracking-wider">Door Staff</span>
+                        <span className="text-[9px] bg-orange-200/80 dark:bg-orange-900 text-orange-900 dark:text-orange-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                      </div>
+                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">David Miller</p>
+                      <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">staff@eventforge.com</p>
+                    </button>
+
+                    {/* Verified Attendee */}
+                    <button
+                      type="button"
+                      onClick={() => handleQuickLogin('attendee@eventforge.com', 'Password123!')}
+                      className="p-3 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Attendee Pass</span>
+                        <span className="text-[9px] bg-emerald-200/80 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                      </div>
+                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Marcus Vance</p>
+                      <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">attendee@eventforge.com</p>
+                    </button>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="relative flex py-2 items-center">
+                    <div className="flex-grow border-t border-[#EFE8DA] dark:border-stone-800"></div>
+                    <span className="shrink-0 mx-3 text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-wider">Or Sign In Manually</span>
+                    <div className="flex-grow border-t border-[#EFE8DA] dark:border-stone-800"></div>
+                  </div>
+                </div>
+              )}
+
+              {/* Registration Benefits Badge Bar (In Sign-Up mode) */}
+              {isRegister && (
+                <div className="bg-[#FAF8F5] dark:bg-[#292524] p-3.5 rounded-2xl border border-[#EFE8DA] dark:border-stone-800 flex items-center justify-around text-[11px] text-stone-700 dark:text-stone-300 font-semibold">
+                  <span className="flex items-center gap-1">
+                    <Check size={13} className="text-emerald-600" /> Instant QR Passes
                   </span>
-                  <span className="text-[10px] font-mono text-stone-400">Password: Password123!</span>
+                  <span className="flex items-center gap-1">
+                    <Check size={13} className="text-emerald-600" /> AI Matchmaker
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Check size={13} className="text-emerald-600" /> Free Registration
+                  </span>
                 </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {/* Super Admin */}
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('admin@eventforge.com', 'Password123!')}
-                    className="p-2.5 rounded-2xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-left transition-all group flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-[10px] font-extrabold text-rose-800 dark:text-rose-400 uppercase tracking-wider">Super Admin</span>
-                      <span className="text-[9px] bg-rose-200/80 dark:bg-rose-900 text-rose-900 dark:text-rose-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
-                    </div>
-                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Platform Admin</p>
-                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">admin@eventforge.com</p>
-                  </button>
-
-                  {/* Organizer */}
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('organizer@eventforge.com', 'Password123!')}
-                    className="p-2.5 rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/70 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-left transition-all group flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-[10px] font-extrabold text-[#B45309] dark:text-amber-400 uppercase tracking-wider">Organizer</span>
-                      <span className="text-[9px] bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
-                    </div>
-                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Elena Rostova</p>
-                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">organizer@eventforge.com</p>
-                  </button>
-
-                  {/* Door Staff */}
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('staff@eventforge.com', 'Password123!')}
-                    className="p-2.5 rounded-2xl border border-orange-200 dark:border-orange-900/50 bg-orange-50/70 dark:bg-orange-950/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 text-left transition-all group flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-[10px] font-extrabold text-orange-800 dark:text-orange-400 uppercase tracking-wider">Door Staff</span>
-                      <span className="text-[9px] bg-orange-200/80 dark:bg-orange-900 text-orange-900 dark:text-orange-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
-                    </div>
-                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">David Miller</p>
-                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">staff@eventforge.com</p>
-                  </button>
-
-                  {/* Verified Attendee */}
-                  <button
-                    type="button"
-                    onClick={() => handleQuickLogin('attendee@eventforge.com', 'Password123!')}
-                    className="p-2.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/70 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-left transition-all group flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Attendee Pass</span>
-                      <span className="text-[9px] bg-emerald-200/80 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
-                    </div>
-                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Marcus Vance</p>
-                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">attendee@eventforge.com</p>
-                  </button>
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="relative flex py-1 items-center">
-                <div className="flex-grow border-t border-[#EFE8DA] dark:border-stone-800"></div>
-                <span className="shrink-0 mx-3 text-[10px] text-stone-400 font-bold uppercase tracking-wider">Or Sign In Manually</span>
-                <div className="flex-grow border-t border-[#EFE8DA] dark:border-stone-800"></div>
-              </div>
+              )}
 
               {error && (
-                <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-semibold animate-in fade-in">
-                  {error}
+                <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-800 dark:text-rose-300 rounded-2xl text-xs font-semibold animate-in fade-in flex items-center gap-2">
+                  <span>{error}</span>
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {/* Registration specific fields */}
-            {isRegister && (
-              <>
-                <div>
-                  <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">
-                    Account Type
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setRoleType('ORGANIZER')}
-                      className={`p-2.5 rounded-xl border text-xs font-bold transition-all ${
-                        roleType === 'ORGANIZER' 
-                          ? 'bg-[#B45309]/10 border-[#B45309] text-[#B45309]' 
-                          : 'border-[#EFE8DA] bg-[#FAF8F5] text-stone-600 hover:border-stone-300'
-                      }`}
-                    >
-                      Event Organizer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRoleType('ATTENDEE')}
-                      className={`p-2.5 rounded-xl border text-xs font-bold transition-all ${
-                        roleType === 'ATTENDEE' 
-                          ? 'bg-emerald-50 border-emerald-600 text-emerald-800' 
-                          : 'border-[#EFE8DA] bg-[#FAF8F5] text-stone-600 hover:border-stone-300'
-                      }`}
-                    >
-                      Attendee
-                    </button>
-                  </div>
-                </div>
+                
+                {/* Registration: Select Account Role */}
+                {isRegister && (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider">
+                      Select Account Type
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Attendee Option */}
+                      <button
+                        type="button"
+                        onClick={() => setRoleType('ATTENDEE')}
+                        className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                          roleType === 'ATTENDEE' 
+                            ? 'bg-amber-50/80 dark:bg-amber-950/40 border-[#B45309] dark:border-amber-500 ring-2 ring-[#B45309]/20 shadow-sm' 
+                            : 'border-[#EFE8DA] dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#292524] hover:border-stone-300 dark:hover:border-stone-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <Ticket size={16} className={roleType === 'ATTENDEE' ? 'text-[#B45309]' : 'text-stone-400'} />
+                          {roleType === 'ATTENDEE' && (
+                            <span className="w-2 h-2 rounded-full bg-[#B45309]"></span>
+                          )}
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs font-extrabold text-stone-900 dark:text-white">Attendee / VIP</p>
+                          <p className="text-[10px] text-stone-500 dark:text-stone-400">Book passes &amp; network</p>
+                        </div>
+                      </button>
 
-                <div>
-                  <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Full Name</label>
-                  <div className="relative">
-                    <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
-                    <input
-                      required
-                      type="text"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      placeholder="e.g. Eleanor Vance"
-                      className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl pl-10 pr-4 py-3 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-[#B45309]"
-                    />
+                      {/* Organizer Option */}
+                      <button
+                        type="button"
+                        onClick={() => setRoleType('ORGANIZER')}
+                        className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                          roleType === 'ORGANIZER' 
+                            ? 'bg-amber-50/80 dark:bg-amber-950/40 border-[#B45309] dark:border-amber-500 ring-2 ring-[#B45309]/20 shadow-sm' 
+                            : 'border-[#EFE8DA] dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#292524] hover:border-stone-300 dark:hover:border-stone-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <Building size={16} className={roleType === 'ORGANIZER' ? 'text-[#B45309]' : 'text-stone-400'} />
+                          {roleType === 'ORGANIZER' && (
+                            <span className="w-2 h-2 rounded-full bg-[#B45309]"></span>
+                          )}
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs font-extrabold text-stone-900 dark:text-white">Event Organizer</p>
+                          <p className="text-[10px] text-stone-500 dark:text-stone-400">Host &amp; curate summits</p>
+                        </div>
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {roleType === 'ORGANIZER' && (
-                  <div>
-                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Organization / Company Name</label>
+                {/* Full Name (Sign Up only) */}
+                {isRegister && (
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+                      <input
+                        required
+                        type="text"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        placeholder="e.g. Eleanor Vance"
+                        className="w-full bg-[#FAF8F5] dark:bg-[#292524] hover:bg-white dark:hover:bg-[#1C1917] focus:bg-white dark:focus:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-xl pl-10 pr-4 py-3 text-xs text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#B45309]/25 focus:border-[#B45309] transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Organization Name (If Organizer role selected in Sign Up) */}
+                {isRegister && roleType === 'ORGANIZER' && (
+                  <div className="space-y-1 animate-in fade-in">
+                    <label className="block text-xs font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider">
+                      Organization / Company Name
+                    </label>
                     <div className="relative">
                       <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                       <input
@@ -404,81 +450,87 @@ export default function Login() {
                         type="text"
                         value={organizationName}
                         onChange={e => setOrganizationName(e.target.value)}
-                        placeholder="e.g. Global Tech Guild"
-                        className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl pl-10 pr-4 py-3 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-[#B45309]"
+                        placeholder="e.g. Global Tech Summit Guild"
+                        className="w-full bg-[#FAF8F5] dark:bg-[#292524] hover:bg-white dark:hover:bg-[#1C1917] focus:bg-white dark:focus:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-xl pl-10 pr-4 py-3 text-xs text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#B45309]/25 focus:border-[#B45309] transition-all"
                       />
                     </div>
                   </div>
                 )}
-              </>
-            )}
 
-            {/* Email */}
-            <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Email Address</label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
-                <input
-                  required
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl pl-10 pr-4 py-3 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-[#B45309] font-mono"
-                />
-              </div>
-            </div>
+                {/* Email Address */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+                    <input
+                      required
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="name@company.com"
+                      className="w-full bg-[#FAF8F5] dark:bg-[#292524] hover:bg-white dark:hover:bg-[#1C1917] focus:bg-white dark:focus:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-xl pl-10 pr-4 py-3 text-xs text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#B45309]/25 focus:border-[#B45309] transition-all font-mono"
+                    />
+                  </div>
+                </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Password</label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
-                <input
-                  required
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl pl-10 pr-10 py-3 text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-[#B45309] font-mono"
-                />
+                {/* Password */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+                    <input
+                      required
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-[#FAF8F5] dark:bg-[#292524] hover:bg-white dark:hover:bg-[#1C1917] focus:bg-white dark:focus:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-xl pl-10 pr-10 py-3 text-xs text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-[#B45309]/25 focus:border-[#B45309] transition-all font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit CTA Button */}
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700"
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#B45309] hover:bg-[#92400E] text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-[#B45309]/25 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider disabled:opacity-50 cursor-pointer"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {loading ? 'Authenticating...' : isRegister ? 'Create Account & Continue' : 'Sign In to EventForge'}
+                  <ArrowRight size={15} />
                 </button>
+              </form>
+
+              {/* Security Footer Badge */}
+              <div className="pt-4 border-t border-[#EFE8DA] dark:border-stone-800 text-center space-y-1.5">
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-stone-500 dark:text-stone-400 font-medium">
+                  <ShieldCheck size={14} className="text-[#B45309]" />
+                  <span>Enterprise Security &amp; End-to-End Verification</span>
+                </div>
+                <p className="text-[10px] text-stone-400 dark:text-stone-500">
+                  {isRegister 
+                    ? 'By registering, you agree to EventForge Terms of Service and Privacy Policy.' 
+                    : 'Sign in to access your conferences, attendee passes, or operator controls.'}
+                </p>
               </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#B45309] hover:bg-[#92400E] text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-[#B45309]/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider disabled:opacity-50"
-            >
-              {loading ? 'Authenticating...' : isRegister ? 'Create Account & Continue' : 'Sign In to EventForge'}
-              <ArrowRight size={15} />
-            </button>
-          </form>
-
-          {/* Production Footer Badge */}
-          <div className="pt-4 border-t border-[#EFE8DA] text-center space-y-2">
-            <div className="flex items-center justify-center gap-2 text-[11px] text-stone-500 font-medium">
-              <ShieldCheck size={14} className="text-[#B45309]" />
-              <span>Enterprise Security &amp; End-to-End Verification</span>
-            </div>
-            <p className="text-[10px] text-stone-400">
-              {isRegister 
-                ? 'Create your organizer or attendee profile to start managing and attending conferences.' 
-                : 'Sign in to access your conferences, attendee passes, or admin controls.'}
-            </p>
-          </div>
-        </>
-      )}
+            </>
+          )}
 
         </div>
       </div>
+
+      {/* Universal Enterprise Luxury Footer */}
+      <AppFooter />
     </div>
   );
 }

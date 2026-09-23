@@ -5,14 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Calendar, MapPin, Users, Ticket as TicketIcon, Sparkles, 
   Building, Clock, ArrowRight, Lock, UserPlus, X, Check, ShieldCheck, Tag,
-  Bookmark, BookmarkCheck, Share2, Layers, Filter
+  Bookmark, BookmarkCheck, Share2, Layers, Filter, Shield, ShieldAlert,
+  QrCode, ExternalLink
 } from 'lucide-react';
 import { api } from '../../services/api';
 import TicketCheckout from './TicketCheckout';
 import AISessionFinder from '../../components/public/AISessionFinder';
 import Breadcrumbs from '../../components/common/Breadcrumbs';
 import FAQSection from '../../components/common/FAQSection';
-import TestimonialsSection from '../../components/common/TestimonialsSection';
+import EventReviewsSection from '../../components/common/EventReviewsSection';
 import useDocumentTitle from '../../components/common/useDocumentTitle';
 
 export default function EventPage() {
@@ -22,6 +23,10 @@ export default function EventPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [preselectedTicketId, setPreselectedTicketId] = useState(null);
   const [selectedRoomFilter, setSelectedRoomFilter] = useState('ALL');
+  
+  const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
+  const isOperator = user?.role === 'STAFF' || user?.role === 'PLATFORM_ADMIN';
+
   const [bookmarkedSessions, setBookmarkedSessions] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('eventforge_bookmarked_sessions') || '[]');
@@ -42,12 +47,20 @@ export default function EventPage() {
 
   // Auto-open checkout if redirected back after authenticating or if checkout param present
   useEffect(() => {
-    if (searchParams.get('checkout') === 'true') {
+    if (searchParams.get('checkout') === 'true' && !isOperator) {
       setCheckoutOpen(true);
     }
-  }, [searchParams]);
+  }, [searchParams, isOperator]);
 
   const handleOpenCheckout = (ticketCategoryId = null) => {
+    if (isOperator) {
+      if (user?.role === 'STAFF') {
+        navigate('/staff/scanner');
+      } else {
+        navigate('/admin');
+      }
+      return;
+    }
     if (ticketCategoryId) {
       setPreselectedTicketId(ticketCategoryId);
     }
@@ -161,15 +174,33 @@ export default function EventPage() {
             </div>
           </div>
 
-          <motion.button 
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => handleOpenCheckout()}
-            className="w-full md:w-auto bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-[#B45309]/20 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
-          >
-            <TicketIcon size={18} />
-            Secure Passes Now
-          </motion.button>
+          {user?.role === 'STAFF' ? (
+            <Link
+              to="/staff/scanner"
+              className="w-full md:w-auto bg-stone-900 hover:bg-stone-800 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+            >
+              <QrCode size={18} className="text-[#C28E27]" />
+              Door Entrance Scanner
+            </Link>
+          ) : user?.role === 'PLATFORM_ADMIN' ? (
+            <Link
+              to="/admin"
+              className="w-full md:w-auto bg-stone-900 hover:bg-stone-800 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+            >
+              <Shield size={18} className="text-[#C28E27]" />
+              Manage in Admin Console
+            </Link>
+          ) : (
+            <motion.button 
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => handleOpenCheckout()}
+              className="w-full md:w-auto bg-[#B45309] hover:bg-[#92400E] text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-[#B45309]/20 transition-all flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer"
+            >
+              <TicketIcon size={18} />
+              Secure Passes Now
+            </motion.button>
+          )}
         </motion.div>
       </div>
 
@@ -180,7 +211,11 @@ export default function EventPage() {
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
               Conference <span className="cursive-accent font-normal text-gradient-shimmer text-glow-accent text-float-subtle text-3xl sm:text-4xl align-middle px-1">Passes &amp; Admission</span>
             </h2>
-            <p className="text-xs sm:text-sm text-stone-500 mt-1">Select your pass tier for instant digital QR badge issuance</p>
+            <p className="text-xs sm:text-sm text-stone-500 mt-1">
+              {isOperator 
+                ? 'Operator account: Ticket purchasing is restricted for Staff & Administrators.'
+                : 'Select your pass tier for instant digital QR badge issuance'}
+            </p>
           </div>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs">
             <ShieldCheck size={15} /> Official Authorized Registration
@@ -229,19 +264,37 @@ export default function EventPage() {
                   </div>
                 </div>
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleOpenCheckout(tier._id)}
-                  className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    isAvailable 
-                      ? 'bg-[#B45309] hover:bg-[#92400E] text-white shadow-md shadow-[#B45309]/20' 
-                      : 'bg-stone-900 hover:bg-stone-800 text-white'
-                  }`}
-                >
-                  <TicketIcon size={14} />
-                  <span>{isAvailable ? `Select ${tier.name}` : 'Join Waitlist'}</span>
-                </motion.button>
+                {user?.role === 'STAFF' ? (
+                  <Link
+                    to="/staff/scanner"
+                    className="w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-stone-900 hover:bg-stone-800 text-white shadow-xs"
+                  >
+                    <QrCode size={14} className="text-[#C28E27]" />
+                    <span>Door Scanner Access</span>
+                  </Link>
+                ) : user?.role === 'PLATFORM_ADMIN' ? (
+                  <Link
+                    to="/admin"
+                    className="w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-stone-900 hover:bg-stone-800 text-white shadow-xs"
+                  >
+                    <Shield size={14} className="text-[#C28E27]" />
+                    <span>Admin Oversight</span>
+                  </Link>
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleOpenCheckout(tier._id)}
+                    className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                      isAvailable 
+                        ? 'bg-[#B45309] hover:bg-[#92400E] text-white shadow-md shadow-[#B45309]/20' 
+                        : 'bg-stone-900 hover:bg-stone-800 text-white'
+                    }`}
+                  >
+                    <TicketIcon size={14} />
+                    <span>{isAvailable ? `Select ${tier.name}` : 'Join Waitlist'}</span>
+                  </motion.button>
+                )}
               </motion.div>
             );
           })}
@@ -253,12 +306,14 @@ export default function EventPage() {
               <p className="text-xs text-stone-500 max-w-md mx-auto">
                 Secure your general admission pass with instant QR badge issuance.
               </p>
-              <button
-                onClick={() => handleOpenCheckout()}
-                className="bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold py-3 px-6 rounded-xl shadow-md cursor-pointer"
-              >
-                Secure Delegate Pass ($299)
-              </button>
+              {!isOperator && (
+                <button
+                  onClick={() => handleOpenCheckout()}
+                  className="bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold py-3 px-6 rounded-xl shadow-md cursor-pointer"
+                >
+                  Secure Delegate Pass ($299)
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -389,14 +444,14 @@ export default function EventPage() {
 
       </div>
 
-      {/* Verified Reviews Section */}
-      <TestimonialsSection />
+      {/* Verified Post-Event Reviews Section */}
+      <EventReviewsSection event={event} />
 
       {/* Comprehensive FAQs Section */}
       <FAQSection />
 
       {/* Checkout Modal */}
-      {checkoutOpen && (
+      {checkoutOpen && !isOperator && (
         <TicketCheckout 
           event={event} 
           initialCategoryId={preselectedTicketId}

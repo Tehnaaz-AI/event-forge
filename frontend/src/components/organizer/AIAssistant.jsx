@@ -165,10 +165,12 @@ export default function AIAssistant({ eventId }) {
                   className="w-full text-xs px-3 py-2 bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl text-stone-800 focus:outline-none focus:border-[#B45309]"
                 >
                   <option value="auto">Auto-Detect from API Key</option>
-                  <option value="gemini">Google Gemini (Recommended / gemini-1.5-flash)</option>
-                  <option value="openai">OpenAI (GPT-4o-mini / GPT-4o)</option>
+                  <option value="gemini">Google Gemini (Gemini 2.0 / 1.5 Flash)</option>
+                  <option value="anthropic">Anthropic Claude (Claude 3.5 Sonnet)</option>
+                  <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
                   <option value="groq">Groq Cloud (Llama 3.3 70B)</option>
-                  <option value="openrouter">OpenRouter (Multi-Model)</option>
+                  <option value="deepseek">DeepSeek AI (DeepSeek-V3 / R1)</option>
+                  <option value="openrouter">OpenRouter (Multi-Model Gateway)</option>
                   <option value="bios">BIOS AI Cloud</option>
                 </select>
               </div>
@@ -384,7 +386,7 @@ export default function AIAssistant({ eventId }) {
             )}
           </div>
           
-          <div className="flex-1 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl p-6 overflow-y-auto font-sans text-xs text-stone-800 leading-relaxed whitespace-pre-wrap shadow-inner">
+          <div className="flex-1 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl p-6 overflow-y-auto scrollbar-beige font-sans text-xs text-stone-800 leading-relaxed whitespace-pre-wrap shadow-inner">
             {isPending ? (
               <div className="flex flex-col items-center justify-center h-full text-stone-400 gap-4">
                 <Sparkles size={36} className="animate-spin text-[#B45309]" />
