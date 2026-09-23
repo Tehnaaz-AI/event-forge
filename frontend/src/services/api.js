@@ -1,4 +1,5 @@
-const BASE = (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/$/, '') : '') + '/api';
+const rawApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const BASE = rawApiUrl.endsWith('/api') ? rawApiUrl : (rawApiUrl ? `${rawApiUrl}/api` : '/api');
 
 // Base fetch helper
 export async function api(path, options = {}) {
