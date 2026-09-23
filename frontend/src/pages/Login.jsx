@@ -56,6 +56,34 @@ export default function Login() {
     setCurrentUser(null);
   };
 
+  const handleQuickLogin = async (quickEmail, quickPassword) => {
+    setEmail(quickEmail);
+    setPassword(quickPassword);
+    setIsRegister(false);
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await api.post('/auth/login', { email: quickEmail, password: quickPassword });
+      localStorage.setItem('eventforge_token', res.token);
+      localStorage.setItem('eventforge_user', JSON.stringify(res.user));
+
+      if (res.user?.role === 'PLATFORM_ADMIN') {
+        navigate('/dashboard/admin');
+      } else if (res.user?.role === 'ATTENDEE') {
+        navigate('/dashboard/attendee');
+      } else if (res.user?.role === 'STAFF') {
+        navigate('/dashboard/staff');
+      } else {
+        navigate('/dashboard/organizer');
+      }
+    } catch (err) {
+      setError(err.message || 'Quick login failed. Please retry.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -233,6 +261,81 @@ export default function Login() {
                 >
                   Create Account
                 </button>
+              </div>
+
+              {/* One-Click Role Quick Fill & Instant Sign In */}
+              <div className="space-y-2.5 pb-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1">
+                    <Sparkles size={12} className="text-[#B45309]" /> One-Click Role Demo Access
+                  </span>
+                  <span className="text-[10px] font-mono text-stone-400">Password: Password123!</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Super Admin */}
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin('admin@eventforge.com', 'Password123!')}
+                    className="p-2.5 rounded-2xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-left transition-all group flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-[10px] font-extrabold text-rose-800 dark:text-rose-400 uppercase tracking-wider">Super Admin</span>
+                      <span className="text-[9px] bg-rose-200/80 dark:bg-rose-900 text-rose-900 dark:text-rose-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                    </div>
+                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Platform Admin</p>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">admin@eventforge.com</p>
+                  </button>
+
+                  {/* Organizer */}
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin('organizer@eventforge.com', 'Password123!')}
+                    className="p-2.5 rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/70 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-left transition-all group flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-[10px] font-extrabold text-[#B45309] dark:text-amber-400 uppercase tracking-wider">Organizer</span>
+                      <span className="text-[9px] bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                    </div>
+                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Elena Rostova</p>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">organizer@eventforge.com</p>
+                  </button>
+
+                  {/* Door Staff */}
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin('staff@eventforge.com', 'Password123!')}
+                    className="p-2.5 rounded-2xl border border-orange-200 dark:border-orange-900/50 bg-orange-50/70 dark:bg-orange-950/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 text-left transition-all group flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-[10px] font-extrabold text-orange-800 dark:text-orange-400 uppercase tracking-wider">Door Staff</span>
+                      <span className="text-[9px] bg-orange-200/80 dark:bg-orange-900 text-orange-900 dark:text-orange-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                    </div>
+                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">David Miller</p>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">staff@eventforge.com</p>
+                  </button>
+
+                  {/* Verified Attendee */}
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin('attendee@eventforge.com', 'Password123!')}
+                    className="p-2.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/70 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-left transition-all group flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Attendee Pass</span>
+                      <span className="text-[9px] bg-emerald-200/80 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                    </div>
+                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Marcus Vance</p>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">attendee@eventforge.com</p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-[#EFE8DA] dark:border-stone-800"></div>
+                <span className="shrink-0 mx-3 text-[10px] text-stone-400 font-bold uppercase tracking-wider">Or Sign In Manually</span>
+                <div className="flex-grow border-t border-[#EFE8DA] dark:border-stone-800"></div>
               </div>
 
               {error && (
