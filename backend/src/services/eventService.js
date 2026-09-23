@@ -1,13 +1,25 @@
-import { Event, Session, TicketCategory, Registration, Ticket, Announcement, User, EventStaff } from '../models/index.js';
+import { Event, Session, TicketCategory, Registration, Ticket, Announcement, User, EventStaff, Organization } from '../models/index.js';
 import mongoose from 'mongoose';
 import QRCode from 'qrcode';
+
 export const getEvents = async (req, res) => {
   const q = req.query.q ? { title: { $regex: req.query.q, $options: 'i' } } : {};
   return await Event.find(q).populate('organization', 'name').sort({ startDate: 1 });
 };
 
 export const getOrganizerEvents = async (req, res) => {
-  return await Event.find({ organization: req.user.organization }).sort({ startDate: -1 });
+  // If Platform Admin, return all events across the platform
+  if (req.user.role === 'PLATFORM_ADMIN') {
+    return await Event.find().populate('organization', 'name').sort({ startDate: -1 });
+  }
+
+  // If user has organization, return organization's events
+  if (req.user.organization) {
+    return await Event.find({ organization: req.user.organization }).populate('organization', 'name').sort({ startDate: -1 });
+  }
+
+  // Otherwise return events created by this organizer
+  return await Event.find({ organizer: req.user._id }).populate('organization', 'name').sort({ startDate: -1 });
 };
 
 export const getEventById = async (req, res) => {
@@ -15,10 +27,22 @@ export const getEventById = async (req, res) => {
 };
 
 export const getPublicEvent = async (req, res) => {
-  const event = await Event.findOne({ slug: req.params.slug, status: { $in: ['PUBLISHED', 'REGISTRATION_OPEN', 'REGISTRATION_CLOSED', 'LIVE', 'COMPLETED'] } })
-    .populate('organization', 'name')
-    .lean();
-  
+  const queryParam = req.params.slug;
+  const isObjId = mongoose.isValidObjectId(queryParam);
+
+  let event = await Event.findOne({
+    $or: [
+      { slug: queryParam },
+      ...(isObjId ? [{ _id: queryParam }] : [])
+    ]
+  }).populate('organization', 'name').lean();
+
+  if (!event) {
+    event = await Event.findOne({
+      slug: { $regex: new RegExp(`^${queryParam}$`, 'i') }
+    }).populate('organization', 'name').lean();
+  }
+
   if (!event) throw new Error('Event not found or not published');
 
   let [sessions, ticketCategories, sponsors] = await Promise.all([
@@ -56,7 +80,31 @@ export const getPublicEvent = async (req, res) => {
 export const createEvent = async (req, res) => {
   const v = req.body;
   const slug = `${v.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${Date.now().toString(36)}`;
-  const event = await Event.create({ ...v, slug, organization: req.user.organization, organizer: req.user._id });
+  
+  let organizationId = req.user.organization || v.organization;
+  if (!organizationId) {
+    // Find or auto-provision default organization for this user
+    let defaultOrg = await Organization.findOne({ contactEmail: req.user.email });
+    if (!defaultOrg) {
+      defaultOrg = await Organization.create({
+        name: `${req.user.name}'s Enterprise` || 'EventForge Global Enterprise',
+        contactEmail: req.user.email,
+        industry: 'Conferences & Events',
+        subscriptionPlan: 'Enterprise VIP',
+        subscriptionStatus: 'ACTIVE'
+      });
+    }
+    organizationId = defaultOrg._id;
+    req.user.organization = defaultOrg._id;
+    await req.user.save();
+  }
+
+  const event = await Event.create({ 
+    ...v, 
+    slug, 
+    organization: organizationId, 
+    organizer: req.user._id 
+  });
   
   // Auto-provision initial ticket categories
   await TicketCategory.insertMany([
@@ -224,7 +272,7 @@ export const registerAttendee = async (req, res) => {
   const registration = await Registration.create({
     event: event._id,
     attendee: req.user._id,
-    ticketCategory: req.body.ticketCategory,
+    ticketCategory: category?._id || req.body.ticketCategory,
     registrationStatus: status,
     amount: finalAmount
   });

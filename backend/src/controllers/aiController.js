@@ -32,6 +32,28 @@ export const getAttendeeRecommendations = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+export const generateSpeechCoach = async (req, res, next) => {
+  try {
+    const { speechTitle, speakerBio, durationMinutes, apiKey } = z.object({
+      speechTitle: z.string().min(2),
+      speakerBio: z.string().optional(),
+      durationMinutes: z.number().min(1).max(120).optional().default(15),
+      apiKey: z.string().optional()
+    }).parse(req.body);
+
+    const result = await aiService.generateSpeechCoach(
+      req.params.eventId, 
+      speechTitle, 
+      speakerBio, 
+      durationMinutes, 
+      apiKey
+    );
+    ok(res, { content: result }, 'Speech coach and Q&A framework synthesized successfully');
+  } catch (e) {
+    next(e);
+  }
+};
+
 export const testAIKey = async (req, res, next) => {
   try {
     const { apiKey, provider, model } = z.object({

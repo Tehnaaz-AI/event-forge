@@ -54,12 +54,16 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<ExploreEvents />} />
+          <Route path="/conferences" element={<ExploreEvents />} />
+          <Route path="/events" element={<ExploreEvents />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/waitlist" element={<WaitlistPage />} />
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/e/:slug" element={<EventPage />} />
+          <Route path="/conferences/:slug" element={<EventPage />} />
+          <Route path="/events/:slug" element={<EventPage />} />
         </Route>
         
         <Route path="/login" element={<Login />} />

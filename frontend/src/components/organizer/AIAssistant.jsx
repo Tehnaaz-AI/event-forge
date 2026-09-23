@@ -8,10 +8,13 @@ import {
 import { api } from '../../services/api';
 
 export default function AIAssistant({ eventId }) {
-  const [activeTab, setActiveTab] = useState('marketing'); // 'marketing' | 'sessions' | 'speaker'
+  const [activeTab, setActiveTab] = useState('marketing'); // 'marketing' | 'sessions' | 'speaker' | 'coach'
   const [targetAudience, setTargetAudience] = useState('Enterprise CTOs, Senior Software Architects, and AI Engineers');
   const [sessionTopic, setSessionTopic] = useState('Distributed AI Agents, Autonomous Workflows & Zero-Trust Cloud Architecture');
   const [speakerTopic, setSpeakerTopic] = useState('Dr. Sarah Chen, VP of AI Systems at OpenAI');
+  const [coachTitle, setCoachTitle] = useState('Architecting Zero-Collision AI Systems for 10M+ Users');
+  const [coachBio, setCoachBio] = useState('VP of Distributed Computing, 15+ years enterprise keynote speaker');
+  const [coachDuration, setCoachDuration] = useState(15);
   
   // Real AI Key & Model Configuration
   const [showConfig, setShowConfig] = useState(false);
@@ -50,6 +53,16 @@ export default function AIAssistant({ eventId }) {
     onSuccess: (data) => setResult(data.content)
   });
 
+  const generateSpeechCoach = useMutation({
+    mutationFn: (coachData) => api.post(`/events/${eventId}/ai/speech-coach`, {
+      speechTitle: coachData.title,
+      speakerBio: coachData.bio,
+      durationMinutes: Number(coachData.duration),
+      apiKey: aiApiKey || undefined
+    }),
+    onSuccess: (data) => setResult(data.content)
+  });
+
   const handleCopy = () => {
     navigator.clipboard.writeText(result);
     setCopied(true);
@@ -62,8 +75,10 @@ export default function AIAssistant({ eventId }) {
       generateCopy.mutate(targetAudience);
     } else if (activeTab === 'sessions') {
       generateSessions.mutate(sessionTopic);
-    } else {
+    } else if (activeTab === 'speaker') {
       generateSessions.mutate(`Keynote Speaker Bio & Abstract for: ${speakerTopic}`);
+    } else {
+      generateSpeechCoach.mutate({ title: coachTitle, bio: coachBio, duration: coachDuration });
     }
   };
 
@@ -88,9 +103,9 @@ export default function AIAssistant({ eventId }) {
     }
   };
 
-  const isPending = generateCopy.isPending || generateSessions.isPending;
-  const isError = generateCopy.isError || generateSessions.isError;
-  const errorMsg = generateCopy.error?.message || generateSessions.error?.message;
+  const isPending = generateCopy.isPending || generateSessions.isPending || generateSpeechCoach.isPending;
+  const isError = generateCopy.isError || generateSessions.isError || generateSpeechCoach.isError;
+  const errorMsg = generateCopy.error?.message || generateSessions.error?.message || generateSpeechCoach.error?.message;
 
   return (
     <div className="bg-white rounded-3xl border border-[#EFE8DA] shadow-sm overflow-hidden font-sans">
@@ -110,7 +125,7 @@ export default function AIAssistant({ eventId }) {
                 </span>
               </div>
               <p className="text-xs text-stone-500">
-                Autonomous conference copywriting, agenda synthesis &amp; multi-track ideation.
+                Autonomous conference copywriting, agenda synthesis &amp; keynote speech coaching.
               </p>
             </div>
           </div>
@@ -195,7 +210,7 @@ export default function AIAssistant({ eventId }) {
         )}
 
         {/* Synthesis Mode Selector Tabs */}
-        <div className="flex gap-2 border-b border-[#EFE8DA] pb-px">
+        <div className="flex flex-wrap gap-2 border-b border-[#EFE8DA] pb-px">
           <button 
             onClick={() => { setActiveTab('marketing'); setResult(''); }}
             className={`px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 ${
@@ -215,7 +230,7 @@ export default function AIAssistant({ eventId }) {
                 : 'text-stone-600 hover:bg-stone-200/50'
             }`}
           >
-            <Lightbulb size={14} /> Session &amp; Multi-Track Ideation
+            <Lightbulb size={14} /> Multi-Track Ideation
           </button>
 
           <button 
@@ -226,7 +241,18 @@ export default function AIAssistant({ eventId }) {
                 : 'text-stone-600 hover:bg-stone-200/50'
             }`}
           >
-            <Layers size={14} /> Keynote &amp; Speaker Abstracts
+            <Layers size={14} /> Speaker Abstracts
+          </button>
+
+          <button 
+            onClick={() => { setActiveTab('coach'); setResult(''); }}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 ${
+              activeTab === 'coach' 
+                ? 'bg-[#B45309] text-white shadow-xs' 
+                : 'text-stone-600 hover:bg-stone-200/50'
+            }`}
+          >
+            <Sparkles size={14} /> Keynote Speech &amp; Q&amp;A Coach
           </button>
         </div>
       </div>
@@ -239,7 +265,7 @@ export default function AIAssistant({ eventId }) {
           <div className="flex items-center gap-2 border-b border-[#EFE8DA] pb-3">
             <MessageSquare size={16} className="text-[#B45309]" />
             <h3 className="font-extrabold text-xs text-stone-900 uppercase tracking-wider">
-              {activeTab === 'marketing' ? 'Marketing Target' : activeTab === 'sessions' ? 'Track Theme' : 'Speaker Profile'}
+              {activeTab === 'marketing' ? 'Marketing Target' : activeTab === 'sessions' ? 'Track Theme' : activeTab === 'speaker' ? 'Speaker Profile' : 'Keynote Speech Brief'}
             </h3>
           </div>
           
@@ -282,6 +308,46 @@ export default function AIAssistant({ eventId }) {
                 placeholder="e.g. Dr. Alex Vance, Head of Quantum Computing Research at MIT"
               />
               <p className="text-[10px] text-stone-500">Generates keynote title, executive bio, and abstract outline.</p>
+            </div>
+          )}
+
+          {activeTab === 'coach' && (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-stone-700">Keynote Topic / Speech Title</label>
+                <input 
+                  type="text"
+                  value={coachTitle}
+                  onChange={(e) => setCoachTitle(e.target.value)}
+                  className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl p-3 text-xs text-stone-900 focus:ring-1 focus:ring-[#B45309] focus:outline-none"
+                  placeholder="e.g. Scaling Autonomous Agents"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-stone-700">Speaker Background</label>
+                <input 
+                  type="text"
+                  value={coachBio}
+                  onChange={(e) => setCoachBio(e.target.value)}
+                  className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl p-3 text-xs text-stone-900 focus:ring-1 focus:ring-[#B45309] focus:outline-none"
+                  placeholder="e.g. VP of Engineering, AI Pioneer"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-stone-700">Allotted Stage Duration</label>
+                <select
+                  value={coachDuration}
+                  onChange={(e) => setCoachDuration(e.target.value)}
+                  className="w-full bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl p-3 text-xs text-stone-900 focus:ring-1 focus:ring-[#B45309] focus:outline-none"
+                >
+                  <option value="10">10 Minutes (Lightning Keynote)</option>
+                  <option value="15">15 Minutes (Standard TED-Style)</option>
+                  <option value="30">30 Minutes (Deep-Dive Keynote)</option>
+                  <option value="45">45 Minutes (Masterclass &amp; Q&amp;A)</option>
+                </select>
+              </div>
             </div>
           )}
 
@@ -331,7 +397,7 @@ export default function AIAssistant({ eventId }) {
                 <Sparkles size={32} className="text-stone-300" />
                 <p className="text-xs font-bold text-stone-600">No output generated yet</p>
                 <p className="text-[11px] text-stone-400 text-center max-w-xs">
-                  Configure your prompt on the left and click "Generate with AI" to create marketing copy or session agendas.
+                  Configure your prompt on the left and click "Generate with AI" to create marketing copy, agendas, or keynote coaching briefs.
                 </p>
               </div>
             )}

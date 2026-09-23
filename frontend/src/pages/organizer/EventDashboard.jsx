@@ -3,7 +3,7 @@ import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   ArrowLeft, Calendar, MapPin, Users, Settings, Sparkles, 
-  Volume2, ShieldCheck, Ticket, MessageSquare 
+  Volume2, ShieldCheck, Ticket, MessageSquare, Timer, Radio 
 } from 'lucide-react';
 import { api } from '../../services/api';
 import SessionScheduler from '../../components/organizer/SessionScheduler';
@@ -15,6 +15,7 @@ import EventSpeakers from '../../components/organizer/EventSpeakers';
 import EventSettings from '../../components/organizer/EventSettings';
 import StaffManager from '../../components/organizer/StaffManager';
 import TicketManager from '../../components/organizer/TicketManager';
+import StageRunOfShow from '../../components/organizer/StageRunOfShow';
 
 export default function EventDashboard() {
   const { id } = useParams();
@@ -45,11 +46,12 @@ export default function EventDashboard() {
 
   const tabs = [
     { id: 'overview', label: 'Executive Overview' },
+    { id: 'stage', label: '🎙️ Stage Run-of-Show' },
     { id: 'tickets', label: 'Tickets & Pricing Tiers' },
     { id: 'staff', label: 'Door Staff & Crew' },
     { id: 'sessions', label: 'Sessions & Multi-Track' },
     { id: 'speakers', label: 'Speakers' },
-    { id: 'sponsors', label: 'Sponsors & Packages' },
+    { id: 'sponsors', label: 'Sponsors & Lead Capture' },
     { id: 'ai', label: 'AI Content Assistant' },
     { id: 'announcements', label: 'Broadcasts' },
     { id: 'settings', label: 'Event Configuration' }
@@ -116,6 +118,10 @@ export default function EventDashboard() {
       <div>
         {currentTab === 'overview' && (
           <EventOverview eventId={event._id} />
+        )}
+
+        {currentTab === 'stage' && (
+          <StageRunOfShow eventId={event._id} />
         )}
 
         {currentTab === 'tickets' && (

@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { User } from '../models/index.js';
+import { User, Organization } from '../models/index.js';
 
 export async function initSuperAdmin() {
   const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
@@ -11,6 +11,18 @@ export async function initSuperAdmin() {
   }
 
   try {
+    let adminOrg = await Organization.findOne({ contactEmail: adminEmail });
+    if (!adminOrg) {
+      adminOrg = await Organization.create({
+        name: 'EventForge Global Enterprise',
+        contactEmail: adminEmail,
+        industry: 'Conference & Event Technology',
+        subscriptionPlan: 'Enterprise VIP',
+        subscriptionStatus: 'ACTIVE'
+      });
+      console.log('🏛️ Enterprise Organization created for Super Admin');
+    }
+
     let admin = await User.findOne({ email: adminEmail }).select('+passwordHash');
     if (!admin) {
       const passwordHash = await bcrypt.hash(adminPassword, 12);
@@ -19,6 +31,7 @@ export async function initSuperAdmin() {
         email: adminEmail,
         passwordHash,
         role: 'PLATFORM_ADMIN',
+        organization: adminOrg._id,
         status: 'ACTIVE'
       });
       console.log(`👑 Super Admin account initialized from .env: ${adminEmail}`);
@@ -30,6 +43,10 @@ export async function initSuperAdmin() {
       }
       if (adminName && admin.name !== adminName) {
         admin.name = adminName;
+        updated = true;
+      }
+      if (!admin.organization) {
+        admin.organization = adminOrg._id;
         updated = true;
       }
       if (updated) {

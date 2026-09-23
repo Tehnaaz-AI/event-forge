@@ -25,17 +25,20 @@ export default function ExploreEvents() {
 
   const categories = ['ALL', 'Artificial Intelligence', 'Product & Design', 'Finance & Banking', 'Healthcare & Biotech', 'Cybersecurity'];
 
-  const filteredEvents = events?.filter(event => {
+  const eventsList = Array.isArray(events) ? events : (events?.events || []);
+
+  const filteredEvents = eventsList.filter(event => {
     const matchesSearch = !searchTerm || 
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      event.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
       event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.venue?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      event.venue?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.category?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = selectedCategory === 'ALL' || 
       event.category?.toLowerCase() === selectedCategory.toLowerCase();
 
     return matchesSearch && matchesCategory;
-  }) || [];
+  });
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] pb-24 text-stone-900 font-sans selection:bg-[#B45309] selection:text-white">
@@ -60,7 +63,7 @@ export default function ExploreEvents() {
             animate={{ opacity: 1, y: 0 }}
             className="text-3xl md:text-5xl font-extrabold tracking-tight text-stone-900"
           >
-            Explore <span className="cursive-accent font-normal text-[#B45309] text-4xl md:text-6xl align-middle inline-block px-1.5">Upcoming Events</span>
+            Explore <span className="cursive-accent font-normal text-gradient-shimmer text-glow-accent text-float-subtle text-4xl md:text-6xl align-middle inline-block px-1.5">Upcoming Events</span>
           </motion.h1>
           
           <p className="text-sm md:text-base text-stone-600 max-w-xl mx-auto leading-relaxed font-light">

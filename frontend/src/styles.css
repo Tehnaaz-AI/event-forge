@@ -302,3 +302,85 @@
     display: none !important;
   }
 }
+
+/* 🌟 LUXURY TEXT ANIMATIONS & EFFECTS 🌟 */
+@keyframes textShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.text-gradient-shimmer {
+  background: linear-gradient(
+    135deg,
+    #92400E 0%,
+    #D97706 25%,
+    #B45309 50%,
+    #F59E0B 75%,
+    #78350F 100%
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 6s ease infinite;
+}
+
+@keyframes textFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.text-float-subtle {
+  display: inline-block;
+  animation: textFloat 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    text-shadow: 0 0 1px rgba(180, 83, 9, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 16px rgba(217, 119, 6, 0.45), 0 0 30px rgba(180, 83, 9, 0.25);
+  }
+}
+
+.text-glow-accent {
+  animation: pulseGlow 3.5s ease-in-out infinite;
+}
+
+@keyframes wordReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-word-reveal {
+  animation: wordReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-cursor-blink {
+  animation: cursorBlink 1s infinite;
+}
+

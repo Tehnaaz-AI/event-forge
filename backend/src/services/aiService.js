@@ -2,7 +2,7 @@ import { Event, Organization } from '../models/index.js';
 
 // Real Multi-Provider AI Engine (Gemini, OpenAI, Groq, OpenRouter, BIOS)
 async function callGeminiAPI(apiKey, prompt, systemInstruction, model = null) {
-  const candidateModels = model ? [model] : ['gemini-2.5-flash', 'gemini-3.6-flash', 'gemini-1.5-flash', 'gemini-flash-latest'];
+  const candidateModels = model ? [model] : ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-flash-latest'];
   let lastError = null;
 
   for (const m of candidateModels) {
@@ -11,6 +11,7 @@ async function callGeminiAPI(apiKey, prompt, systemInstruction, model = null) {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(8000),
         body: JSON.stringify({
           contents: [
             {
@@ -48,6 +49,7 @@ async function callOpenAICompatibleAPI(apiUrl, apiKey, prompt, systemInstruction
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
+    signal: AbortSignal.timeout(8000),
     body: JSON.stringify({
       model,
       messages: [
@@ -255,6 +257,69 @@ Recommend the top 3 best sessions for this attendee to attend with brief reasoni
       }
       return `Welcome to **${event.title}**! Based on your interest in "${interests}", we recommend checking out our Keynote and main track sessions in the Main Hall.`;
     }
+  );
+};
+
+// Keynote Speech Coach & Audience Q&A Predictor
+export const generateSpeechCoach = async (eventId, speechTitle, speakerBio, durationMinutes = 15, customKey = null) => {
+  const event = await Event.findById(eventId).populate('organization');
+  if (!event) throw new Error('Event not found');
+
+  if (customKey) {
+    if (!event.organization) event.organization = { settings: {} };
+    if (!event.organization.settings) event.organization.settings = {};
+    event.organization.settings.aiApiKey = customKey;
+  }
+
+  const prompt = `Conference: "${event.title}" (${event.category || 'Technology'})
+Keynote Title: "${speechTitle}"
+Speaker Background: "${speakerBio || 'Industry Keynote Speaker'}"
+Target Duration: ${durationMinutes} minutes
+
+Generate a comprehensive, executive Stage Run-of-Show Speech Coach plan including:
+1. ⏱️ Minute-by-Minute Stage Pacing Outline (Hook 0-2m, Problem Statement 2-5m, Core Solution & Case Study 5-10m, Future Outlook 10-13m, Strong Call to Action 13-15m)
+2. 🎯 3 Powerful Podium Teleprompter Cue Lines
+3. ❓ 4 Predicted Hard-Hitting Audience Q&A Questions with model answer frameworks
+4. 💡 Pro AV Tip for Stage Presence & Voice Pacing`;
+
+  return await generateWithAI(
+    event,
+    prompt,
+    'You are an executive keynote speech coach and master stage producer for TED-style conferences.',
+    () => `🎙️ **Executive Keynote Stage Coach & Pacing Guide**
+**Topic:** "${speechTitle}" (${durationMinutes} Min Allotted Time)
+**Event:** ${event.title}
+
+---
+
+### ⏱️ Stage Pacing Breakdown
+- **0:00 - 2:00 [The Hook]:** Open with a striking real-world statistic or provocative question to anchor audience attention immediately.
+- **2:00 - 5:30 [The Core Problem]:** Articulate why legacy paradigms are breaking down in ${event.category || 'the industry'}. Frame the exact stakes.
+- **5:30 - 10:30 [Breakthrough Solution]:** Reveal your core framework. Share 1 high-impact architecture diagram or customer milestone.
+- **10:30 - 13:00 [The Next Horizon]:** Forecast what the next 24-36 months look like and what early adopters are doing today.
+- **13:00 - 15:00 [Call-to-Action]:** Deliver your unforgettable closing punchline and invite delegates to connect during networking hours.
+
+---
+
+### 🎯 Teleprompter Cue Notes
+1. _"We aren't just adjusting to change; we are orchestrating it."_
+2. _"The bottleneck was never our vision—it was our infrastructure."_
+3. _"What you build after this summit will define your organization's trajectory for the decade."_
+
+---
+
+### ❓ Predicted Audience Q&A Frameworks
+1. **Q: How do you address legacy migration risks while adopting this?**
+   - **Answer Framework:** Acknowledge legacy dependencies, recommend an incremental strangle pattern, and emphasize automated regression sandboxes.
+2. **Q: What is the estimated time-to-ROI for an enterprise team?**
+   - **Answer Framework:** Benchmark typical pilots showing quantifiable gains within 60-90 days of staged rollout.
+3. **Q: How does security/governance fit into this paradigm?**
+   - **Answer Framework:** Stress zero-trust compliance by design rather than an afterthought.
+
+---
+
+### 💡 AV & Stage Delivery Pro Tip
+_Keep your movement deliberate: deliver the hook from center stage, walk stage-left during the technical breakdown, and return center-stage for your final 2-minute crescendo._`
   );
 };
 

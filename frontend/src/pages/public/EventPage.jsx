@@ -178,7 +178,7 @@ export default function EventPage() {
         <div className="border-b border-[#EFE8DA] pb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
           <div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-              Conference <span className="cursive-accent font-normal text-[#B45309] text-3xl sm:text-4xl align-middle px-1">Passes &amp; Admission</span>
+              Conference <span className="cursive-accent font-normal text-gradient-shimmer text-glow-accent text-float-subtle text-3xl sm:text-4xl align-middle px-1">Passes &amp; Admission</span>
             </h2>
             <p className="text-xs sm:text-sm text-stone-500 mt-1">Select your pass tier for instant digital QR badge issuance</p>
           </div>

@@ -9,6 +9,7 @@ const organizerAuth = [authenticate, allowRoles('ORGANIZER', 'PLATFORM_ADMIN'), 
 
 r.post('/generate-copy', organizerAuth, c.generateMarketingCopy);
 r.post('/recommend-sessions', organizerAuth, c.recommendSessions);
+r.post('/speech-coach', organizerAuth, c.generateSpeechCoach);
 r.post('/test-key', authenticate, c.testAIKey);
 
 // Attendee routes (public/attendee)

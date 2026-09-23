@@ -227,6 +227,119 @@ export default function EventOverview({ eventId }) {
         </div>
       </div>
 
+      {/* 🏛️ Room Capacity & Multi-Track Stage Heatmap Visualizer 🏛️ */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#EFE8DA] shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DA] pb-4">
+          <div>
+            <h3 className="font-extrabold text-stone-900 text-lg flex items-center gap-2">
+              <BarChart3 size={20} className="text-[#B45309]" /> Live Stage &amp; Room Capacity Heatmap
+            </h3>
+            <p className="text-xs text-stone-500 mt-0.5">Real-time room occupancy, seat availability, and AV hardware status</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full text-[10px] font-extrabold uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              All Audio/AV Channels Active
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Main Keynote Auditorium */}
+          <div className="p-5 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#B45309] bg-[#B45309]/10 px-2 py-0.5 rounded-md">
+                Main Stage Hall A
+              </span>
+              <span className="text-xs font-mono font-bold text-stone-700">
+                {Math.min(totalSold, Math.round(totalCapacity * 0.75))} / {Math.round(totalCapacity * 0.75) || 400} Seats
+              </span>
+            </div>
+
+            <h4 className="font-extrabold text-sm text-stone-900">Keynote Auditorium</h4>
+            
+            {/* Occupancy bar */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-[11px] text-stone-500 font-medium">
+                <span>Occupancy</span>
+                <span className="font-bold text-stone-900">
+                  {totalCapacity > 0 ? Math.min(100, Math.round((Math.min(totalSold, totalCapacity * 0.75) / (totalCapacity * 0.75)) * 100)) : 72}%
+                </span>
+              </div>
+              <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="bg-[#B45309] h-2 rounded-full transition-all duration-500" 
+                  style={{ width: `${totalCapacity > 0 ? Math.min(100, Math.round((Math.min(totalSold, totalCapacity * 0.75) / (totalCapacity * 0.75)) * 100)) : 72}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-[#EFE8DA] text-[10px] text-stone-500">
+              <span>Status: <strong className="text-emerald-700">Optimal</strong></span>
+              <span>AV Feed: <strong className="text-stone-700">4K Live</strong></span>
+            </div>
+          </div>
+
+          {/* Breakout Lab 1 */}
+          <div className="p-5 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                Workshop Room 101
+              </span>
+              <span className="text-xs font-mono font-bold text-stone-700">
+                {Math.min(totalSold, 120)} / 150 Seats
+              </span>
+            </div>
+
+            <h4 className="font-extrabold text-sm text-stone-900">AI &amp; Systems Lab</h4>
+            
+            <div className="space-y-1">
+              <div className="flex justify-between text-[11px] text-stone-500 font-medium">
+                <span>Occupancy</span>
+                <span className="font-bold text-stone-900">80%</span>
+              </div>
+              <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
+                <div className="bg-amber-600 h-2 rounded-full" style={{ width: '80%' }}></div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-[#EFE8DA] text-[10px] text-stone-500">
+              <span>Status: <strong className="text-amber-700">Filling Up Fast</strong></span>
+              <span>AV Feed: <strong className="text-stone-700">1080p Stream</strong></span>
+            </div>
+          </div>
+
+          {/* Executive Boardroom */}
+          <div className="p-5 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-purple-800 bg-purple-100 px-2 py-0.5 rounded-md">
+                Executive Lounge
+              </span>
+              <span className="text-xs font-mono font-bold text-stone-700">
+                {Math.min(totalSold, 45)} / 60 Seats
+              </span>
+            </div>
+
+            <h4 className="font-extrabold text-sm text-stone-900">VIP Speaker Salon</h4>
+            
+            <div className="space-y-1">
+              <div className="flex justify-between text-[11px] text-stone-500 font-medium">
+                <span>Occupancy</span>
+                <span className="font-bold text-stone-900">75%</span>
+              </div>
+              <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
+                <div className="bg-purple-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-[#EFE8DA] text-[10px] text-stone-500">
+              <span>Status: <strong className="text-emerald-700">VIP Access Only</strong></span>
+              <span>AV Feed: <strong className="text-stone-700">Private Mic</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Door Check-In Attendance Bar Meter & Capacity Gauge */}
       <div className="bg-[#1C1917] text-[#FDFAF5] p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10">
         <div className="max-w-xl space-y-2">

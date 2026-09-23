@@ -133,9 +133,9 @@ export default function Home() {
             <span>AI-Driven Corporate Event Operating System</span>
           </motion.div>
           
-          {/* Editorial Headline with Cursive Accent */}
+          {/* Editorial Headline with Cursive Accent & Dynamic Shimmer */}
           <motion.h1 variants={itemVariants} className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-stone-900 leading-[1.2]">
-            Curate, Scale &amp; <span className="cursive-accent font-normal text-[#B45309] text-6xl sm:text-7xl md:text-8xl inline-block px-2 align-middle">Masterpiece</span> <br />
+            Curate, Scale &amp; <span className="cursive-accent font-normal text-gradient-shimmer text-glow-accent text-float-subtle text-6xl sm:text-7xl md:text-8xl inline-block px-2 align-middle">Masterpiece</span> <br />
             <span className="font-serif italic font-normal text-stone-800">
               World-Class Conferences
             </span>
