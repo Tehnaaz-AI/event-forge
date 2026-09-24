@@ -25,6 +25,8 @@ const eventSchema = new Schema({
     default: 'DRAFT' 
   },
   organizer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  bannerImage: { type: String, default: '' },
+  cardColor: { type: String, default: '#1C1917' },
   tags: [String],
   registrationSettings: {
     waitlistEnabled: { type: Boolean, default: true },

@@ -189,7 +189,7 @@ export default function WaitlistManager({ eventId }) {
       {/* Waitlist Table / Cards */}
       <div className="bg-white rounded-3xl border border-[#EFE8DA] shadow-sm overflow-hidden">
         {filtered.length > 0 ? (
-          <div className="divide-y divide-[#EFE8DA]">
+          <div className="max-h-[520px] overflow-y-auto overflow-x-auto divide-y divide-[#EFE8DA] scrollbar-beige">
             {filtered.map((item, idx) => {
               const joinDate = item.createdAt ? new Date(item.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'Recently';
               return (

@@ -105,9 +105,12 @@ export const createEvent = async (req, res) => {
 
   const event = await Event.create({ 
     ...v, 
+    status: v.status || 'REGISTRATION_OPEN',
     slug, 
     organization: organizationId, 
-    organizer: req.user._id 
+    organizer: req.user._id,
+    bannerImage: v.bannerImage || '',
+    cardColor: v.cardColor || '#1C1917'
   });
   
   // Auto-provision initial ticket categories
@@ -134,7 +137,7 @@ export const createEvent = async (req, res) => {
 };
 
 export const updateEvent = async (req, res) => {
-  const fields = ['title', 'description', 'eventType', 'category', 'startDate', 'endDate', 'capacity', 'venue', 'tags', 'status'];
+  const fields = ['title', 'description', 'eventType', 'category', 'startDate', 'endDate', 'capacity', 'venue', 'tags', 'status', 'bannerImage', 'cardColor'];
   fields.forEach(field => {
     if (req.body[field] !== undefined) {
       req.event[field] = req.body[field];

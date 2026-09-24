@@ -167,9 +167,9 @@ export default function StaffManager({ eventId }) {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[500px] overflow-y-auto scrollbar-beige">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF8F5] border-b border-[#EFE8DA] text-stone-600 font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-[#FAF8F5] border-b border-[#EFE8DA] text-stone-600 font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 shadow-xs">
                 <tr>
                   <th className="py-3.5 px-6">Staff Member</th>
                   <th className="py-3.5 px-6">Assigned Duty</th>

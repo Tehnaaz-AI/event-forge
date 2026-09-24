@@ -150,10 +150,10 @@ export default function EventRegistrations({ eventId }) {
             <p className="text-[10px] text-stone-400">Try adjusting your search query or filter tab.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[520px] overflow-y-auto scrollbar-beige">
             <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#EFE8DA] bg-[#FAF8F5] text-[10px] font-extrabold uppercase tracking-wider text-stone-500">
+              <thead className="sticky top-0 z-10">
+                <tr className="border-b border-[#EFE8DA] bg-[#FAF8F5] text-[10px] font-extrabold uppercase tracking-wider text-stone-500 shadow-xs">
                   <th className="py-3.5 px-6">Delegate</th>
                   <th className="py-3.5 px-4">Pass Tier</th>
                   <th className="py-3.5 px-4">Status</th>

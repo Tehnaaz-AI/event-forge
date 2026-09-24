@@ -57,14 +57,21 @@ export default function EventsList() {
             className="bg-white rounded-3xl shadow-sm border border-[#EFE8DA] overflow-hidden hover:shadow-md transition-shadow group flex flex-col justify-between"
           >
             <div>
-              <div className="h-32 bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] flex items-center justify-between p-6 relative">
-                <span className="text-xs font-extrabold text-[#B45309] bg-white border border-[#EFE8DA] px-3 py-1 rounded-full uppercase tracking-wider">
+              <div 
+                className="h-32 border-b border-[#EFE8DA] flex items-start justify-between p-5 relative overflow-hidden bg-cover bg-center transition-all"
+                style={{
+                  backgroundColor: event.cardColor || '#1C1917',
+                  backgroundImage: event.bannerImage ? `url(${event.bannerImage})` : undefined
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none"></div>
+                <span className="relative z-10 text-[10px] font-extrabold text-stone-900 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
                   {event.category || 'CONFERENCE'}
                 </span>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                  event.status === 'LIVE' ? 'bg-emerald-100 text-emerald-800' :
-                  event.status === 'REGISTRATION_OPEN' ? 'bg-[#B45309]/10 text-[#B45309]' :
-                  'bg-stone-100 text-stone-700'
+                <span className={`relative z-10 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase shadow-xs ${
+                  event.status === 'LIVE' ? 'bg-emerald-500 text-white' :
+                  event.status === 'REGISTRATION_OPEN' ? 'bg-[#B45309] text-white' :
+                  'bg-stone-800 text-stone-100'
                 }`}>
                   {event.status.replace('_', ' ')}
                 </span>
