@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import * as intelService from '../services/eventIntelligenceService.js';
 import { ok, fail } from '../utils/http.js';
@@ -156,6 +157,24 @@ export const getRecoveryScenarios = async (req, res, next) => {
     ];
 
     ok(res, scenarios);
+  } catch (e) {
+    next(e);
+  }
+};
+
+export const generateStreamToken = async (req, res, next) => {
+  try {
+    const streamToken = jwt.sign(
+      {
+        purpose: 'SSE_STREAM',
+        userId: String(req.user._id),
+        eventId: String(req.event._id),
+        role: req.user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '120s' }
+    );
+    ok(res, { streamToken, expiresIn: 120 });
   } catch (e) {
     next(e);
   }

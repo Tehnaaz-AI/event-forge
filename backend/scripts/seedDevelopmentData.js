@@ -311,6 +311,8 @@ export async function seedDevelopmentData() {
         event: event1._id,
         name: 'General Admission Pass',
         description: 'Full conference access, keynotes, masterclasses, and networking.',
+        tier: 'STANDARD',
+        isVipEligible: false,
         price: 299,
         capacity: 400,
         availableQuantity: 398
@@ -324,6 +326,8 @@ export async function seedDevelopmentData() {
         event: event1._id,
         name: 'Executive VIP Pass',
         description: 'Fast-track entrance, VIP lounge, and private speaker reception.',
+        tier: 'VIP',
+        isVipEligible: true,
         price: 699,
         capacity: 100,
         availableQuantity: 99

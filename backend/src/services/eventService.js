@@ -179,17 +179,90 @@ export const deleteEvent = async (req, res) => {
 
 export const createSession = async (req, res) => {
   const v = req.body;
+  if (!v.capacity || v.capacity <= 0) throw new Error('Session room capacity must be positive');
   if (v.endTime <= v.startTime) throw new Error('Session end time must be after start time');
+
+  // Verify event duration boundaries
+  if (req.event.startDate && new Date(v.startTime) < new Date(new Date(req.event.startDate).getTime() - 24 * 3600000)) {
+    throw new Error('Session cannot start before the conference start date');
+  }
+
   const overlap = { event: req.event._id, startTime: { $lt: v.endTime }, endTime: { $gt: v.startTime } };
   
   if (await Session.exists({ ...overlap, room: v.room })) throw new Error('Room conflict: another session overlaps in this room');
   if (v.speakers?.length && await Session.exists({ ...overlap, speakers: { $in: v.speakers } })) throw new Error('Speaker conflict: assigned speaker is unavailable');
   
-  return await Session.create({ ...v, event: req.event._id });
+  return await Session.create({ 
+    ...v, 
+    event: req.event._id,
+    status: v.status || 'PUBLISHED'
+  });
 };
 
 export const getSessions = async (req, res) => {
   return await Session.find({ event: req.params.eventId }).populate('speakers', 'name').sort({ startTime: 1 });
+};
+
+export const updateSessionStatus = async (req, res) => {
+  const { sessionId } = req.params;
+  const { status } = req.body;
+  const validTransitions = ['DRAFT', 'PROPOSED', 'APPROVED', 'PUBLISHED', 'REJECTED'];
+  if (!validTransitions.includes(status)) {
+    throw new Error(`Invalid session status transition to "${status}"`);
+  }
+
+  const session = await Session.findOne({ _id: sessionId, event: req.event._id });
+  if (!session) throw new Error('Session not found in this event');
+
+  session.status = status;
+  await session.save();
+  return session;
+};
+
+export const deleteSession = async (req, res) => {
+  const { sessionId } = req.params;
+  const session = await Session.findOneAndDelete({ _id: sessionId, event: req.event._id });
+  if (!session) throw new Error('Session not found');
+  return { success: true, deletedSessionId: sessionId };
+};
+
+export const generateProposedSchedule = async (req, res) => {
+  const { trackTitle, rooms, slots, durationMinutes } = req.body;
+  const event = req.event;
+  const startTime = new Date(event.startDate || Date.now());
+  const proposedSessions = [];
+  const roomList = Array.isArray(rooms) && rooms.length ? rooms : ['Grand Ballroom A', 'Breakout Room 1', 'Workshop Studio'];
+  const count = slots || 3;
+  const duration = durationMinutes || 60;
+
+  for (let i = 0; i < count; i++) {
+    const slotStart = new Date(startTime.getTime() + (i * (duration + 15)) * 60000);
+    const slotEnd = new Date(slotStart.getTime() + duration * 60000);
+    const room = roomList[i % roomList.length];
+
+    const conflict = await Session.exists({
+      event: event._id,
+      room,
+      startTime: { $lt: slotEnd },
+      endTime: { $gt: slotStart }
+    });
+
+    if (!conflict) {
+      const created = await Session.create({
+        event: event._id,
+        title: `${trackTitle || 'Track Symposium'} - Part ${i + 1}`,
+        description: `Draft session proposed for organizer review and approval.`,
+        room,
+        startTime: slotStart,
+        endTime: slotEnd,
+        capacity: 100,
+        status: 'PROPOSED'
+      });
+      proposedSessions.push(created);
+    }
+  }
+
+  return { success: true, proposedSessions, count: proposedSessions.length };
 };
 
 export const createTicketCategory = async (req, res) => {
@@ -292,9 +365,8 @@ export const registerAttendee = async (req, res) => {
     finalAmount = Math.max(0, finalAmount - 50);
   }
 
-  // Determine VIP / Priority status (Server-authoritative: Only genuine VIP ticket tiers grant VIP status)
-  const isVIPTier = (categoryCheck.name || '').toLowerCase().includes('vip') ||
-                    (categoryCheck.name || '').toLowerCase().includes('executive');
+  // Determine VIP / Priority status (Server-authoritative domain model: based on explicit TicketCategory.isVipEligible or tier)
+  const isVIPTier = Boolean(categoryCheck.isVipEligible || categoryCheck.tier === 'VIP' || categoryCheck.tier === 'EXECUTIVE');
   const priorityScore = isVIPTier ? 10 : 0;
 
   // If sold out, handle waitlist with deterministic priority positioning

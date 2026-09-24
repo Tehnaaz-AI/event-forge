@@ -73,6 +73,33 @@ export const getSessions = async (req, res, next) => {
   try { ok(res, await eventService.getSessions(req, res)); } catch (e) { next(e); }
 };
 
+export const updateSessionStatus = async (req, res, next) => {
+  try {
+    req.body = z.object({
+      status: z.enum(['DRAFT', 'PROPOSED', 'APPROVED', 'PUBLISHED', 'REJECTED'])
+    }).parse(req.body);
+    ok(res, await eventService.updateSessionStatus(req, res), 'Session status updated');
+  } catch (e) { next(e); }
+};
+
+export const deleteSession = async (req, res, next) => {
+  try {
+    ok(res, await eventService.deleteSession(req, res), 'Session deleted');
+  } catch (e) { next(e); }
+};
+
+export const generateProposedSchedule = async (req, res, next) => {
+  try {
+    req.body = z.object({
+      trackTitle: z.string().optional(),
+      rooms: z.array(z.string()).optional(),
+      slots: z.number().int().min(1).max(20).optional(),
+      durationMinutes: z.number().int().min(15).max(480).optional()
+    }).parse(req.body || {});
+    ok(res, await eventService.generateProposedSchedule(req, res), 'Proposed schedule generated for review', 201);
+  } catch (e) { next(e); }
+};
+
 export const createTicketCategory = async (req, res, next) => {
   try {
     req.body = z.object({

@@ -16,40 +16,52 @@ export default function EventPulse({ eventId }) {
   const [activeTab, setActiveTab] = useState('command'); // 'command', 'copilot', 'recovery', 'simulation'
   const [realtimeConnected, setRealtimeConnected] = useState(false);
 
-  // SSE Real-time Subscription
+  // SSE Real-time Subscription with Scoped Stream Token
   useEffect(() => {
     if (!eventId) return;
-    const token = localStorage.getItem('eventforge_token') || localStorage.getItem('token');
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3100/api';
-    const streamUrl = `${apiUrl}/events/${eventId}/intelligence/stream${token ? `?token=${encodeURIComponent(token)}` : ''}`;
-
     let eventSource = null;
-    try {
-      eventSource = new EventSource(streamUrl);
+    let isCancelled = false;
 
-      eventSource.onopen = () => {
-        setRealtimeConnected(true);
-      };
+    async function initStream() {
+      try {
+        const rawApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+        const base = rawApiUrl.endsWith('/api') ? rawApiUrl : (rawApiUrl ? `${rawApiUrl}/api` : '/api');
+        
+        // Request short-lived scoped stream token
+        const tokenRes = await api.post(`/events/${eventId}/intelligence/stream-token`);
+        const streamToken = tokenRes?.streamToken;
+        if (!streamToken || isCancelled) return;
 
-      const handleUpdate = () => {
-        queryClient.invalidateQueries({ queryKey: ['event-pulse', eventId] });
-        queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      };
+        const streamUrl = `${base}/events/${eventId}/intelligence/stream?token=${encodeURIComponent(streamToken)}`;
+        eventSource = new EventSource(streamUrl);
 
-      eventSource.addEventListener('ATTENDEE_CHECKED_IN', handleUpdate);
-      eventSource.addEventListener('ROOM_OCCUPANCY_CHANGED', handleUpdate);
-      eventSource.addEventListener('ACTION_EXECUTED', handleUpdate);
-      eventSource.addEventListener('PULSE_UPDATED', handleUpdate);
-      eventSource.addEventListener('ANNOUNCEMENT_CREATED', handleUpdate);
+        eventSource.onopen = () => {
+          if (!isCancelled) setRealtimeConnected(true);
+        };
 
-      eventSource.onerror = () => {
-        setRealtimeConnected(false);
-      };
-    } catch (err) {
-      console.warn('Real-time SSE subscription notice:', err);
+        const handleUpdate = () => {
+          queryClient.invalidateQueries({ queryKey: ['event-pulse', eventId] });
+          queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+        };
+
+        eventSource.addEventListener('ATTENDEE_CHECKED_IN', handleUpdate);
+        eventSource.addEventListener('ROOM_OCCUPANCY_CHANGED', handleUpdate);
+        eventSource.addEventListener('ACTION_EXECUTED', handleUpdate);
+        eventSource.addEventListener('PULSE_UPDATED', handleUpdate);
+        eventSource.addEventListener('ANNOUNCEMENT_CREATED', handleUpdate);
+
+        eventSource.onerror = () => {
+          if (!isCancelled) setRealtimeConnected(false);
+        };
+      } catch (err) {
+        console.warn('Real-time SSE scoped token notice:', err.message);
+      }
     }
 
+    initStream();
+
     return () => {
+      isCancelled = true;
       if (eventSource) eventSource.close();
     };
   }, [eventId, queryClient]);

@@ -18,6 +18,9 @@ r.post('/', authenticate, allowRoles('ORGANIZER', 'PLATFORM_ADMIN'), c.createEve
 // 3. Specific Event Sub-resources
 r.get('/:eventId/sessions', c.getSessions);
 r.post('/:eventId/sessions', authenticate, eventAccess, c.createSession);
+r.post('/:eventId/sessions/generate', authenticate, eventAccess, c.generateProposedSchedule);
+r.patch('/:eventId/sessions/:sessionId/status', authenticate, eventAccess, c.updateSessionStatus);
+r.delete('/:eventId/sessions/:sessionId', authenticate, eventAccess, c.deleteSession);
 
 r.get('/:eventId/tickets', c.getTicketCategories);
 r.post('/:eventId/tickets', authenticate, eventAccess, c.createTicketCategory);

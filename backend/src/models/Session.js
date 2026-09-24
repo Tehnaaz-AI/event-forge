@@ -10,6 +10,11 @@ export const Session = model('Session', new Schema({
   startTime: { type: Date, required: true },
   endTime: { type: Date, required: true },
   capacity: { type: Number, min: 1, required: true },
+  status: { 
+    type: String, 
+    enum: ['DRAFT', 'PROPOSED', 'APPROVED', 'PUBLISHED', 'REJECTED'], 
+    default: 'PUBLISHED' 
+  },
   category: String,
   tags: [String]
 }, { timestamps: true }));
