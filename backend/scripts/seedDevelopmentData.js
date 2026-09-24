@@ -139,7 +139,7 @@ export async function seedDevelopmentData() {
       { upsert: true, new: true }
     );
 
-    // Attendee
+    // Attendee 1 (Confirmed Standard)
     const attendee = await User.findOneAndUpdate(
       { email: 'attendee@eventforge.com' },
       {
@@ -153,7 +153,49 @@ export async function seedDevelopmentData() {
       { upsert: true, new: true }
     );
 
-    console.log('✓ Provisioned 6 Users: 1 Admin, 3 Organizers, 1 Staff, 1 Attendee');
+    // Attendee 2 (Confirmed Executive VIP)
+    const vipAttendee = await User.findOneAndUpdate(
+      { email: 'vip.attendee@eventforge.com' },
+      {
+        name: 'David Thorne (VIP Executive)',
+        email: 'vip.attendee@eventforge.com',
+        passwordHash,
+        role: 'ATTENDEE',
+        organization: orgA._id,
+        status: 'ACTIVE'
+      },
+      { upsert: true, new: true }
+    );
+
+    // Attendee 3 (VIP Waitlisted #1)
+    const vipWaitlistUser = await User.findOneAndUpdate(
+      { email: 'vip.waitlist@eventforge.com' },
+      {
+        name: 'Rachel Adams (VIP Standby)',
+        email: 'vip.waitlist@eventforge.com',
+        passwordHash,
+        role: 'ATTENDEE',
+        organization: orgA._id,
+        status: 'ACTIVE'
+      },
+      { upsert: true, new: true }
+    );
+
+    // Attendee 4 (Standard Waitlisted #2)
+    const standardWaitlistUser = await User.findOneAndUpdate(
+      { email: 'standard.waitlist@eventforge.com' },
+      {
+        name: 'Liam Chen (Standard Standby)',
+        email: 'standard.waitlist@eventforge.com',
+        passwordHash,
+        role: 'ATTENDEE',
+        organization: orgA._id,
+        status: 'ACTIVE'
+      },
+      { upsert: true, new: true }
+    );
+
+    console.log('✓ Provisioned Development Users: 1 Admin, 3 Organizers, 1 Staff, 4 Attendees (Confirmed + VIP + Waitlist)');
 
     // ==========================================
     // 3. EVENTS (Exactly 3 Conferences: 1 per Organizer)
@@ -261,7 +303,7 @@ export async function seedDevelopmentData() {
     console.log('✓ Provisioned 3 Conferences (Strict Ownership: Event 1 -> Org A, Event 2 -> Org B, Event 3 -> Org C)');
 
     // ==========================================
-    // 4. TICKET CATEGORIES & DEMO ATTENDEE PASS FOR EVENT 1
+    // 4. TICKET CATEGORIES & REGISTRATIONS FOR EVENT 1
     // ==========================================
     const catStandard = await TicketCategory.findOneAndUpdate(
       { event: event1._id, name: 'General Admission Pass' },
@@ -271,7 +313,7 @@ export async function seedDevelopmentData() {
         description: 'Full conference access, keynotes, masterclasses, and networking.',
         price: 299,
         capacity: 400,
-        availableQuantity: 399
+        availableQuantity: 398
       },
       { upsert: true, new: true }
     );
@@ -284,13 +326,13 @@ export async function seedDevelopmentData() {
         description: 'Fast-track entrance, VIP lounge, and private speaker reception.',
         price: 699,
         capacity: 100,
-        availableQuantity: 100
+        availableQuantity: 99
       },
       { upsert: true, new: true }
     );
 
-    // Initial Registration for Attendee in Event 1
-    const reg = await Registration.findOneAndUpdate(
+    // 1. Confirmed Standard Registration
+    const reg1 = await Registration.findOneAndUpdate(
       { event: event1._id, attendee: attendee._id },
       {
         event: event1._id,
@@ -304,21 +346,87 @@ export async function seedDevelopmentData() {
       { upsert: true, new: true }
     );
 
-    const ticketNumber = `EF-2026-CONF-1001`;
-    const qrCode = await QRCode.toDataURL(JSON.stringify({
-      registration: String(reg._id),
-      ticketNumber,
+    const ticketNumber1 = `EF-2026-CONF-1001`;
+    const qrCode1 = await QRCode.toDataURL(JSON.stringify({
+      registration: String(reg1._id),
+      ticketNumber: ticketNumber1,
       attendee: attendee.name,
       event: event1.title
     }));
 
     await Ticket.findOneAndUpdate(
-      { registration: reg._id },
+      { registration: reg1._id },
       {
-        registration: reg._id,
-        ticketNumber,
-        qrCode,
+        registration: reg1._id,
+        ticketNumber: ticketNumber1,
+        qrCode: qrCode1,
         status: 'ACTIVE'
+      },
+      { upsert: true, new: true }
+    );
+
+    // 2. Confirmed VIP Registration
+    const reg2 = await Registration.findOneAndUpdate(
+      { event: event1._id, attendee: vipAttendee._id },
+      {
+        event: event1._id,
+        attendee: vipAttendee._id,
+        ticketCategory: catVIP._id,
+        registrationStatus: 'CONFIRMED',
+        isVIP: true,
+        priorityScore: 10,
+        amount: 699
+      },
+      { upsert: true, new: true }
+    );
+
+    const ticketNumber2 = `EF-VIP-2026-CONF-2001`;
+    const qrCode2 = await QRCode.toDataURL(JSON.stringify({
+      registration: String(reg2._id),
+      ticketNumber: ticketNumber2,
+      attendee: vipAttendee.name,
+      event: event1.title
+    }));
+
+    await Ticket.findOneAndUpdate(
+      { registration: reg2._id },
+      {
+        registration: reg2._id,
+        ticketNumber: ticketNumber2,
+        qrCode: qrCode2,
+        status: 'ACTIVE'
+      },
+      { upsert: true, new: true }
+    );
+
+    // 3. VIP Waitlisted Registration (Priority Standby #1)
+    await Registration.findOneAndUpdate(
+      { event: event1._id, attendee: vipWaitlistUser._id },
+      {
+        event: event1._id,
+        attendee: vipWaitlistUser._id,
+        ticketCategory: catVIP._id,
+        registrationStatus: 'WAITLISTED',
+        isVIP: true,
+        priorityScore: 10,
+        waitlistPosition: 1,
+        amount: 699
+      },
+      { upsert: true, new: true }
+    );
+
+    // 4. Standard Waitlisted Registration (Standby #2)
+    await Registration.findOneAndUpdate(
+      { event: event1._id, attendee: standardWaitlistUser._id },
+      {
+        event: event1._id,
+        attendee: standardWaitlistUser._id,
+        ticketCategory: catStandard._id,
+        registrationStatus: 'WAITLISTED',
+        isVIP: false,
+        priorityScore: 0,
+        waitlistPosition: 2,
+        amount: 299
       },
       { upsert: true, new: true }
     );
@@ -351,12 +459,15 @@ export async function seedDevelopmentData() {
 
     console.log('✅ Controlled development seed completed successfully.');
     console.log('--------------------------------------------------');
-    console.log('Admin:       admin@eventforge.com      | ' + defaultPassword);
-    console.log('Organizer A: organizer.a@nexus.io      | ' + defaultPassword);
-    console.log('Organizer B: organizer.b@vanguard.io   | ' + defaultPassword);
-    console.log('Organizer C: organizer.c@summitcorp.io | ' + defaultPassword);
-    console.log('Staff:       staff@eventforge.com      | ' + defaultPassword);
-    console.log('Attendee:    attendee@eventforge.com   | ' + defaultPassword);
+    console.log('Admin:                admin@eventforge.com             | ' + defaultPassword);
+    console.log('Organizer A:          organizer.a@nexus.io             | ' + defaultPassword);
+    console.log('Organizer B:          organizer.b@vanguard.io          | ' + defaultPassword);
+    console.log('Organizer C:          organizer.c@summitcorp.io        | ' + defaultPassword);
+    console.log('Staff:                staff@eventforge.com             | ' + defaultPassword);
+    console.log('Attendee (Confirmed): attendee@eventforge.com          | ' + defaultPassword);
+    console.log('Attendee (VIP):       vip.attendee@eventforge.com      | ' + defaultPassword);
+    console.log('Waitlist (VIP #1):    vip.waitlist@eventforge.com      | ' + defaultPassword);
+    console.log('Waitlist (Std #2):    standard.waitlist@eventforge.com | ' + defaultPassword);
     console.log('--------------------------------------------------');
     
     process.exit(0);

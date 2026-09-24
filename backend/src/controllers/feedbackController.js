@@ -5,7 +5,7 @@ import { ok, fail } from '../utils/http.js';
 export const getEventFeedback = async (req, res, next) => {
   try {
     const feedback = await Feedback.find({ event: req.params.eventId })
-      .populate('attendee', 'name email')
+      .populate('attendee', 'name avatar')
       .populate('session', 'title')
       .sort({ createdAt: -1 });
     ok(res, feedback);

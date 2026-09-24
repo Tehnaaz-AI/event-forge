@@ -292,12 +292,10 @@ export const registerAttendee = async (req, res) => {
     finalAmount = Math.max(0, finalAmount - 50);
   }
 
-  // Determine VIP / Priority status
+  // Determine VIP / Priority status (Server-authoritative: Only genuine VIP ticket tiers grant VIP status)
   const isVIPTier = (categoryCheck.name || '').toLowerCase().includes('vip') ||
-                    (categoryCheck.name || '').toLowerCase().includes('executive') ||
-                    code === 'VIP50' ||
-                    Boolean(req.body.isVIP);
-  const priorityScore = isVIPTier ? (Number(req.body.priorityScore) || 10) : (Number(req.body.priorityScore) || 0);
+                    (categoryCheck.name || '').toLowerCase().includes('executive');
+  const priorityScore = isVIPTier ? 10 : 0;
 
   // If sold out, handle waitlist with deterministic priority positioning
   if (!category) {

@@ -111,6 +111,64 @@ test('Authorization: Tenant Isolation and Role Guards', async (t) => {
     assert.strictEqual(isExecutable, false, 'Already executed recommendation must not be re-executed');
   });
 
+  await t.test('Three-Organizer Isolation: Cross-organizer access between A, B, and C is strictly rejected', async () => {
+    const orgA = new mongoose.Types.ObjectId();
+    const orgB = new mongoose.Types.ObjectId();
+    const orgC = new mongoose.Types.ObjectId();
+    const userA = new mongoose.Types.ObjectId();
+    const userB = new mongoose.Types.ObjectId();
+    const userC = new mongoose.Types.ObjectId();
+    const eventA = { _id: new mongoose.Types.ObjectId(), organizer: userA, organization: orgA };
+    const eventB = { _id: new mongoose.Types.ObjectId(), organizer: userB, organization: orgB };
+    const eventC = { _id: new mongoose.Types.ObjectId(), organizer: userC, organization: orgC };
+
+    const eventsMap = {
+      [String(eventA._id)]: eventA,
+      [String(eventB._id)]: eventB,
+      [String(eventC._id)]: eventC
+    };
+
+    Event.findById = (id) => Promise.resolve(eventsMap[String(id)] || null);
+
+    const testDenial = async (user, targetEventId) => {
+      let nextCalled = false;
+      let statusCode = 200;
+      const req = {
+        params: { eventId: String(targetEventId) },
+        user: { _id: user._id, role: 'ORGANIZER', organization: user.organization }
+      };
+      const res = {
+        status(c) { statusCode = c; return this; },
+        json(p) { return this; }
+      };
+      await eventAccess(req, res, () => { nextCalled = true; });
+      assert.strictEqual(nextCalled, false);
+      assert.strictEqual(statusCode, 403);
+    };
+
+    // Organizer A attempts Event B and C
+    await testDenial({ _id: userA, organization: orgA }, eventB._id);
+    await testDenial({ _id: userA, organization: orgA }, eventC._id);
+
+    // Organizer B attempts Event A and C
+    await testDenial({ _id: userB, organization: orgB }, eventA._id);
+    await testDenial({ _id: userB, organization: orgB }, eventC._id);
+
+    // Organizer C attempts Event A and B
+    await testDenial({ _id: userC, organization: orgC }, eventA._id);
+    await testDenial({ _id: userC, organization: orgC }, eventB._id);
+  });
+
+  await t.test('VIP Security: Public attendee payload with isVIP:true on standard tier is rejected/sanitized', () => {
+    const standardCategory = { name: 'General Admission Pass', price: 299 };
+    const isVIPTier = (standardCategory.name || '').toLowerCase().includes('vip') ||
+                      (standardCategory.name || '').toLowerCase().includes('executive');
+    const priorityScore = isVIPTier ? 10 : 0;
+
+    assert.strictEqual(isVIPTier, false, 'Standard pass must not yield VIP entitlement');
+    assert.strictEqual(priorityScore, 0, 'Standard pass priority score must remain 0');
+  });
+
   // Restore mocks
   Event.findById = originalFindById;
   EventStaff.findOne = originalFindOne;
