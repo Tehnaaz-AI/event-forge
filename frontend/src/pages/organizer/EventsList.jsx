@@ -7,7 +7,9 @@ import { api } from '../../services/api';
 export default function EventsList() {
   const { data: events, isLoading, error } = useQuery({
     queryKey: ['organizer-events'],
-    queryFn: () => api.get('/events/organizer/me')
+    queryFn: () => api.get('/events/organizer/me'),
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true
   });
 
   if (isLoading) {

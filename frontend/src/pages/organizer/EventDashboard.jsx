@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   ArrowLeft, Calendar, MapPin, Users, Settings, Sparkles, 
   Volume2, ShieldCheck, Ticket, MessageSquare, Timer, Radio 
@@ -23,13 +23,74 @@ import PostEventReport from '../../components/organizer/PostEventReport';
 
 export default function EventDashboard() {
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'overview';
+  const [isLiveConnected, setIsLiveConnected] = useState(false);
 
   const { data: event, isLoading, error } = useQuery({
     queryKey: ['event', id],
     queryFn: () => api.get(`/events/${id}`)
   });
+
+  // Real-time SSE Live Updates with Scoped Stream Token
+  useEffect(() => {
+    if (!id) return;
+    let eventSource = null;
+    let isCancelled = false;
+
+    async function initRealtime() {
+      try {
+        const rawApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+        const base = rawApiUrl.endsWith('/api') ? rawApiUrl : (rawApiUrl ? `${rawApiUrl}/api` : '/api');
+        
+        const tokenRes = await api.post(`/events/${id}/intelligence/stream-token`);
+        const streamToken = tokenRes?.streamToken;
+        if (!streamToken || isCancelled) return;
+
+        const streamUrl = `${base}/events/${id}/intelligence/stream?token=${encodeURIComponent(streamToken)}`;
+        eventSource = new EventSource(streamUrl);
+
+        eventSource.onopen = () => {
+          if (!isCancelled) setIsLiveConnected(true);
+        };
+
+        const invalidateEventData = () => {
+          queryClient.invalidateQueries({ queryKey: ['event', id] });
+          queryClient.invalidateQueries({ queryKey: ['event-waitlist', id] });
+          queryClient.invalidateQueries({ queryKey: ['event-registrations', id] });
+          queryClient.invalidateQueries({ queryKey: ['event-analytics', id] });
+          queryClient.invalidateQueries({ queryKey: ['event-pulse', id] });
+          queryClient.invalidateQueries({ queryKey: ['event-tickets', id] });
+          queryClient.invalidateQueries({ queryKey: ['event-sessions', id] });
+        };
+
+        eventSource.addEventListener('REGISTRATION_CREATED', invalidateEventData);
+        eventSource.addEventListener('WAITLIST_JOINED', invalidateEventData);
+        eventSource.addEventListener('WAITLIST_PROMOTED', invalidateEventData);
+        eventSource.addEventListener('WAITLIST_PRIORITY_UPDATED', invalidateEventData);
+        eventSource.addEventListener('ATTENDEE_CHECKED_IN', invalidateEventData);
+        eventSource.addEventListener('REGISTRATION_CANCELLED', invalidateEventData);
+        eventSource.addEventListener('PULSE_UPDATED', invalidateEventData);
+        eventSource.addEventListener('ANNOUNCEMENT_CREATED', invalidateEventData);
+        eventSource.addEventListener('ROOM_OCCUPANCY_CHANGED', invalidateEventData);
+        eventSource.addEventListener('ACTION_EXECUTED', invalidateEventData);
+
+        eventSource.onerror = () => {
+          if (!isCancelled) setIsLiveConnected(false);
+        };
+      } catch (err) {
+        console.warn('Real-time connection fallback to polling:', err.message);
+      }
+    }
+
+    initRealtime();
+
+    return () => {
+      isCancelled = true;
+      if (eventSource) eventSource.close();
+    };
+  }, [id, queryClient]);
 
   if (isLoading) {
     return (

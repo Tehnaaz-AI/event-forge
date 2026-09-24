@@ -16,13 +16,14 @@ export const getOrganizerEvents = async (req, res) => {
     return await Event.find().populate('organization', 'name').sort({ startDate: -1 });
   }
 
-  // If user has organization, return organization's events
-  if (req.user.organization) {
-    return await Event.find({ organization: req.user.organization }).populate('organization', 'name').sort({ startDate: -1 });
-  }
-
-  // Otherwise return events created by this organizer
-  return await Event.find({ organizer: req.user._id }).populate('organization', 'name').sort({ startDate: -1 });
+  // Return all events created by this organizer OR belonging to their organization
+  const query = {
+    $or: [
+      { organizer: req.user._id },
+      ...(req.user.organization ? [{ organization: req.user.organization }] : [])
+    ]
+  };
+  return await Event.find(query).populate('organization', 'name').sort({ startDate: -1 });
 };
 
 export const getEventById = async (req, res) => {
@@ -393,6 +394,14 @@ export const registerAttendee = async (req, res) => {
       amount: finalAmount
     });
 
+    eventBus.broadcast(String(event._id), 'WAITLIST_JOINED', {
+      attendee: req.user.name || req.user.email,
+      isVIP: isVIPTier,
+      position: waitlistPosition,
+      category: categoryCheck.name
+    });
+    eventBus.broadcast(String(event._id), 'PULSE_UPDATED', { eventId: String(event._id) });
+
     return { 
       registration, 
       ticket: null, 
@@ -430,6 +439,14 @@ export const registerAttendee = async (req, res) => {
       qrCode,
       status: 'ACTIVE'
     });
+
+    eventBus.broadcast(String(event._id), 'REGISTRATION_CREATED', {
+      attendee: req.user.name || req.user.email,
+      ticketNumber,
+      isVIP: isVIPTier,
+      category: categoryCheck.name
+    });
+    eventBus.broadcast(String(event._id), 'PULSE_UPDATED', { eventId: String(event._id) });
 
     return { registration, ticket, waitlisted: false, isVIP: isVIPTier };
   } catch (err) {
@@ -511,6 +528,7 @@ export const joinVipWaitlist = async (req, res) => {
     position: waitlistPosition,
     category: vipCategory.name
   });
+  eventBus.broadcast(String(event._id), 'PULSE_UPDATED', { eventId: String(event._id) });
 
   return {
     success: true,
@@ -627,6 +645,17 @@ export const cancelRegistration = async (req, res) => {
     }
   }
 
+  eventBus.broadcast(String(registration.event), 'REGISTRATION_CANCELLED', {
+    registrationId: registration._id
+  });
+  if (promotedRegistration) {
+    eventBus.broadcast(String(registration.event), 'WAITLIST_PROMOTED', {
+      attendee: String(promotedRegistration.attendee),
+      registrationId: promotedRegistration._id
+    });
+  }
+  eventBus.broadcast(String(registration.event), 'PULSE_UPDATED', { eventId: String(registration.event) });
+
   return {
     success: true,
     cancelledRegistrationId: registration._id,
@@ -729,6 +758,13 @@ export const promoteWaitlistedAttendee = async (req, res) => {
     await remaining[i].save();
   }
 
+  eventBus.broadcast(String(req.event._id), 'WAITLIST_PROMOTED', {
+    attendee: registration.attendee?.name || registration.attendee?.email,
+    ticketNumber,
+    isVIP: registration.isVIP
+  });
+  eventBus.broadcast(String(req.event._id), 'PULSE_UPDATED', { eventId: String(req.event._id) });
+
   return { success: true, registration, ticket };
 };
 
@@ -759,6 +795,13 @@ export const updateWaitlistPriority = async (req, res) => {
     waitlist[i].waitlistPosition = i + 1;
     await waitlist[i].save();
   }
+
+  eventBus.broadcast(String(req.event._id), 'WAITLIST_PRIORITY_UPDATED', {
+    registrationId,
+    isVIP: registration.isVIP,
+    priorityScore: registration.priorityScore
+  });
+  eventBus.broadcast(String(req.event._id), 'PULSE_UPDATED', { eventId: String(req.event._id) });
 
   return { success: true, registration };
 };

@@ -12,7 +12,9 @@ export default function EventRegistrations({ eventId }) {
 
   const { data: registrations, isLoading, error, refetch } = useQuery({
     queryKey: ['event-registrations', eventId],
-    queryFn: () => api.get(`/events/${eventId}/registrations`)
+    queryFn: () => api.get(`/events/${eventId}/registrations`),
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true
   });
 
   if (isLoading) {

@@ -14,7 +14,9 @@ export default function OrganizerOverview() {
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['organizer-events-overview'],
-    queryFn: () => api.get('/events/organizer/me')
+    queryFn: () => api.get('/events/organizer/me'),
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true
   });
 
   const totalEvents = events?.length || 0;

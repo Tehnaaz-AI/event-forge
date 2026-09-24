@@ -48,7 +48,9 @@ export default function AttendeeDashboard() {
 
   const { data: myRegistrations, isLoading } = useQuery({
     queryKey: ['my-tickets'],
-    queryFn: () => api.get('/events/attendee/my-tickets')
+    queryFn: () => api.get('/events/attendee/my-tickets'),
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true
   });
 
   const { data: allEvents } = useQuery({

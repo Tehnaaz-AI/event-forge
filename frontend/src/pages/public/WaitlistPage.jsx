@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, Clock, CheckCircle, Ticket, Mail, User, 
   ShieldCheck, ArrowRight, Calendar, BellRing, Zap, Check, Lock, LogIn, UserPlus
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import Breadcrumbs from '../../components/common/Breadcrumbs';
 import useDocumentTitle from '../../components/common/useDocumentTitle';
@@ -14,9 +14,11 @@ export default function WaitlistPage() {
   useDocumentTitle('VIP Waitlist & Early Access', 'Join the priority queue for sold-out summits and early bird tiers.');
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const eventParam = searchParams.get('event') || searchParams.get('eventId') || '';
   const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
 
-  const [selectedEvent, setSelectedEvent] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState(eventParam);
   const [joined, setJoined] = useState(false);
   const [queueNumber, setQueueNumber] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,6 +28,14 @@ export default function WaitlistPage() {
     queryKey: ['public-events-list'],
     queryFn: () => api.get('/events')
   });
+
+  useEffect(() => {
+    if (eventParam) {
+      setSelectedEvent(eventParam);
+    } else if (events && events.length > 0 && !selectedEvent) {
+      setSelectedEvent(events[0]._id);
+    }
+  }, [eventParam, events]);
 
   const handleJoin = async (e) => {
     e.preventDefault();

@@ -17,7 +17,9 @@ export default function WaitlistManager({ eventId }) {
   // Fetch event-scoped waitlist
   const { data: waitlist, isLoading, error, refetch } = useQuery({
     queryKey: ['event-waitlist', eventId],
-    queryFn: () => api.get(`/events/${eventId}/waitlist`)
+    queryFn: () => api.get(`/events/${eventId}/waitlist`),
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true
   });
 
   // Promote mutation
