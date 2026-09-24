@@ -14,3 +14,7 @@ export * from './Coupon.js';
 export * from './EventStaff.js';
 export * from './SessionRegistration.js';
 export * from './Inquiry.js';
+export * from './EventTelemetry.js';
+export * from './EventAlert.js';
+export * from './EventRecommendation.js';
+export * from './EventAction.js';

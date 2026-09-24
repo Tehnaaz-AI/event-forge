@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { User, Event, Session, TicketCategory, Registration, Ticket, Announcement, Organization } from '../models/index.js';
 import mongoose from 'mongoose';
 
@@ -33,10 +34,12 @@ export const createUser = async ({ name, email, password, role = 'ATTENDEE', org
     orgId = newOrg._id;
   }
 
+  const rawPassword = password || crypto.randomBytes(16).toString('base64url') + '!A1';
+
   const user = await User.create({
     name,
     email,
-    passwordHash: await bcrypt.hash(password || 'DemoPass123!', 12),
+    passwordHash: await bcrypt.hash(rawPassword, 12),
     role,
     organization: orgId || null,
     phone,

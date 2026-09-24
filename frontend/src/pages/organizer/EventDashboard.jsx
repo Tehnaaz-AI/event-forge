@@ -15,7 +15,8 @@ import EventSpeakers from '../../components/organizer/EventSpeakers';
 import EventSettings from '../../components/organizer/EventSettings';
 import StaffManager from '../../components/organizer/StaffManager';
 import TicketManager from '../../components/organizer/TicketManager';
-import StageRunOfShow from '../../components/organizer/StageRunOfShow';
+import EventPulse from '../../components/organizer/EventPulse';
+import PostEventReport from '../../components/organizer/PostEventReport';
 
 export default function EventDashboard() {
   const { id } = useParams();
@@ -46,6 +47,7 @@ export default function EventDashboard() {
 
   const tabs = [
     { id: 'overview', label: 'Executive Overview' },
+    { id: 'pulse', label: '⚡ Live Event Pulse & OS' },
     { id: 'stage', label: '🎙️ Stage Run-of-Show' },
     { id: 'tickets', label: 'Tickets & Pricing Tiers' },
     { id: 'staff', label: 'Door Staff & Crew' },
@@ -54,6 +56,7 @@ export default function EventDashboard() {
     { id: 'sponsors', label: 'Sponsors & Lead Capture' },
     { id: 'ai', label: 'AI Content Assistant' },
     { id: 'announcements', label: 'Broadcasts' },
+    { id: 'post-event', label: '📊 Post-Event AI Report' },
     { id: 'settings', label: 'Event Configuration' }
   ];
 
@@ -120,6 +123,10 @@ export default function EventDashboard() {
           <EventOverview eventId={event._id} />
         )}
 
+        {currentTab === 'pulse' && (
+          <EventPulse eventId={event._id} />
+        )}
+
         {currentTab === 'stage' && (
           <StageRunOfShow eventId={event._id} />
         )}
@@ -150,6 +157,10 @@ export default function EventDashboard() {
 
         {currentTab === 'announcements' && (
           <AnnouncementsManager eventId={event._id} />
+        )}
+
+        {currentTab === 'post-event' && (
+          <PostEventReport eventId={event._id} />
         )}
 
         {currentTab === 'settings' && (

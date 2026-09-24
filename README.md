@@ -1,8 +1,96 @@
 # EventForge 🌟
-### Enterprise Multi-Track Conference & Event Operating System
+### The AI Operating System for Live Events
 
-> **Plan. Connect. Orchestrate. Measure.**  
-> EventForge is a premier, production-grade corporate event orchestration platform engineered for high-concurrency summits, multi-track agendas, atomic ticket registrations, on-site optical badge validation, and generative AI content synthesis.
+> **EventForge is a real-time AI Event Operating System for planning, operating, and analyzing live events.**  
+> It transforms static event management into continuous operational intelligence: streaming live state, detecting anomalies deterministically, compiling concrete evidence, synthesizing AI recommendations, enforcing human approval, executing backend actions, and recording immutable audit trails.
+
+---
+
+## 🎯 Product Definition & Operational Intelligence Loop
+
+EventForge is not a simple CRUD application. The platform runs a continuous closed-loop event operating system:
+
+```text
+REAL EVENT DATA (Badge Scans, Room Capacities, Ticket Sales)
+      ↓
+REAL-TIME STATE (EventBus / Server-Sent Events / Telemetry)
+      ↓
+DETECTION (Deterministic Thresholds, Attendance Gaps, Room Congestion)
+      ↓
+EVIDENCE (Live Occupancy Ratios, Seat Headroom, Demand Multipliers)
+      ↓
+AI / RULE-BASED REASONING (Gemini 2.0 Flash / Fallback Synthesis)
+      ↓
+RECOMMENDATION (Relocations, Overflows, Reminders, Staff Reassignments)
+      ↓
+HUMAN APPROVAL (Organizer Command Center with One-Click Execution)
+      ↓
+BACKEND ACTION (Atomic MongoDB Updates, Announcements)
+      ↓
+AUDIT TRAIL (Immutable EventAction Records)
+      ↓
+UPDATED REAL-TIME STATE (Real-time SSE Broadcasts to All Consoles)
+```
+
+---
+
+## ⚡ Core Capabilities
+
+### 1. Live Event Pulse Command Center
+- **Real-time Event Health Score (0–100)**: Fully explainable weighted index:
+  - *Attendance Health (25%)*: Proportion of expected arrivals checked in against dynamic arrival curve.
+  - *Capacity Health (25%)*: Room occupancy headroom and overflow prevention.
+  - *Schedule Health (20%)*: Active session flow, room conflicts, speaker readiness.
+  - *Check-In Health (15%)*: Velocity of attendee badge scans and queue flow.
+  - *Session Demand (15%)*: Demand vs room capacity balance across tracks.
+- **Live Room & Multi-Track Intelligence**: Tracks room occupancy in real time (`HEALTHY`, `NEAR_CAPACITY`, `CAPACITY_RISK`, `OVERFLOW`).
+- **Dynamic Arrival Curve**: Forecasts expected attendance velocity based on event elapsed time and calculates real-time attendance gaps.
+- **Zero-Reload Real-time Sync**: Uses Server-Sent Events (`/api/events/:eventId/intelligence/stream`) to update consoles instantly on badge scans, room updates, and operational actions.
+
+### 2. Evidence-Backed AI Recommendations & Human-in-the-Loop Actions
+- AI never silently alters consequential event state.
+- Operational risks automatically compile concrete evidence:
+  - Live room occupancy percentage and seat headroom
+  - Registered session demand ratio
+  - Comparative hall capacity
+- Proposes actionable mitigations (`MOVE_SESSION`, `OPEN_OVERFLOW_ROOM`, `BROADCAST_ANNOUNCEMENT`, `REASSIGN_STAFF`).
+- **Idempotent Human Approval**: The organizer can review, approve, or dismiss proposals. Server-side validation checks authorization and state freshness before executing updates in MongoDB and logging audit records in `EventAction`.
+
+### 3. Autonomous AI Event Copilot
+- Natural language command assistant grounded strictly in live database records.
+- Organizers can query:
+  - *"What needs my attention right now?"*
+  - *"Why is Hall A at risk?"*
+  - *"Which session has the highest demand?"*
+  - *"How many attendees have not checked in?"*
+  - *"Give me a 30-minute operational status report."*
+- Structured query processing -> live MongoDB context -> evidence-backed synthesis with deterministic offline fallback and explicit engine attribution (`Gemini` vs `Event Intelligence (Live Database Telemetry)`).
+
+### 4. Operational Recovery Mode
+- Calculated mitigations against real backend state:
+  - **Speaker Sudden Cancellation**: Proposes speaker substitution, rescheduling, and attendee broadcast.
+  - **Room Evacuation / AV Failure**: Proposes immediate session relocation to halls with available headroom.
+  - **Gate Scanner Outage**: Switches staff to degraded offline validation mode.
+  - **Hall Overflow Surge**: Proposes simulcast video overflow hall opening.
+
+### 5. Live Event Simulation Engine
+- Development and demo simulation tool:
+  - **Scenario A (Normal Arrivals)**: Injects steady badge check-ins and normal room flows.
+  - **Scenario B (Capacity Surge 94%)**: Injects high-density bursts to trigger capacity alerts and AI overflow proposals.
+  - **Reset Telemetry**: Clears simulated state and restores live database numbers.
+
+### 6. Offline-Friendly Check-In Scanner
+- Staff check-in includes automatic connectivity detection:
+  - **Online Mode (🟢)**: Direct server validation and instant badge verification.
+  - **Offline Mode (🟠)**: Locally caches scanned badges with `locally accepted` status, displaying queued scan counts and supporting one-click batch synchronization upon reconnect.
+
+### 7. Post-Event AI Intelligence Report
+- Compiles complete event lifecycle metrics:
+  - Attendance show-up rate vs no-show percentage
+  - Peak room and track capacity utilization
+  - Full operational mitigation audit trail
+  - AI strategic takeaways and capacity recommendations for future summits
+  - One-click printable/exportable dossier
 
 ---
 
@@ -12,101 +100,40 @@
 EventForge/
 ├── backend/                         Node.js + Express.js REST API
 │   ├── src/
-│   │   ├── config/                  MongoDB connection & Super Admin bootstrap
-│   │   ├── controllers/             Zod-validated request handlers
-│   │   ├── middleware/              JWT authentication, RBAC & defensive ObjectId guards
-│   │   ├── models/                  Mongoose schemas (16 interrelated collections)
-│   │   ├── routes/                  REST API endpoints (ordered for route safety)
-│   │   ├── services/                Business logic, MongoDB aggregations & AI engine
-│   │   ├── app.js                   Express application & security middleware (Helmet, CORS)
+│   │   ├── config/                  MongoDB Atlas connection, super admin bootstrap, demo seeder
+│   │   ├── controllers/             Zod-validated controllers (Events, Intelligence, Sponsors, Speakers, Auth)
+│   │   ├── middleware/              JWT authentication, strict tenant isolation & event ownership guards
+│   │   ├── models/                  Mongoose models (Event, Telemetry, Alert, Recommendation, Action, Ticket, etc.)
+│   │   ├── realtime/                EventBus (EventEmitter) & Server-Sent Events (SSE) streaming handler
+│   │   ├── routes/                  REST API routers with endpoint rate limiters
+│   │   ├── services/                Event Intelligence, AI Engine, Lifecycle & Waitlist Engine
+│   │   ├── app.js                   Express application, Helmet, CORS, RequestId observability & error contract
 │   │   └── server.js                Server entrypoint with graceful shutdown
-│   └── .env                         Environment credentials & bootstrap configurations
+│   └── tests/                       Comprehensive unit & integration test suite (24 passing tests)
 ├── frontend/                        React 18 + Vite 6 Single Page Application
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── common/              Floating curved navbar, badges, UI elements
-│   │   │   ├── organizer/           Overview analytics, Staff, Sessions, Speakers, Sponsors, AI Studio
-│   │   │   └── public/              AI Session Finder, Ticket Checkout, Badge Print View
-│   │   ├── layouts/                 PublicLayout with dynamic auth-aware footer
-│   │   ├── pages/                   Home, Explore, About, Features, Dashboard, Login, Profile
+│   │   │   ├── common/              Floating luxury navbar, badges, footer
+│   │   │   ├── organizer/           EventPulse, PostEventReport, StageRunOfShow, AIAssistant, TicketManager
+│   │   │   └── public/              Public event page, atomic checkout, badge print
+│   │   ├── pages/                   Organizer, Attendee, Staff, Admin, Public pages
 │   │   ├── services/                Axios API client with dynamic base URL support
-│   │   ├── styles.css               Tailwind CSS v4 + Warm Beige luxury design system
-│   │   └── main.jsx                 Root React entrypoint with TanStack Query provider
-│   └── index.html                   HTML5 boilerplate with Google Fonts & SEO meta tags
+│   │   └── styles.css               Tailwind CSS v4 luxury warm-editorial design system
+│   └── dist/                        Production build bundle
 └── README.md
 ```
 
 ---
 
-## 🎨 Luxury Editorial Design System
-EventForge adopts an executive **Warm Beige, Sand, Cream, Gold, and Deep Espresso** palette:
-- **Backgrounds**: Pure Ivory (`#FDFAF5`), Warm Sand (`#FAF8F5`), Crisp White (`#FFFFFF`).
-- **Borders & Accents**: Soft Linen (`#EFE8DA`), Golden Honey (`#C28E27`), Warm Amber (`#B45309`).
-- **Typography**: Deep Espresso (`#1C1917`), Charcoal (`#292524`).
-- **Custom Fonts**:
-  - `Dancing Script`: Signature cursive brand accents.
-  - `Playfair Display` & `Cinzel`: Editorial luxury headers.
-  - `Plus Jakarta Sans`: High-legibility modern UI body copy.
-  - `JetBrains Mono`: Pass codes, ticket numbers, and diagnostic logs.
-- **Micro-Interactions**: Floating curved navbar with backdrop blur, slim warm-beige custom scrollbars (`.scrollbar-beige`), hover-lift card elevations, and tactile scanline animations.
+## 🔒 Security & Data Integrity Hardening
 
----
-
-## 👥 6 Integrated Role Portals & Workflows
-
-### 1. Platform Super Administrator (`PLATFORM_ADMIN`)
-- **Bootstrap Initialization**: Initialized automatically on backend launch from `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` in `backend/.env`.
-- **Master Console** (`/dashboard/admin`): Cross-tenant telemetry (total users, active conferences, total GMV volume, enterprise organizations).
-- **User Directory**: Search, role filtering, instant privilege modification, and platform-wide deletion.
-- **Conference Roster**: Global oversight of all drafts, published events, and live conferences across all organizers.
-
-### 2. Event Organizer Workspace (`ORGANIZER`)
-Accessed via `/dashboard/organizer` and `/dashboard/organizer/events/:id`:
-- **Executive Overview**: 100% dynamic analytics calculated via MongoDB time-series aggregations (Gross pass revenue, registration velocity curves, tier distribution donut, and live door check-in rates).
-- **Door Staff & Crew Manager**: Provision gatekeepers with dedicated duty roles (`CHECK_IN`, `SUPPORT`, `MANAGER`) and copyable credentials.
-- **Sessions & Multi-Track Scheduler**: Conflict-free room and time scheduling, track tagging, and speaker linking.
-- **Keynote Speakers Studio**: Onboard keynote luminaries, panel moderators, biographies, headshots, and session track assignments.
-- **Sponsors & Packages Hub**: Create custom partnership tiers (Platinum, Gold, Silver) with price and spot limits, and onboard brand sponsors.
-- **EventForge AI Studio**: Multi-pipeline generative engine for marketing copywriting, agenda ideation, and speaker abstracts.
-- **Broadcast Announcements**: Send instant updates to registered attendees.
-- **Event Configuration**: Update venue, category, dates, and lifecycle status (`DRAFT`, `PUBLISHED`, `REGISTRATION_OPEN`, `LIVE`, `COMPLETED`).
-
-### 3. Attendee Pass Hub (`ATTENDEE`)
-- **Public Discovery** (`/explore`): Search summits by title, category, date, and location.
-- **Atomic Checkout**: Transactional pass registration with MongoDB inventory decrements to prevent overbooking.
-- **My Passes & Badges** (`/dashboard/attendee`): View confirmed tickets, generated dynamic QR admission badges, and one-click printable badge generator formatted for physical conference lanyards.
-- **AI Session Matchmaker**: Natural language matching against event session tracks based on attendee learning goals.
-
-### 4. Door Staff Optical Scanner (`STAFF`)
-- **Live Camera Scanner** (`/dashboard/staff`): Real-time optical video QR scanner with targeting HUD and animated laser scanlines.
-- **Manual Verification**: Rapid manual ticket code validation for backup check-in.
-- **Instant Door Feedback**: Visual approval banners and Web Audio API synthesized audio chimes for gatekeepers.
-- **Live Arrivals Stream**: Real-time log of verified entries.
-
-### 5. Speaker Management (`SPEAKER`)
-- Profile bios, expertise tags, talk abstracts, and multi-track session assignments.
-
-### 6. Corporate Brand Sponsors (`SPONSOR`)
-- Package deliverable tracking, booth allocations, and sponsor brand showcase.
-
----
-
-## 🤖 Real Multi-Model AI Engine
-
-EventForge features an enterprise multi-provider AI engine ([`backend/src/services/aiService.js`](file:///d:/Projects/EventForge/backend/src/services/aiService.js)):
-- **Supported Providers & Models**:
-  - **Google Gemini**: `gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-2.5-flash`, `gemini-flash-latest`
-  - **Anthropic Claude**: `claude-3-5-sonnet-20241022`, `claude-3-haiku-20240307`
-  - **OpenAI**: `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo`
-  - **Groq Cloud**: `llama-3.3-70b-versatile`, `mixtral-8x7b-32768`
-  - **DeepSeek AI**: `deepseek-chat`, `deepseek-reasoner`
-  - **OpenRouter & BIOS Cloud**: Multi-model routing gateways
-- **Purpose-Driven Synthesis Pipelines**:
-  1. 🚀 **Marketing Copywriter**: Synthesizes social posts (X/Twitter), LinkedIn executive announcements, and targeted email invitations.
-  2. 💡 **Multi-Track Ideation**: Generates 3 comprehensive breakout sessions with learning objectives and speaker profiles.
-  3. 🎙️ **Keynote Speech & Q&A Coach**: Creates minute-by-minute stage pacing, teleprompter cue notes, and predicted audience Q&A.
-  4. 🎯 **Attendee Matchmaker**: Recommends personalized event agendas based on attendee interests with scrollable summaries.
-- **Fault-Tolerant Fallback**: If an API key is not configured or encounters network issues, EventForge automatically executes its local high-fidelity synthesis engine without crashing the UI.
+1. **Strict Tenant Isolation**: Event modification and access requires explicit ownership (`PLATFORM_ADMIN`, `event.organizer === user._id`, or matching `event.organization`). Cross-tenant access is rejected with HTTP 403.
+2. **Authoritative Server Role Assignment**: Public registration restricts user self-assignment to `ATTENDEE` or `ORGANIZER` with organization. Escalation attempts to `PLATFORM_ADMIN` or `STAFF` are prevented.
+3. **Cryptographically Secure Credentials**: Removed all hardcoded credentials. All staff and speaker invitations generate crypto-random temporary tokens.
+4. **Atomic Inventory & Waitlist Promotion**: Ticket categories decrement inventory atomically. On cancellation, seats are restored and oldest waitlisted attendees are automatically promoted with QR badges and notifications.
+5. **No Key Leakage**: AI provider keys are protected server-side and never returned in API payloads, database models, or logs.
+6. **Observability & Request Tracing**: Every request is assigned a unique `requestId` and tracked with latency, HTTP status, and user context.
+7. **Health & Readiness Probes**: `/api/health` reports uptime and liveness, while `/api/ready` validates active database connectivity.
 
 ---
 
@@ -116,7 +143,7 @@ EventForge features an enterprise multi-provider AI engine ([`backend/src/servic
 - Node.js (v20 or higher)
 - MongoDB Atlas Cloud Database connection
 
-### 1. Environment Setup
+### 1. Environment Configuration
 
 #### Backend (`backend/.env`):
 ```env
@@ -129,12 +156,12 @@ CLIENT_URL=http://localhost:5173
 # Super Admin Bootstrap Credentials
 ADMIN_NAME=Platform Administrator
 ADMIN_EMAIL=admin@eventforge.com
-ADMIN_PASSWORD=Password123!
+ADMIN_PASSWORD=your_secure_password_here
 
-# AI Engine Configuration
+# AI Engine Configuration (Gemini API)
 AI_PROVIDER=gemini
 GEMINI_API_KEY=your_gemini_api_key_here
-AI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-2.0-flash
 ```
 
 #### Frontend (`frontend/.env`):
@@ -152,7 +179,13 @@ cd backend
 npm install
 npm run dev
 ```
-*Backend runs on `http://localhost:3100` (Health check: `http://localhost:3100/api/health`)*
+*Backend runs on `http://localhost:3100` (Health: `http://localhost:3100/api/health`, Ready: `http://localhost:3100/api/ready`)*
+
+#### Seed Realistic Demo Data (Optional):
+```bash
+cd backend
+npm run seed
+```
 
 #### Start the Frontend Web Application:
 ```bash
@@ -162,13 +195,13 @@ npm run dev
 ```
 *Frontend runs on `http://localhost:5173`*
 
-#### Run Automated Unit Tests:
+#### Run Automated Test Suite (24 Tests):
 ```bash
 cd backend
 npm test
 ```
 
-#### Build Production Bundle:
+#### Build Frontend Production Bundle:
 ```bash
 cd frontend
 npm run build
@@ -176,9 +209,39 @@ npm run build
 
 ---
 
-## 🔒 Security & Data Integrity
-- **MongoDB Atlas Cloud Persistence**: Production cloud database storage with zero local mock data dependencies.
-- **Defensive Route Ordering**: Static sub-routes precede parameterized paths to prevent Mongoose CastErrors.
-- **Atomic Booking**: MongoDB transactions ensure ticket categories never oversell beyond total capacity.
-- **Role-Based Access Control**: Strict middleware verification for `PLATFORM_ADMIN`, `ORGANIZER`, `STAFF`, and `ATTENDEE`.
-- **QR Code Cryptographic Signatures**: Gate check-in parses JSON payloads, `EVENTFORGE:...` signatures, and ticket identifiers.
+## ☁️ Deployment Guide
+
+### Backend (Render / Railway / Fly.io)
+1. Set Root Directory to `backend/`.
+2. Build Command: `npm install`.
+3. Start Command: `npm start`.
+4. Add Environment Variables: `MONGODB_URI`, `JWT_SECRET`, `CLIENT_URL`, `GEMINI_API_KEY`.
+5. Health Check Path: `/api/health`.
+
+### Frontend (Vercel / Netlify / Cloudflare Pages)
+1. Set Root Directory to `frontend/`.
+2. Framework Preset: `Vite`.
+3. Build Command: `npm run build`.
+4. Output Directory: `dist`.
+5. Add Environment Variable: `VITE_API_URL=https://<your-backend-domain>/api`.
+
+---
+
+## 🎬 Live Demonstration Walkthrough
+
+1. **Before Event (Planning & Forecasting)**:
+   - Organizer configures multi-track sessions, speakers, and pricing tiers.
+   - AI Content Assistant generates executive marketing campaigns and stage run-of-show pacing.
+2. **Live Event (Real-time Operations)**:
+   - Door staff scan attendee badges (online or offline).
+   - Organizer views **Event Pulse Command Center** live telemetry updating via SSE in real time.
+3. **Anomaly Detected**:
+   - In Simulator mode, trigger **94% Capacity Risk** surge in Hall A.
+   - Deterministic alert flags capacity risk with concrete evidence (occupancy, rated capacity, remaining seats).
+4. **AI Recommendation & Human Approval**:
+   - AI recommends relocating session to Hall B.
+   - Evidence card displays exact headroom comparisons.
+   - Organizer clicks **[Approve & Execute]**.
+   - System updates session room in MongoDB and broadcasts schedule change announcement over real-time EventBus.
+5. **Post-Event (AI Intelligence Report)**:
+   - Organizer opens **Post-Event AI Report** to review attendance rates, session utilization, and strategic takeaways for the next conference.

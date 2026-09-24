@@ -6,14 +6,24 @@ export const registerUser = async ({ name, email, password, organizationName, ro
   const normalizedEmail = email.toLowerCase().trim();
   if (await User.exists({ email: normalizedEmail })) throw new Error('Email already registered');
   
-  const org = organizationName ? await Organization.create({ name: organizationName.trim(), contactEmail: normalizedEmail }) : null;
-  const role = requestedRole || (org ? 'ORGANIZER' : 'ATTENDEE');
+  // Authoritative role assignment: Public users cannot register as PLATFORM_ADMIN or STAFF
+  let assignedRole = 'ATTENDEE';
+  let org = null;
+
+  if (organizationName && organizationName.trim()) {
+    org = await Organization.create({ name: organizationName.trim(), contactEmail: normalizedEmail });
+    assignedRole = 'ORGANIZER';
+  } else if (requestedRole === 'ORGANIZER') {
+    // If requested organizer but without explicit organization name, provide default org
+    org = await Organization.create({ name: `${name.trim()}'s Organization`, contactEmail: normalizedEmail });
+    assignedRole = 'ORGANIZER';
+  }
   
   const user = await User.create({
     name: name.trim(),
     email: normalizedEmail,
     passwordHash: await bcrypt.hash(password, 12),
-    role,
+    role: assignedRole,
     organization: org?._id
   });
 

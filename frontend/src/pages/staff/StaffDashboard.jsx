@@ -50,6 +50,15 @@ export default function StaffDashboard() {
   const [facingMode, setFacingMode] = useState('environment'); // 'environment' | 'user'
   const [recentScans, setRecentScans] = useState([]);
   const [scanStatus, setScanStatus] = useState('Standby');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [offlineQueue, setOfflineQueue] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('eventforge_offline_checkins') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -57,17 +66,94 @@ export default function StaffDashboard() {
   const canvasRef = useRef(null);
   const lastScannedRef = useRef({ code: '', time: 0 });
 
+  // Save offline queue to storage
+  useEffect(() => {
+    localStorage.setItem('eventforge_offline_checkins', JSON.stringify(offlineQueue));
+  }, [offlineQueue]);
+
+  // Online / Offline listeners
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Auto-sync if items in queue
+      syncOfflineQueue();
+    };
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [offlineQueue]);
+
+  const syncOfflineQueue = async () => {
+    const pending = offlineQueue.filter(item => item.syncStatus === 'locally accepted' || item.syncStatus === 'pending sync');
+    if (pending.length === 0 || isSyncing) return;
+
+    setIsSyncing(true);
+    let updatedQueue = [...offlineQueue];
+
+    for (const item of pending) {
+      try {
+        const res = await api.post('/events/staff/check-in', { ticketNumber: item.code });
+        updatedQueue = updatedQueue.map(q => q.id === item.id ? { ...q, syncStatus: 'synced', syncedAt: new Date().toLocaleTimeString(), details: res } : q);
+      } catch (err) {
+        updatedQueue = updatedQueue.map(q => q.id === item.id ? { ...q, syncStatus: 'rejected', error: err.message } : q);
+      }
+    }
+
+    setOfflineQueue(updatedQueue);
+    setIsSyncing(false);
+  };
+
   const checkInMutation = useMutation({
-    mutationFn: (code) => api.post('/events/staff/check-in', { ticketNumber: code }),
+    mutationFn: async (code) => {
+      if (!navigator.onLine) {
+        // Queue locally
+        const localItem = {
+          id: `off-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          code,
+          timestamp: new Date().toLocaleTimeString(),
+          syncStatus: 'locally accepted'
+        };
+        setOfflineQueue(prev => [localItem, ...prev]);
+        return {
+          ticketNumber: code,
+          offlineAccepted: true,
+          registration: { attendee: { name: `Pass: ${code}` }, ticketCategory: { name: 'Offline Validated' } }
+        };
+      }
+      return await api.post('/events/staff/check-in', { ticketNumber: code });
+    },
     onSuccess: (data) => {
       playAudioFeedback('success');
       setLastCheckIn(data);
       setRecentScans(prev => [data, ...prev.slice(0, 4)]);
       setTicketNumber('');
       setErrorMsg('');
-      setScanStatus('Check-in verified!');
+      setScanStatus(data.offlineAccepted ? 'Locally Accepted (Queued)' : 'Check-in verified!');
     },
     onError: (err) => {
+      // If network error occurred, fall back to offline queue
+      if (!navigator.onLine || err.message?.includes('network') || err.message?.includes('fetch')) {
+        const localItem = {
+          id: `off-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          code: ticketNumber,
+          timestamp: new Date().toLocaleTimeString(),
+          syncStatus: 'locally accepted'
+        };
+        setOfflineQueue(prev => [localItem, ...prev]);
+        playAudioFeedback('success');
+        setLastCheckIn({
+          ticketNumber,
+          offlineAccepted: true,
+          registration: { attendee: { name: `Pass: ${ticketNumber}` }, ticketCategory: { name: 'Offline Validated' } }
+        });
+        setScanStatus('Locally Accepted (Queued for Sync)');
+        return;
+      }
       playAudioFeedback('error');
       setErrorMsg(err.message || 'Invalid or expired ticket code');
       setLastCheckIn(null);
@@ -216,12 +302,23 @@ export default function StaffDashboard() {
       {/* Welcome Header in Luxury Espresso / Beige */}
       <div className="bg-[#1C1917] text-[#FDFAF5] p-8 rounded-3xl shadow-xl flex items-center justify-between border border-white/10">
         <div className="space-y-2 max-w-xl">
-          <span className="px-3 py-1 bg-white/10 text-[#C28E27] rounded-full text-xs font-bold uppercase tracking-wider inline-block backdrop-blur-md border border-white/10">
-            Event Staff Operations
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 bg-white/10 text-[#C28E27] rounded-full text-xs font-bold uppercase tracking-wider inline-block backdrop-blur-md border border-white/10">
+              Event Staff Operations
+            </span>
+            {isOnline ? (
+              <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-black uppercase tracking-wider inline-flex items-center gap-1.5 border border-emerald-500/30">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+              </span>
+            ) : (
+              <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-black uppercase tracking-wider inline-flex items-center gap-1.5 border border-amber-500/30">
+                <span className="w-2 h-2 rounded-full bg-amber-400"></span> OFFLINE MODE ({offlineQueue.filter(q => q.syncStatus === 'locally accepted').length} queued)
+              </span>
+            )}
+          </div>
           <h1 className="text-3xl font-extrabold tracking-tight">Door Check-In &amp; QR Validation</h1>
           <p className="text-stone-300 text-xs md:text-sm leading-relaxed">
-            Validate attendee passes, verify VIP status, and monitor real-time door arrival volumes.
+            Validate attendee passes, verify VIP status, and monitor real-time door arrival volumes with offline caching.
           </p>
         </div>
         <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-[#C28E27] backdrop-blur-md shrink-0 border border-white/10">
@@ -229,7 +326,41 @@ export default function StaffDashboard() {
         </div>
       </div>
 
+      {/* Offline Queue Sync Card if items are pending */}
+      {offlineQueue.length > 0 && (
+        <div className="bg-white p-5 rounded-3xl border border-[#EFE8DA] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-stone-900 text-xs">Offline Check-In Queue</span>
+              <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold">
+                {offlineQueue.filter(q => q.syncStatus === 'locally accepted').length} Pending Sync
+              </span>
+            </div>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Badges scanned during connectivity drops are safely cached locally and queued for server verification.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={syncOfflineQueue}
+              disabled={isSyncing || !isOnline}
+              className="px-4 py-2 bg-[#B45309] hover:bg-[#92400E] disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+            >
+              <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
+              {isSyncing ? 'Syncing...' : 'Sync Queued Scans'}
+            </button>
+            <button
+              onClick={() => setOfflineQueue([])}
+              className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl text-xs font-bold transition-all"
+            >
+              Clear Log
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
         
         {/* Main Check-In Controls */}
         <div className="lg:col-span-2 space-y-6">

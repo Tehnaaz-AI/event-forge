@@ -24,6 +24,7 @@ r.patch('/:eventId/tickets/:categoryId', authenticate, eventAccess, c.updateTick
 r.delete('/:eventId/tickets/:categoryId', authenticate, eventAccess, c.deleteTicketCategory);
 
 r.post('/:eventId/register', authenticate, allowRoles('ATTENDEE', 'ORGANIZER', 'PLATFORM_ADMIN'), c.registerAttendee);
+r.post('/:eventId/registrations/:registrationId/cancel', authenticate, c.cancelRegistration);
 r.post('/:eventId/check-in', authenticate, eventAccess, c.checkInTicket);
 
 r.get('/:eventId/staff', authenticate, eventAccess, c.getEventStaff);

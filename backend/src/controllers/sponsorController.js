@@ -45,20 +45,20 @@ export const addSponsor = async (req, res, next) => {
 
 export const deletePackage = async (req, res, next) => {
   try {
-    await sponsorService.deletePackage(req.params.packageId);
+    await sponsorService.deletePackage(req.params.eventId, req.params.packageId);
     ok(res, null, 'Package deleted successfully');
   } catch (e) { next(e); }
 };
 
 export const removeSponsor = async (req, res, next) => {
   try {
-    await sponsorService.removeSponsor(req.params.sponsorId);
+    await sponsorService.removeSponsor(req.params.eventId, req.params.sponsorId);
     ok(res, null, 'Sponsor removed successfully');
   } catch (e) { next(e); }
 };
 
 export const getDeliverables = async (req, res, next) => {
-  try { ok(res, await sponsorService.getDeliverables(req.params.sponsorId)); } catch (e) { next(e); }
+  try { ok(res, await sponsorService.getDeliverables(req.params.eventId, req.params.sponsorId)); } catch (e) { next(e); }
 };
 
 export const createDeliverable = async (req, res, next) => {
@@ -68,13 +68,13 @@ export const createDeliverable = async (req, res, next) => {
       description: z.string().optional(),
       deadline: z.coerce.date()
     }).parse(req.body);
-    ok(res, await sponsorService.createDeliverable(req.params.sponsorId, data), 'Deliverable added', 201);
+    ok(res, await sponsorService.createDeliverable(req.params.eventId, req.params.sponsorId, data), 'Deliverable added', 201);
   } catch (e) { next(e); }
 };
 
 export const updateDeliverableStatus = async (req, res, next) => {
   try {
     const data = z.object({ status: z.enum(['PENDING', 'IN_PROGRESS', 'SUBMITTED', 'APPROVED', 'OVERDUE']) }).parse(req.body);
-    ok(res, await sponsorService.updateDeliverableStatus(req.params.deliverableId, data.status), 'Status updated');
+    ok(res, await sponsorService.updateDeliverableStatus(req.params.eventId, req.params.sponsorId, req.params.deliverableId, data.status), 'Status updated');
   } catch (e) { next(e); }
 };

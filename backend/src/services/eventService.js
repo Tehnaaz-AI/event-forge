@@ -1,6 +1,9 @@
 import { Event, Session, TicketCategory, Registration, Ticket, Announcement, User, EventStaff, Organization } from '../models/index.js';
 import mongoose from 'mongoose';
 import QRCode from 'qrcode';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+import { eventBus } from '../realtime/eventBus.js';
 
 export const getEvents = async (req, res) => {
   const q = req.query.q ? { title: { $regex: req.query.q, $options: 'i' } } : {};
@@ -220,44 +223,67 @@ export const deleteTicketCategory = async (req, res) => {
   return deleted;
 };
 
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+
 export const registerAttendee = async (req, res) => {
+  const eventId = req.params.eventId;
+  const event = await Event.findById(eventId);
+  if (!event) throw new Error('Event not found');
+
+  // Enforce Event Lifecycle
+  const allowedStatuses = ['REGISTRATION_OPEN', 'PUBLISHED', 'LIVE'];
+  if (!allowedStatuses.includes(event.status)) {
+    throw new Error(`Registration is not permitted. Current event status is "${event.status}"`);
+  }
+
   const existing = await Registration.findOne({
-    event: req.params.eventId, 
+    event: eventId, 
     attendee: req.user._id, 
     registrationStatus: { $ne: 'CANCELLED' }
   });
   if (existing) throw new Error('You already have an active registration for this event');
   
-  const event = await Event.findById(req.params.eventId);
-  if (!event) throw new Error('Event not found');
-
-  let categoryQuery = { event: req.params.eventId, availableQuantity: { $gt: 0 } };
-  if (req.body.ticketCategory && mongoose.Types.ObjectId.isValid(req.body.ticketCategory)) {
-    categoryQuery._id = req.body.ticketCategory;
+  let targetCategoryId = req.body.ticketCategory;
+  if (!targetCategoryId || !mongoose.Types.ObjectId.isValid(targetCategoryId)) {
+    // Find first active category for event or create default
+    let defaultCat = await TicketCategory.findOne({ event: eventId });
+    if (!defaultCat) {
+      defaultCat = await TicketCategory.create({
+        event: event._id,
+        name: 'General Admission Pass',
+        description: 'Standard conference admission pass.',
+        price: 299,
+        capacity: event.capacity || 500,
+        availableQuantity: event.capacity || 500
+      });
+    }
+    targetCategoryId = defaultCat._id;
   }
 
+  // Validate category belongs to this event
+  const categoryCheck = await TicketCategory.findOne({ _id: targetCategoryId, event: eventId });
+  if (!categoryCheck) {
+    throw new Error('Selected ticket category does not belong to this event');
+  }
+
+  // Check sale dates
+  const now = new Date();
+  if (categoryCheck.saleStart && now < new Date(categoryCheck.saleStart)) {
+    throw new Error('Ticket sales for this category have not opened yet');
+  }
+  if (categoryCheck.saleEnd && now > new Date(categoryCheck.saleEnd)) {
+    throw new Error('Ticket sales for this category have ended');
+  }
+
+  // Atomic reservation
   let category = await TicketCategory.findOneAndUpdate(
-    categoryQuery,
+    { _id: targetCategoryId, event: eventId, availableQuantity: { $gt: 0 } },
     { $inc: { availableQuantity: -1 } },
     { new: true }
   );
 
-  // If no category existed, auto-create one
-  if (!category && !req.body.ticketCategory) {
-    category = await TicketCategory.create({
-      event: event._id,
-      name: 'General Admission Pass',
-      description: 'Standard conference admission pass.',
-      price: 299,
-      capacity: event.capacity || 500,
-      availableQuantity: (event.capacity || 500) - 1
-    });
-  }
-  
-  const status = category ? 'CONFIRMED' : (event.registrationSettings?.waitlistEnabled ? 'WAITLISTED' : null);
-  if (!status) throw new Error('This ticket category is currently sold out');
-  
-  let finalAmount = category?.price || 0;
+  let finalAmount = categoryCheck.price || 0;
   const code = (req.body.couponCode || '').trim().toUpperCase();
   if (code === 'SAVE20') {
     finalAmount = Math.round(finalAmount * 0.8);
@@ -269,16 +295,41 @@ export const registerAttendee = async (req, res) => {
     finalAmount = Math.max(0, finalAmount - 50);
   }
 
-  const registration = await Registration.create({
-    event: event._id,
-    attendee: req.user._id,
-    ticketCategory: category?._id || req.body.ticketCategory,
-    registrationStatus: status,
-    amount: finalAmount
-  });
-  
-  let ticket = null;
-  if (category) {
+  // If sold out, handle waitlist
+  if (!category) {
+    if (!event.registrationSettings?.waitlistEnabled) {
+      throw new Error('This ticket category is currently sold out and waitlist is disabled');
+    }
+    const waitlistCount = await Registration.countDocuments({
+      event: event._id,
+      ticketCategory: targetCategoryId,
+      registrationStatus: 'WAITLISTED'
+    });
+    const waitlistPosition = waitlistCount + 1;
+
+    const registration = await Registration.create({
+      event: event._id,
+      attendee: req.user._id,
+      ticketCategory: targetCategoryId,
+      registrationStatus: 'WAITLISTED',
+      waitlistPosition,
+      amount: finalAmount
+    });
+
+    return { registration, ticket: null, waitlisted: true, position: waitlistPosition };
+  }
+
+  // Confirmed registration with safe ticket generation
+  let registration;
+  try {
+    registration = await Registration.create({
+      event: event._id,
+      attendee: req.user._id,
+      ticketCategory: targetCategoryId,
+      registrationStatus: 'CONFIRMED',
+      amount: finalAmount
+    });
+
     const ticketNumber = `EF-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
     const qrCode = await QRCode.toDataURL(JSON.stringify({ 
       registration: String(registration._id), 
@@ -286,15 +337,128 @@ export const registerAttendee = async (req, res) => {
       attendee: req.user.name || req.user.email,
       event: event.title
     }));
-    ticket = await Ticket.create({ 
+
+    const ticket = await Ticket.create({ 
       registration: registration._id, 
       ticketNumber, 
       qrCode,
       status: 'ACTIVE'
     });
+
+    return { registration, ticket, waitlisted: false };
+  } catch (err) {
+    // Rollback inventory on creation failure
+    await TicketCategory.findByIdAndUpdate(targetCategoryId, { $inc: { availableQuantity: 1 } });
+    if (registration?._id) await Registration.findByIdAndDelete(registration._id);
+    throw err;
   }
-  
-  return { registration, ticket };
+};
+
+// Waitlist Auto-Promotion Engine & Ticket Cancellation
+export const cancelRegistration = async (req, res) => {
+  const { registrationId } = req.params;
+  const registration = await Registration.findById(registrationId);
+  if (!registration) throw new Error('Registration not found');
+
+  // Verify authorization (Must be the attendee themselves or event organizer/platform admin)
+  const isAttendee = String(registration.attendee) === String(req.user._id);
+  const isOrganizer = req.user.role === 'PLATFORM_ADMIN' || 
+    (req.event && String(req.event.organizer) === String(req.user._id)) ||
+    (req.event && req.user.organization && String(req.event.organization) === String(req.user.organization));
+
+  if (!isAttendee && !isOrganizer) {
+    throw new Error('Not authorized to cancel this registration');
+  }
+
+  if (registration.registrationStatus === 'CANCELLED') {
+    return { success: true, message: 'Registration is already cancelled' };
+  }
+
+  const previousStatus = registration.registrationStatus;
+  registration.registrationStatus = 'CANCELLED';
+  registration.cancelledAt = new Date();
+  registration.waitlistPosition = null;
+  await registration.save();
+
+  // Cancel associated ticket
+  const ticket = await Ticket.findOneAndUpdate(
+    { registration: registration._id },
+    { status: 'CANCELLED' },
+    { new: true }
+  );
+
+  let promotedRegistration = null;
+
+  // If previous registration was CONFIRMED, free inventory and promote oldest waitlisted
+  if (previousStatus === 'CONFIRMED') {
+    // 1. Restore 1 seat
+    await TicketCategory.findByIdAndUpdate(registration.ticketCategory, { $inc: { availableQuantity: 1 } });
+
+    // 2. Find oldest eligible waitlisted attendee
+    const oldestWaitlisted = await Registration.findOne({
+      event: registration.event,
+      ticketCategory: registration.ticketCategory,
+      registrationStatus: 'WAITLISTED'
+    }).sort({ createdAt: 1 });
+
+    if (oldestWaitlisted) {
+      // 3. Atomically consume the seat
+      const reserved = await TicketCategory.findOneAndUpdate(
+        { _id: registration.ticketCategory, availableQuantity: { $gt: 0 } },
+        { $inc: { availableQuantity: -1 } },
+        { new: true }
+      );
+
+      if (reserved) {
+        // 4. Promote waitlisted attendee
+        oldestWaitlisted.registrationStatus = 'CONFIRMED';
+        oldestWaitlisted.promotedAt = new Date();
+        oldestWaitlisted.waitlistPosition = null;
+        await oldestWaitlisted.save();
+
+        // 5. Generate badge ticket
+        const ticketNumber = `EF-PROMO-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+        const event = await Event.findById(registration.event);
+        const qrCode = await QRCode.toDataURL(JSON.stringify({
+          registration: String(oldestWaitlisted._id),
+          ticketNumber,
+          attendee: String(oldestWaitlisted.attendee),
+          event: event?.title || 'EventForge'
+        }));
+
+        await Ticket.create({
+          registration: oldestWaitlisted._id,
+          ticketNumber,
+          qrCode,
+          status: 'ACTIVE'
+        });
+
+        // 6. Send announcement / alert
+        await Announcement.create({
+          event: registration.event,
+          title: 'Waitlist Promotion',
+          content: `A confirmed seat has opened up and registration has been automatically promoted.`,
+          type: 'INFO',
+          createdBy: req.user._id,
+          sentAt: new Date()
+        }).catch(() => {});
+
+        // 7. Update remaining waitlist positions
+        await Registration.updateMany(
+          { event: registration.event, ticketCategory: registration.ticketCategory, registrationStatus: 'WAITLISTED', waitlistPosition: { $gt: 1 } },
+          { $inc: { waitlistPosition: -1 } }
+        );
+
+        promotedRegistration = oldestWaitlisted;
+      }
+    }
+  }
+
+  return {
+    success: true,
+    cancelledRegistrationId: registration._id,
+    promotedAttendee: promotedRegistration ? promotedRegistration.attendee : null
+  };
 };
 
 // Helper to extract clean ticket number or registration ID from any QR payload
@@ -320,7 +484,6 @@ function extractTicketQuery(input) {
     if (lastPart.startsWith('EF-') || lastPart.length >= 6) {
       return { ticketNumber: lastPart.toUpperCase() };
     }
-    // Check if any part is a valid ObjectId
     for (const part of parts) {
       if (mongoose.Types.ObjectId.isValid(part)) {
         return { $or: [{ ticketNumber: raw.toUpperCase() }, { registration: part }] };
@@ -338,28 +501,55 @@ export const checkInTicket = async (req, res) => {
 
   const ticket = await Ticket.findOne(query).populate('registration');
   if (!ticket || String(ticket.registration.event) !== String(req.event._id)) throw new Error('Invalid ticket for this event');
-  if (ticket.status !== 'ACTIVE') throw new Error('Ticket is not active');
+  if (ticket.status !== 'ACTIVE') throw new Error('Ticket is not active or has been cancelled');
   if (ticket.checkedInAt) throw new Error(`Already checked in on ${new Date(ticket.checkedInAt).toLocaleTimeString()}`);
   
   ticket.checkedInAt = new Date();
-  return await ticket.save();
+  await ticket.save();
+
+  // Broadcast real-time check-in to organizer dashboards
+  eventBus.broadcast(String(req.event._id), 'ATTENDEE_CHECKED_IN', {
+    ticketNumber: ticket.ticketNumber,
+    checkedInAt: ticket.checkedInAt
+  });
+
+  return ticket;
 };
 
 export const createAnnouncement = async (req, res) => {
-  return await Announcement.create({ ...req.body, event: req.event._id, createdBy: req.user._id, sentAt: new Date() });
+  const ann = await Announcement.create({ ...req.body, event: req.event._id, createdBy: req.user._id, sentAt: new Date() });
+  
+  // Broadcast real-time announcement
+  eventBus.broadcast(String(req.event._id), 'ANNOUNCEMENT_CREATED', {
+    id: ann._id,
+    title: ann.title,
+    message: ann.message,
+    type: ann.type,
+    sentAt: ann.sentAt
+  });
+
+  return ann;
 };
 
 export const getAnalytics = async (req, res) => {
-  const [registrations, confirmed, checkedIn, sessions] = await Promise.all([
+  const [registrations, confirmed, waitlisted, checkedIn, sessions] = await Promise.all([
     Registration.countDocuments({ event: req.event._id }),
     Registration.countDocuments({ event: req.event._id, registrationStatus: 'CONFIRMED' }),
+    Registration.countDocuments({ event: req.event._id, registrationStatus: 'WAITLISTED' }),
     Ticket.countDocuments({
       registration: { $in: await Registration.find({ event: req.event._id }).distinct('_id') },
       checkedInAt: { $ne: null }
     }),
     Session.find({ event: req.event._id })
   ]);
-  return { registrations, confirmed, checkedIn, attendanceRate: confirmed ? Math.round(checkedIn / confirmed * 100) : 0, sessions: sessions.length };
+  return { 
+    registrations, 
+    confirmed, 
+    waitlisted,
+    checkedIn, 
+    attendanceRate: confirmed ? Math.round(checkedIn / confirmed * 100) : 0, 
+    sessions: sessions.length 
+  };
 };
 
 export const getMyTickets = async (req, res) => {
@@ -407,6 +597,16 @@ export const checkInAnyTicket = async (req, res) => {
 
   ticket.checkedInAt = new Date();
   await ticket.save();
+
+  // Broadcast real-time check-in
+  if (ticket.registration?.event?._id) {
+    eventBus.broadcast(String(ticket.registration.event._id), 'ATTENDEE_CHECKED_IN', {
+      ticketNumber: ticket.ticketNumber,
+      attendee: ticket.registration?.attendee?.name,
+      checkedInAt: ticket.checkedInAt
+    });
+  }
+
   return ticket;
 };
 
@@ -423,10 +623,11 @@ export const addEventStaff = async (req, res) => {
 
   let user = await User.findOne({ email: email.toLowerCase().trim() });
   if (!user) {
+    const rawPassword = password || crypto.randomBytes(16).toString('base64url') + '!A1';
     user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      password: password || 'StaffPass123!',
+      passwordHash: await bcrypt.hash(rawPassword, 12),
       role: 'STAFF',
       phone: phone || '',
       organization: req.event.organization || req.user.organization

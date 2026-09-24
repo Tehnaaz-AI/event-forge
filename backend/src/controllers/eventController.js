@@ -168,5 +168,15 @@ export const removeEventStaff = async (req, res, next) => {
   }
 };
 
+export const cancelRegistration = async (req, res, next) => {
+  try {
+    const result = await eventService.cancelRegistration(req, res);
+    ok(res, result, 'Registration cancelled successfully');
+  } catch (e) {
+    fail(res, e.message, 400);
+  }
+};
+
+
 
 
