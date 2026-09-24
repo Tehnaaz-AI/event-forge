@@ -13,12 +13,10 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  const categoriesList = (event.ticketCategories && event.ticketCategories.length > 0)
-    ? event.ticketCategories
-    : [{ _id: 'default', name: 'General Admission Pass', price: 299, capacity: 500, availableQuantity: 495, description: 'Full conference access, keynotes, and digital badge.' }];
+  const categoriesList = event.ticketCategories || [];
 
   const [selectedCategory, setSelectedCategory] = useState(
-    initialCategoryId || event.ticketCategories?.[0]?._id || categoriesList[0]?._id
+    initialCategoryId || event.ticketCategories?.[0]?._id || null
   );
   const [couponCode, setCouponCode] = useState('SAVE20');
   const [appliedCoupon, setAppliedCoupon] = useState('SAVE20');

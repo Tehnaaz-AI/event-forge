@@ -280,7 +280,7 @@ export default function AdminDashboard() {
               <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Registrations</span>
               <Layers size={16} className="text-[#B45309]" />
             </div>
-            <div className="text-2xl font-black text-stone-900">{stats?.totalRegistrations ?? 25}</div>
+            <div className="text-2xl font-black text-stone-900">{stats?.totalRegistrations ?? 0}</div>
             <div className="text-[10px] text-stone-500 mt-1">Issued passes & QR credentials</div>
           </div>
 
@@ -289,7 +289,7 @@ export default function AdminDashboard() {
               <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Platform Volume</span>
               <DollarSign size={16} className="text-[#B45309]" />
             </div>
-            <div className="text-2xl font-black text-stone-900">${(stats?.totalRevenue ?? 12500).toLocaleString()}</div>
+            <div className="text-2xl font-black text-stone-900">${(stats?.totalRevenue ?? 0).toLocaleString()}</div>
             <div className="text-[10px] text-stone-500 mt-1">Gross conference ticket GMV</div>
           </div>
 
@@ -298,7 +298,7 @@ export default function AdminDashboard() {
               <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Organizations</span>
               <Building size={16} className="text-[#B45309]" />
             </div>
-            <div className="text-2xl font-black text-stone-900">{stats?.totalOrganizations ?? 2}</div>
+            <div className="text-2xl font-black text-stone-900">{stats?.totalOrganizations ?? 0}</div>
             <div className="text-[10px] text-stone-500 mt-1">Verified enterprise tenants</div>
           </div>
         </div>
