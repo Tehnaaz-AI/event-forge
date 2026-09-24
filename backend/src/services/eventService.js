@@ -223,9 +223,6 @@ export const deleteTicketCategory = async (req, res) => {
   return deleted;
 };
 
-import crypto from 'crypto';
-import bcrypt from 'bcryptjs';
-
 export const registerAttendee = async (req, res) => {
   const eventId = req.params.eventId;
   const event = await Event.findById(eventId);
