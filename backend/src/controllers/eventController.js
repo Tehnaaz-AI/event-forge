@@ -177,6 +177,42 @@ export const cancelRegistration = async (req, res, next) => {
   }
 };
 
+export const getEventWaitlist = async (req, res, next) => {
+  try {
+    const waitlist = await eventService.getEventWaitlist(req, res);
+    ok(res, waitlist, 'Event waitlist retrieved');
+  } catch (e) {
+    fail(res, e.message, 400);
+  }
+};
+
+export const promoteWaitlistedAttendee = async (req, res, next) => {
+  try {
+    const result = await eventService.promoteWaitlistedAttendee(req, res);
+    ok(res, result, 'Waitlisted attendee successfully promoted to confirmed registration');
+  } catch (e) {
+    fail(res, e.message, 400);
+  }
+};
+
+export const updateWaitlistPriority = async (req, res, next) => {
+  try {
+    const result = await eventService.updateWaitlistPriority(req, res);
+    ok(res, result, 'Waitlist priority updated');
+  } catch (e) {
+    fail(res, e.message, 400);
+  }
+};
+
+export const getMyWaitlist = async (req, res, next) => {
+  try {
+    const waitlist = await eventService.getMyWaitlist(req, res);
+    ok(res, waitlist, 'Personal waitlist entries retrieved');
+  } catch (e) {
+    fail(res, e.message, 400);
+  }
+};
+
 
 
 

@@ -48,55 +48,50 @@ export default function AppNavbar() {
 
   // Build role-differentiated navigation links
   const getNavLinks = () => {
-    const common = [
-      { label: 'Explore Summits', path: '/explore' },
-      { label: 'Platform Features', path: '/features' },
-      { label: 'About EventForge', path: '/about' },
-      { label: 'VIP Waitlist', path: '/waitlist' },
-      { label: 'Contact', path: '/contact' }
-    ];
-
     if (!user) {
-      return common;
+      return [
+        { label: 'Explore Summits', path: '/explore' },
+        { label: 'Platform Features', path: '/features' },
+        { label: 'About EventForge', path: '/about' },
+        { label: 'VIP Waitlist', path: '/waitlist' },
+        { label: 'Contact', path: '/contact' }
+      ];
     }
 
     if (user.role === 'PLATFORM_ADMIN') {
       return [
-        { label: 'Home', path: '/' },
         { label: 'Explore', path: '/explore' },
         { label: 'Admin Console', path: '/dashboard/admin', icon: <ShieldAlert size={14} className="text-rose-600" /> },
         { label: 'Conferences', path: '/dashboard/organizer/events' },
         { label: 'Speakers', path: '/dashboard/organizer/speakers' },
-        { label: 'Profile', path: '/profile' }
+        { label: 'Contact', path: '/contact' }
       ];
     }
 
     if (user.role === 'ATTENDEE') {
       return [
-        { label: 'Home', path: '/' },
-        { label: 'Explore Conferences', path: '/explore' },
+        { label: 'Explore Summits', path: '/explore' },
         { label: 'My Passes & Badges', path: '/dashboard/attendee', icon: <Ticket size={14} className="text-[#B45309]" /> },
-        { label: 'My Profile', path: '/profile' }
+        { label: 'VIP Waitlist', path: '/waitlist' },
+        { label: 'Contact', path: '/contact' }
       ];
     }
 
     if (user.role === 'STAFF') {
       return [
-        { label: 'Home', path: '/' },
-        { label: 'Explore Conferences', path: '/explore' },
+        { label: 'Explore Summits', path: '/explore' },
         { label: 'Door QR Scanner', path: '/dashboard/staff', icon: <Shield size={14} className="text-[#B45309]" /> },
-        { label: 'My Profile', path: '/profile' }
+        { label: 'Contact', path: '/contact' }
       ];
     }
 
     // ORGANIZER
     return [
-      { label: 'Home', path: '/' },
       { label: 'Explore', path: '/explore' },
-      { label: 'Dashboard', path: '/dashboard/organizer', icon: <LayoutDashboard size={14} className="text-[#B45309]" /> },
+      { label: 'Executive Suite', path: '/dashboard/organizer', icon: <LayoutDashboard size={14} className="text-[#B45309]" /> },
       { label: 'Conferences', path: '/dashboard/organizer/events' },
       { label: 'Speakers', path: '/dashboard/organizer/speakers' },
-      { label: 'My Profile', path: '/profile' }
+      { label: 'Contact', path: '/contact' }
     ];
   };
 

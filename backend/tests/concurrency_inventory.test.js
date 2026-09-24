@@ -103,4 +103,25 @@ describe('Concurrency & Inventory Integrity Simulation', () => {
     assert.strictEqual(remaining.find(w => w.attendee === 'Bob').position, 1);
     assert.strictEqual(remaining.find(w => w.attendee === 'Charlie').position, 2);
   });
+
+  it('VIP Priority Waitlist Ordering: VIP entrant promoted before earlier standard entrant, FIFO within priority', () => {
+    const queue = [
+      { id: 'u1', name: 'Standard Early', isVIP: false, priorityScore: 0, createdAt: new Date('2026-09-01T09:00:00Z') },
+      { id: 'u2', name: 'Standard Later', isVIP: false, priorityScore: 0, createdAt: new Date('2026-09-01T10:00:00Z') },
+      { id: 'v1', name: 'VIP Early', isVIP: true, priorityScore: 10, createdAt: new Date('2026-09-01T11:00:00Z') },
+      { id: 'v2', name: 'VIP Later', isVIP: true, priorityScore: 10, createdAt: new Date('2026-09-01T11:30:00Z') }
+    ];
+
+    // Priority sorting comparator matching backend DB index: { isVIP: -1, priorityScore: -1, createdAt: 1 }
+    const sortedQueue = [...queue].sort((a, b) => {
+      if (b.isVIP !== a.isVIP) return (b.isVIP ? 1 : 0) - (a.isVIP ? 1 : 0);
+      if (b.priorityScore !== a.priorityScore) return b.priorityScore - a.priorityScore;
+      return a.createdAt - b.createdAt;
+    });
+
+    assert.strictEqual(sortedQueue[0].name, 'VIP Early', 'VIP Early must be #1 in queue');
+    assert.strictEqual(sortedQueue[1].name, 'VIP Later', 'VIP Later must be #2 in queue');
+    assert.strictEqual(sortedQueue[2].name, 'Standard Early', 'Standard Early must be #3 in queue');
+    assert.strictEqual(sortedQueue[3].name, 'Standard Later', 'Standard Later must be #4 in queue');
+  });
 });

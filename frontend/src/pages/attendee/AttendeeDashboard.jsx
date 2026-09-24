@@ -166,14 +166,22 @@ export default function AttendeeDashboard() {
                     className="bg-white rounded-3xl border border-[#EFE8DA] shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow"
                   >
                     <div className="p-6 space-y-4">
-                      <div className="flex justify-between items-start">
-                        <span className="px-3 py-1 bg-[#B45309]/10 text-[#B45309] rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                          {reg.ticketCategory?.name || 'Standard Pass'}
-                        </span>
+                      <div className="flex justify-between items-start flex-wrap gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-3 py-1 bg-[#B45309]/10 text-[#B45309] rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                            {reg.ticketCategory?.name || 'Standard Pass'}
+                          </span>
+                          {reg.isVIP && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#B45309] text-white flex items-center gap-1 shadow-xs">
+                              👑 VIP PRIORITY
+                            </span>
+                          )}
+                        </div>
+
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                          isWaitlisted ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                          isWaitlisted ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800'
                         }`}>
-                          {reg.registrationStatus}
+                          {isWaitlisted ? 'STANDBY WAITLIST' : reg.registrationStatus}
                         </span>
                       </div>
 
@@ -220,8 +228,18 @@ export default function AttendeeDashboard() {
                           </div>
                         </>
                       ) : (
-                        <div className="text-xs text-stone-500 font-medium">
-                          {isWaitlisted ? 'Waitlist active. Spot assignment in progress.' : 'Ticket confirmation pending...'}
+                        <div className="w-full flex items-center justify-between gap-2 text-xs">
+                          <div>
+                            <p className="font-extrabold text-amber-900">
+                              {reg.isVIP ? '👑 Priority Standby Queue' : 'Standby Queue'}
+                            </p>
+                            <p className="text-[11px] text-stone-500">
+                              {reg.waitlistPosition ? `Position #${reg.waitlistPosition} in queue` : 'Automated promotion active upon seat release'}
+                            </p>
+                          </div>
+                          <span className="px-3 py-1 bg-amber-200/50 text-amber-900 rounded-xl text-[10px] font-black uppercase">
+                            Auto-Promoting
+                          </span>
                         </div>
                       )}
                     </div>

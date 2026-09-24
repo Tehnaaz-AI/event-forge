@@ -295,11 +295,19 @@ export const registerAttendee = async (req, res) => {
     finalAmount = Math.max(0, finalAmount - 50);
   }
 
-  // If sold out, handle waitlist
+  // Determine VIP / Priority status
+  const isVIPTier = (categoryCheck.name || '').toLowerCase().includes('vip') ||
+                    (categoryCheck.name || '').toLowerCase().includes('executive') ||
+                    code === 'VIP50' ||
+                    Boolean(req.body.isVIP);
+  const priorityScore = isVIPTier ? (Number(req.body.priorityScore) || 10) : (Number(req.body.priorityScore) || 0);
+
+  // If sold out, handle waitlist with deterministic priority positioning
   if (!category) {
     if (!event.registrationSettings?.waitlistEnabled) {
       throw new Error('This ticket category is currently sold out and waitlist is disabled');
     }
+
     const waitlistCount = await Registration.countDocuments({
       event: event._id,
       ticketCategory: targetCategoryId,
@@ -312,11 +320,20 @@ export const registerAttendee = async (req, res) => {
       attendee: req.user._id,
       ticketCategory: targetCategoryId,
       registrationStatus: 'WAITLISTED',
+      isVIP: isVIPTier,
+      priorityScore,
       waitlistPosition,
       amount: finalAmount
     });
 
-    return { registration, ticket: null, waitlisted: true, position: waitlistPosition };
+    return { 
+      registration, 
+      ticket: null, 
+      waitlisted: true, 
+      isVIP: isVIPTier,
+      priorityScore,
+      position: waitlistPosition 
+    };
   }
 
   // Confirmed registration with safe ticket generation
@@ -327,10 +344,12 @@ export const registerAttendee = async (req, res) => {
       attendee: req.user._id,
       ticketCategory: targetCategoryId,
       registrationStatus: 'CONFIRMED',
+      isVIP: isVIPTier,
+      priorityScore,
       amount: finalAmount
     });
 
-    const ticketNumber = `EF-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+    const ticketNumber = `EF-${isVIPTier ? 'VIP-' : ''}${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
     const qrCode = await QRCode.toDataURL(JSON.stringify({ 
       registration: String(registration._id), 
       ticketNumber,
@@ -345,7 +364,7 @@ export const registerAttendee = async (req, res) => {
       status: 'ACTIVE'
     });
 
-    return { registration, ticket, waitlisted: false };
+    return { registration, ticket, waitlisted: false, isVIP: isVIPTier };
   } catch (err) {
     // Rollback inventory on creation failure
     await TicketCategory.findByIdAndUpdate(targetCategoryId, { $inc: { availableQuantity: 1 } });
@@ -389,17 +408,17 @@ export const cancelRegistration = async (req, res) => {
 
   let promotedRegistration = null;
 
-  // If previous registration was CONFIRMED, free inventory and promote oldest waitlisted
+  // If previous registration was CONFIRMED, free inventory and promote highest priority / oldest waitlisted attendee
   if (previousStatus === 'CONFIRMED') {
     // 1. Restore 1 seat
     await TicketCategory.findByIdAndUpdate(registration.ticketCategory, { $inc: { availableQuantity: 1 } });
 
-    // 2. Find oldest eligible waitlisted attendee
+    // 2. Find highest priority, oldest eligible waitlisted attendee (Deterministic: VIP > Standard, then FIFO)
     const oldestWaitlisted = await Registration.findOne({
       event: registration.event,
       ticketCategory: registration.ticketCategory,
       registrationStatus: 'WAITLISTED'
-    }).sort({ createdAt: 1 });
+    }).sort({ isVIP: -1, priorityScore: -1, createdAt: 1 });
 
     if (oldestWaitlisted) {
       // 3. Atomically consume the seat
@@ -417,7 +436,7 @@ export const cancelRegistration = async (req, res) => {
         await oldestWaitlisted.save();
 
         // 5. Generate badge ticket
-        const ticketNumber = `EF-PROMO-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+        const ticketNumber = `EF-${oldestWaitlisted.isVIP ? 'VIP-' : ''}PROMO-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
         const event = await Event.findById(registration.event);
         const qrCode = await QRCode.toDataURL(JSON.stringify({
           registration: String(oldestWaitlisted._id),
@@ -444,10 +463,16 @@ export const cancelRegistration = async (req, res) => {
         }).catch(() => {});
 
         // 7. Update remaining waitlist positions
-        await Registration.updateMany(
-          { event: registration.event, ticketCategory: registration.ticketCategory, registrationStatus: 'WAITLISTED', waitlistPosition: { $gt: 1 } },
-          { $inc: { waitlistPosition: -1 } }
-        );
+        const remaining = await Registration.find({
+          event: registration.event,
+          ticketCategory: registration.ticketCategory,
+          registrationStatus: 'WAITLISTED'
+        }).sort({ isVIP: -1, priorityScore: -1, createdAt: 1 });
+
+        for (let i = 0; i < remaining.length; i++) {
+          remaining[i].waitlistPosition = i + 1;
+          await remaining[i].save();
+        }
 
         promotedRegistration = oldestWaitlisted;
       }
@@ -459,6 +484,129 @@ export const cancelRegistration = async (req, res) => {
     cancelledRegistrationId: registration._id,
     promotedAttendee: promotedRegistration ? promotedRegistration.attendee : null
   };
+};
+
+// 👑 VIP & Priority Waitlist Management Endpoints
+export const getEventWaitlist = async (req, res) => {
+  const registrations = await Registration.find({
+    event: req.event._id,
+    registrationStatus: 'WAITLISTED'
+  })
+    .populate('attendee', 'name email role avatar phone')
+    .populate('ticketCategory', 'name price capacity availableQuantity')
+    .sort({ isVIP: -1, priorityScore: -1, createdAt: 1 })
+    .lean();
+
+  return registrations.map((r, idx) => ({
+    ...r,
+    queueIndex: idx + 1
+  }));
+};
+
+export const promoteWaitlistedAttendee = async (req, res) => {
+  const { registrationId } = req.params;
+  const registration = await Registration.findOne({
+    _id: registrationId,
+    event: req.event._id,
+    registrationStatus: 'WAITLISTED'
+  }).populate('attendee', 'name email').populate('ticketCategory');
+
+  if (!registration) throw new Error('Waitlisted registration not found');
+
+  // Atomically claim 1 seat from ticket category if available
+  const category = await TicketCategory.findOneAndUpdate(
+    { _id: registration.ticketCategory._id, availableQuantity: { $gt: 0 } },
+    { $inc: { availableQuantity: -1 } },
+    { new: true }
+  );
+
+  if (!category && !req.body.overrideCapacity) {
+    throw new Error('No available seats remaining in this ticket category. Enable capacity override to proceed.');
+  }
+
+  if (!category && req.body.overrideCapacity) {
+    await TicketCategory.findByIdAndUpdate(registration.ticketCategory._id, {
+      $inc: { capacity: 1 }
+    });
+  }
+
+  registration.registrationStatus = 'CONFIRMED';
+  registration.promotedAt = new Date();
+  registration.waitlistPosition = null;
+  await registration.save();
+
+  const ticketNumber = `EF-${registration.isVIP ? 'VIP-' : ''}PROMO-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+  const qrCode = await QRCode.toDataURL(JSON.stringify({
+    registration: String(registration._id),
+    ticketNumber,
+    attendee: registration.attendee?.name || registration.attendee?.email,
+    event: req.event.title
+  }));
+
+  const ticket = await Ticket.create({
+    registration: registration._id,
+    ticketNumber,
+    qrCode,
+    status: 'ACTIVE'
+  });
+
+  // Re-index remaining waitlist positions
+  const remaining = await Registration.find({
+    event: req.event._id,
+    ticketCategory: registration.ticketCategory._id,
+    registrationStatus: 'WAITLISTED'
+  }).sort({ isVIP: -1, priorityScore: -1, createdAt: 1 });
+
+  for (let i = 0; i < remaining.length; i++) {
+    remaining[i].waitlistPosition = i + 1;
+    await remaining[i].save();
+  }
+
+  return { success: true, registration, ticket };
+};
+
+export const updateWaitlistPriority = async (req, res) => {
+  const { registrationId } = req.params;
+  const { isVIP, priorityScore } = req.body;
+
+  const registration = await Registration.findOne({
+    _id: registrationId,
+    event: req.event._id,
+    registrationStatus: 'WAITLISTED'
+  });
+
+  if (!registration) throw new Error('Waitlisted registration not found');
+
+  if (isVIP !== undefined) registration.isVIP = Boolean(isVIP);
+  if (priorityScore !== undefined) registration.priorityScore = Number(priorityScore);
+  await registration.save();
+
+  // Re-calculate queue positions deterministically
+  const waitlist = await Registration.find({
+    event: req.event._id,
+    ticketCategory: registration.ticketCategory,
+    registrationStatus: 'WAITLISTED'
+  }).sort({ isVIP: -1, priorityScore: -1, createdAt: 1 });
+
+  for (let i = 0; i < waitlist.length; i++) {
+    waitlist[i].waitlistPosition = i + 1;
+    await waitlist[i].save();
+  }
+
+  return { success: true, registration };
+};
+
+export const getMyWaitlist = async (req, res) => {
+  const waitlisted = await Registration.find({
+    attendee: req.user._id,
+    registrationStatus: 'WAITLISTED'
+  })
+    .populate({ path: 'event', populate: { path: 'organization', select: 'name' } })
+    .populate('ticketCategory')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return waitlisted;
 };
 
 // Helper to extract clean ticket number or registration ID from any QR payload

@@ -10,6 +10,8 @@ const registrationSchema = new Schema({
     enum: ['CONFIRMED', 'WAITLISTED', 'CANCELLED'], 
     default: 'CONFIRMED' 
   },
+  isVIP: { type: Boolean, default: false },
+  priorityScore: { type: Number, default: 0 },
   waitlistPosition: { type: Number, default: null },
   promotedAt: { type: Date, default: null },
   cancelledAt: { type: Date, default: null },
@@ -20,6 +22,13 @@ registrationSchema.index({ event: 1, attendee: 1 }, {
   unique: true, 
   partialFilterExpression: { registrationStatus: { $ne: 'CANCELLED' } } 
 });
-registrationSchema.index({ event: 1, ticketCategory: 1, registrationStatus: 1, createdAt: 1 });
+registrationSchema.index({ 
+  event: 1, 
+  ticketCategory: 1, 
+  registrationStatus: 1, 
+  isVIP: -1, 
+  priorityScore: -1, 
+  createdAt: 1 
+});
 
 export const Registration = model('Registration', registrationSchema);

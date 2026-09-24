@@ -211,7 +211,7 @@ export default function StaffDashboard() {
     animationFrameRef.current = requestAnimationFrame(scanVideoFrame);
   }, [checkInMutation]);
 
-  // Start Camera Stream
+  // Start Camera Stream with reliable ref attachment & robust error handling
   const startCamera = async (mode = facingMode) => {
     try {
       if (streamRef.current) {
@@ -223,34 +223,54 @@ export default function StaffDashboard() {
 
       const constraints = {
         video: {
-          facingMode: mode,
+          facingMode: { ideal: mode },
           width: { ideal: 1280 },
           height: { ideal: 720 }
-        }
+        },
+        audio: false
       };
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute('playsinline', true);
-        videoRef.current.play();
-      }
-
       setIsCameraActive(true);
       setErrorMsg('');
       setScanStatus('Scanning actively for attendee QR badges...');
+
+      // Attach stream immediately if video element is mounted
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.muted = true;
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.play().catch(e => console.warn('Video play error:', e));
+      }
 
       // Start the scan loop
       animationFrameRef.current = requestAnimationFrame(scanVideoFrame);
     } catch (err) {
       console.error('Camera error:', err);
-      setErrorMsg('Camera access denied or device not found. You can enter the ticket code manually below.');
       setIsCameraActive(false);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setErrorMsg('Camera permission was denied. Please allow camera access in browser permissions to scan QR badges.');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setErrorMsg('No camera hardware found on this device. You can enter pass codes manually below.');
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        setErrorMsg('Camera is currently locked by another application or browser tab. Please close other camera apps.');
+      } else {
+        setErrorMsg(`Camera error: ${err.message || 'Unable to start camera'}. You can enter ticket codes manually below.`);
+      }
       setScanStatus('Camera unavailable');
     }
   };
+
+  // Sync video ref whenever isCameraActive becomes true
+  useEffect(() => {
+    if (isCameraActive && streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.muted = true;
+      videoRef.current.setAttribute('playsinline', 'true');
+      videoRef.current.play().catch(e => console.warn('Video play error:', e));
+    }
+  }, [isCameraActive]);
 
   // Stop Camera Stream
   const stopCamera = () => {
@@ -361,7 +381,6 @@ export default function StaffDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        
         {/* Main Check-In Controls */}
         <div className="lg:col-span-2 space-y-6">
           
@@ -402,15 +421,34 @@ export default function StaffDashboard() {
 
             {isCameraActive ? (
               <div className="relative rounded-2xl overflow-hidden bg-stone-950 aspect-video flex items-center justify-center border-2 border-[#B45309]/50 shadow-inner">
-                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-52 h-52 border-2 border-[#B45309] rounded-2xl relative">
+                <video 
+                  ref={videoRef} 
+                  autoPlay 
+                  playsInline 
+                  muted 
+                  onLoadedMetadata={() => {
+                    if (videoRef.current) {
+                      videoRef.current.play().catch(e => console.warn('Video play notice:', e));
+                    }
+                  }}
+                  className="w-full h-full object-cover block absolute inset-0 z-0 bg-black" 
+                />
+                
+                {/* Visual Optical Scanner Reticle Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                  <div className="w-52 h-52 border-2 border-[#B45309] rounded-2xl relative shadow-[0_0_20px_rgba(180,83,9,0.35)]">
                     <div className="absolute inset-x-0 h-0.5 bg-[#B45309] scanner-laser shadow-[0_0_12px_#B45309]"></div>
+                    {/* Corner accent markers */}
+                    <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-[#C28E27]"></div>
+                    <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-[#C28E27]"></div>
+                    <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-[#C28E27]"></div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-[#C28E27]"></div>
                   </div>
                 </div>
-                <div className="absolute bottom-3 inset-x-0 text-center pointer-events-none">
-                  <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-mono rounded-full flex items-center justify-center gap-1.5 w-max mx-auto border border-white/10">
-                    <ScanLine size={13} className="text-[#C28E27] animate-pulse" /> Hold attendee QR badge inside frame
+
+                <div className="absolute bottom-3 inset-x-0 text-center pointer-events-none z-10">
+                  <span className="px-3 py-1 bg-black/75 backdrop-blur-md text-white text-[11px] font-mono rounded-full flex items-center justify-center gap-1.5 w-max mx-auto border border-white/15 shadow-md">
+                    <ScanLine size={13} className="text-[#C28E27] animate-pulse" /> Align attendee QR pass badge inside frame
                   </span>
                 </div>
               </div>

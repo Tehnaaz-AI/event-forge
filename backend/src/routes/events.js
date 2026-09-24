@@ -8,6 +8,7 @@ const r = Router();
 r.get('/public/:slug', c.getPublicEvent);
 r.get('/organizer/me', authenticate, allowRoles('ORGANIZER', 'PLATFORM_ADMIN'), c.getOrganizerEvents);
 r.get('/attendee/my-tickets', authenticate, c.getMyTickets);
+r.get('/attendee/my-waitlist', authenticate, c.getMyWaitlist);
 r.post('/staff/check-in', authenticate, allowRoles('STAFF', 'ORGANIZER', 'PLATFORM_ADMIN'), c.checkInAnyTicket);
 
 // 2. Collection root routes
@@ -26,6 +27,11 @@ r.delete('/:eventId/tickets/:categoryId', authenticate, eventAccess, c.deleteTic
 r.post('/:eventId/register', authenticate, allowRoles('ATTENDEE', 'ORGANIZER', 'PLATFORM_ADMIN'), c.registerAttendee);
 r.post('/:eventId/registrations/:registrationId/cancel', authenticate, c.cancelRegistration);
 r.post('/:eventId/check-in', authenticate, eventAccess, c.checkInTicket);
+
+// VIP & Priority Waitlist Sub-resource
+r.get('/:eventId/waitlist', authenticate, eventAccess, c.getEventWaitlist);
+r.post('/:eventId/waitlist/:registrationId/promote', authenticate, eventAccess, c.promoteWaitlistedAttendee);
+r.patch('/:eventId/waitlist/:registrationId/priority', authenticate, eventAccess, c.updateWaitlistPriority);
 
 r.get('/:eventId/staff', authenticate, eventAccess, c.getEventStaff);
 r.post('/:eventId/staff', authenticate, eventAccess, c.addEventStaff);

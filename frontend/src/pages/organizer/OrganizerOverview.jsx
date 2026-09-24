@@ -135,31 +135,78 @@ export default function OrganizerOverview() {
       </div>
 
       {/* Portfolio Capacity Bar Chart */}
-      {portfolioChartData.length > 0 && (
-        <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#EFE8DA] shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-stone-900 text-lg flex items-center gap-2">
-                <BarChart2 size={20} className="text-[#B45309]" /> Portfolio Conference Capacity Scale
-              </h3>
-              <p className="text-xs text-stone-500 mt-0.5">Attendee capacity allocated per active event</p>
-            </div>
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#EFE8DA] shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="font-extrabold text-stone-900 text-lg flex items-center gap-2">
+              <BarChart2 size={20} className="text-[#B45309]" /> Portfolio Conference Capacity Scale
+            </h3>
+            <p className="text-xs text-stone-500 mt-0.5">Attendee target capacity distribution across your active summits</p>
           </div>
+          <span className="text-[10px] font-extrabold text-[#B45309] bg-[#B45309]/10 border border-[#B45309]/20 px-3 py-1 rounded-full uppercase tracking-wider">
+            {events?.length || 0} Managed Summits
+          </span>
+        </div>
+
+        {portfolioChartData.length > 0 ? (
           <div className="h-64 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={portfolioChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F5F2EB" />
-                <XAxis dataKey="name" stroke="#A8A29E" fontSize={11} tickLine={false} />
-                <YAxis stroke="#A8A29E" fontSize={11} tickLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1C1917', borderRadius: '14px', border: '1px solid #332E2A', color: '#FDFAF5' }}
+              <BarChart data={portfolioChartData} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#B45309" />
+                    <stop offset="100%" stopColor="#D97706" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F5F2EB" vertical={false} />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#78716C" 
+                  fontSize={11} 
+                  fontWeight={600} 
+                  tickLine={false} 
+                  axisLine={{ stroke: '#EFE8DA' }}
                 />
-                <Bar dataKey="capacity" fill="#B45309" radius={[8, 8, 0, 0]} name="Max Capacity" />
+                <YAxis 
+                  stroke="#78716C" 
+                  fontSize={11} 
+                  fontWeight={600} 
+                  tickLine={false} 
+                  axisLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip 
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      const d = payload[0].payload;
+                      return (
+                        <div className="bg-[#1C1917] text-[#FDFAF5] p-3 rounded-2xl shadow-xl border border-stone-800 text-xs font-sans space-y-1">
+                          <p className="font-extrabold text-[#C28E27]">{d.name}</p>
+                          <p className="text-stone-300">Capacity: <strong className="text-white font-mono">{d.capacity}</strong> delegates</p>
+                          <p className="text-[10px] text-stone-400">Status: <span className="font-bold text-amber-400">{d.status}</span></p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar 
+                  dataKey="capacity" 
+                  fill="url(#barGradient)" 
+                  radius={[8, 8, 0, 0]} 
+                  name="Max Capacity" 
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="p-12 text-center bg-[#FAF8F5] rounded-2xl border border-dashed border-[#EFE8DA] space-y-2">
+            <BarChart2 size={32} className="mx-auto text-stone-300" />
+            <p className="text-xs font-bold text-stone-700">No Portfolio Events Created</p>
+            <p className="text-[10px] text-stone-400">Create your first conference to visualize capacity allocation.</p>
+          </div>
+        )}
+      </div>
 
       {/* Quick Action Navigation Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

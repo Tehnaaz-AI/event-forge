@@ -135,35 +135,81 @@ export default function EventOverview({ eventId }) {
         
         {/* Registration & Revenue Trend Chart */}
         <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-3xl border border-[#EFE8DA] shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 className="font-bold text-stone-900 text-lg flex items-center gap-2">
+              <h3 className="font-extrabold text-stone-900 text-lg flex items-center gap-2">
                 <TrendingUp size={20} className="text-[#B45309]" /> Registration &amp; Sales Velocity
               </h3>
-              <p className="text-xs text-stone-500 mt-0.5">Pace of attendee registrations and ticket revenue</p>
+              <p className="text-xs text-stone-500 mt-0.5">Real-time pace of attendee registrations and cumulative pass volume</p>
             </div>
-            <span className="text-[10px] font-bold text-stone-600 bg-[#FAF8F5] border border-[#EFE8DA] px-3 py-1 rounded-full uppercase">
-              Live Trajectory
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live DB Telemetry
+              </span>
+            </div>
           </div>
 
           <div className="h-72 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={timelineData} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorBeigeReg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#B45309" stopOpacity={0.35}/>
+                    <stop offset="5%" stopColor="#B45309" stopOpacity={0.4}/>
                     <stop offset="95%" stopColor="#B45309" stopOpacity={0.0}/>
                   </linearGradient>
+                  <linearGradient id="colorGoldRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#C28E27" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#C28E27" stopOpacity={0.0}/>
+                  </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F5F2EB" />
-                <XAxis dataKey="day" stroke="#A8A29E" fontSize={11} tickLine={false} />
-                <YAxis stroke="#A8A29E" fontSize={11} tickLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1C1917', borderRadius: '16px', border: '1px solid #332E2A', color: '#FDFAF5' }}
-                  itemStyle={{ color: '#D97706' }}
+                <CartesianGrid strokeDasharray="3 3" stroke="#F5F2EB" vertical={false} />
+                <XAxis 
+                  dataKey="day" 
+                  stroke="#78716C" 
+                  fontSize={11} 
+                  fontWeight={600} 
+                  tickLine={false} 
+                  axisLine={{ stroke: '#EFE8DA' }}
                 />
-                <Area type="monotone" dataKey="registrations" stroke="#B45309" strokeWidth={3} fillOpacity={1} fill="url(#colorBeigeReg)" name="Registrations" />
+                <YAxis 
+                  stroke="#78716C" 
+                  fontSize={11} 
+                  fontWeight={600} 
+                  tickLine={false} 
+                  axisLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip 
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-xl border border-stone-800 space-y-1.5 text-xs font-sans">
+                          <p className="font-extrabold text-[#C28E27] uppercase tracking-wider text-[10px]">{label}</p>
+                          <div className="flex items-center justify-between gap-4">
+                            <span className="text-stone-300">New Registrations:</span>
+                            <span className="font-bold text-white font-mono">{payload[0]?.value || 0}</span>
+                          </div>
+                          {payload[0]?.payload?.revenue !== undefined && (
+                            <div className="flex items-center justify-between gap-4 border-t border-stone-800 pt-1">
+                              <span className="text-stone-400">Day Revenue:</span>
+                              <span className="font-bold text-emerald-400 font-mono">${(payload[0]?.payload?.revenue || 0).toLocaleString()}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="registrations" 
+                  stroke="#B45309" 
+                  strokeWidth={3} 
+                  fillOpacity={1} 
+                  fill="url(#colorBeigeReg)" 
+                  name="Daily Registrations" 
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -172,14 +218,17 @@ export default function EventOverview({ eventId }) {
         {/* Ticket Tier Distribution Donut */}
         <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#EFE8DA] shadow-sm flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-bold text-stone-900 text-lg flex items-center gap-2">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-extrabold text-stone-900 text-lg flex items-center gap-2">
                 <PieChartIcon size={20} className="text-[#B45309]" /> Tier Share
               </h3>
+              <span className="text-[10px] font-bold text-stone-400 font-mono">
+                {categoryData.reduce((acc, c) => acc + c.value, 0)} Total
+              </span>
             </div>
-            <p className="text-xs text-stone-500">Breakdown of confirmed passes across tiers</p>
+            <p className="text-xs text-stone-500">Breakdown of confirmed passes across pricing tiers</p>
 
-            {categoryData.length > 0 ? (
+            {categoryData.length > 0 && categoryData.some(c => c.value > 0) ? (
               <>
                 <div className="h-48 w-full relative flex items-center justify-center my-2">
                   <ResponsiveContainer width="100%" height="100%">
@@ -188,39 +237,64 @@ export default function EventOverview({ eventId }) {
                         data={categoryData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={45}
-                        outerRadius={70}
-                        paddingAngle={6}
+                        innerRadius={50}
+                        outerRadius={75}
+                        paddingAngle={5}
                         dataKey="value"
                       >
                         {categoryData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={LUXURY_COLORS[index % LUXURY_COLORS.length]} />
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={LUXURY_COLORS[index % LUXURY_COLORS.length]} 
+                            stroke="#FFFFFF"
+                            strokeWidth={2}
+                          />
                         ))}
                       </Pie>
                       <Tooltip 
-                        contentStyle={{ backgroundColor: '#1C1917', borderRadius: '12px', border: 'none', color: '#FDFAF5' }}
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-[#1C1917] text-[#FDFAF5] p-2.5 rounded-xl shadow-lg border border-stone-800 text-xs">
+                                <p className="font-bold text-[#C28E27]">{data.name}</p>
+                                <p className="text-stone-300">{data.value} delegates (${(data.revenue || 0).toLocaleString()})</p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
 
                 <div className="space-y-2 pt-3 border-t border-[#EFE8DA]">
-                  {categoryData.map((cat, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: LUXURY_COLORS[idx % LUXURY_COLORS.length] }}></div>
-                        <span className="font-medium text-stone-700 truncate max-w-[140px]">{cat.name}</span>
+                  {categoryData.map((cat, idx) => {
+                    const totalTierSold = categoryData.reduce((acc, c) => acc + c.value, 0) || 1;
+                    const pct = Math.round((cat.value / totalTierSold) * 100);
+                    return (
+                      <div key={idx} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: LUXURY_COLORS[idx % LUXURY_COLORS.length] }}></div>
+                          <span className="font-medium text-stone-700 truncate max-w-[130px]">{cat.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-stone-900">{cat.value}</span>
+                          <span className="text-[10px] text-stone-400 font-bold bg-[#FAF8F5] px-1.5 py-0.5 rounded-md border border-[#EFE8DA]">{pct}%</span>
+                        </div>
                       </div>
-                      <span className="font-bold text-stone-900">{cat.value} passes</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </>
             ) : (
-              <div className="h-48 flex flex-col items-center justify-center text-center p-4">
+              <div className="h-48 flex flex-col items-center justify-center text-center p-4 bg-[#FAF8F5] rounded-2xl border border-dashed border-[#EFE8DA] my-3">
                 <PieChartIcon size={32} className="text-stone-300 mb-2" />
-                <p className="text-xs font-bold text-stone-600">No Tier Data Yet</p>
-                <p className="text-[10px] text-stone-400">Configure ticket categories to view live share.</p>
+                <p className="text-xs font-bold text-stone-700">No Pass Allocations Yet</p>
+                <p className="text-[10px] text-stone-500 max-w-[180px]">
+                  Passes booked by attendees will dynamically populate tier share.
+                </p>
               </div>
             )}
           </div>
