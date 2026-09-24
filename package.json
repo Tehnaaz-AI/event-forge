@@ -7,6 +7,7 @@
     "start": "npm start --prefix backend",
     "postinstall": "npm install --prefix backend",
     "seed": "npm run seed --prefix backend",
+    "seed:dev": "npm run seed:dev --prefix backend",
     "test": "npm run test --prefix backend",
     "build": "npm run build --prefix frontend"
   },
