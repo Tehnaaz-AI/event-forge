@@ -4,7 +4,7 @@ import { User, Event, EventStaff } from '../models/index.js';
 
 export async function authenticate(req, res, next) {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.query?.token;
     if (!token) return res.status(401).json({ success: false, message: 'Authentication required' });
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(id);

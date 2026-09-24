@@ -177,6 +177,15 @@ export const cancelRegistration = async (req, res, next) => {
   }
 };
 
+export const getEventRegistrations = async (req, res, next) => {
+  try {
+    const registrations = await eventService.getEventRegistrations(req, res);
+    ok(res, registrations, 'Event registrations retrieved');
+  } catch (e) {
+    fail(res, e.message, 400);
+  }
+};
+
 export const getEventWaitlist = async (req, res, next) => {
   try {
     const waitlist = await eventService.getEventWaitlist(req, res);

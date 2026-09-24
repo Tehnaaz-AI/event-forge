@@ -203,32 +203,31 @@ Please write a comprehensive, professional marketing package for this conference
     event,
     prompt,
     'You are a premier conference marketing strategist and executive copywriter. Create polished, ready-to-publish promotional materials tailored to the target audience.',
-    () => `🚀 **Marketing Campaign Package for "${event.title}"**
+    () => `Marketing Campaign Package for "${event.title}"
 
-📱 **Option 1: Social Media (X / Twitter)**
-Excited to announce ${event.title}! Join industry pioneers for an incredible experience on ${new Date(event.startDate).toLocaleDateString()}. Tailored specifically for ${targetAudience}. 
-🎟️ Reserve your spot today! #EventForge #${event.category || 'Tech'} #Conference #Leadership
+Option 1: Social Media (X / Twitter)
+Excited to announce ${event.title}. Join industry leaders for an engaging executive experience on ${new Date(event.startDate).toLocaleDateString()}, tailored specifically for ${targetAudience}. Reserve your delegate pass on EventForge: #EventForge #${event.category || 'Tech'} #Leadership
 
-💼 **Option 2: Professional (LinkedIn Post)**
-We are thrilled to open registrations for **${event.title}**. 
+Option 2: Professional Announcement (LinkedIn)
+We are pleased to open registrations for ${event.title}.
 
-Designed specifically for ${targetAudience}, this flagship summit features curated keynote sessions, expert-led technical breakouts, and high-impact networking opportunities. 
+Designed specifically for ${targetAudience}, this summit features curated keynote sessions, expert-led technical breakouts, and executive networking opportunities.
 
-📍 **Location:** ${event.venue?.name || 'Main Venue'}
-📅 **Date:** ${new Date(event.startDate).toLocaleDateString()}
+Location: ${event.venue?.name || 'Main Venue'}
+Dates: ${new Date(event.startDate).toLocaleDateString()} to ${new Date(event.endDate).toLocaleDateString()}
 
-Don't miss out on shaping the future of ${event.category || 'our industry'}. Connect with leaders and expand your professional network.
+Connect with senior leaders and accelerate your organizational roadmap.
 
-📧 **Option 3: Email Campaign Broadcast**
-Subject: Exclusive Invitation: Join us at ${event.title}
+Option 3: Email Campaign Broadcast
+Subject: Official Invitation: ${event.title}
 
 Dear Colleague,
 
-We cordially invite you to attend **${event.title}**, taking place on ${new Date(event.startDate).toLocaleDateString()} at ${event.venue?.name || 'our flagship venue'}.
+You are cordially invited to attend ${event.title}, taking place on ${new Date(event.startDate).toLocaleDateString()} at ${event.venue?.name || 'the primary venue'}.
 
-Whether you are looking to master new strategies, discover cutting-edge tools, or connect with peers across ${targetAudience}, ${event.title} is designed to deliver immediate value.
+Whether you are evaluating emerging architectures or networking with peers across ${targetAudience}, ${event.title} is designed to deliver immediate strategic value.
 
-Claim your pass today and explore the complete multi-track agenda on EventForge.`
+Register your pass and view the multi-track agenda on EventForge.`
   );
 };
 
@@ -253,20 +252,20 @@ Suggest 3 comprehensive, high-value conference sessions for this event. For each
   return await generateWithAI(
     event,
     prompt,
-    'You are a master conference agenda curator and session designer.',
-    () => `💡 **AI Recommended Sessions for "${topic}"**
+    'You are an executive conference agenda curator. Generate clear, structured session outlines without emojis or casual slang.',
+    () => `Curated Sessions for "${topic}"
 
-1. 🎯 **"Mastering ${topic}: Architectures & Best Practices"**
-   - **Description:** A deep dive into core methodologies, key pitfalls to avoid, and real-world case studies for implementing ${topic} at enterprise scale.
-   - **Ideal Speaker:** Senior Systems Architect or Principal Lead in ${event.category || 'Technology'}.
+1. "Mastering ${topic}: Architectures and Enterprise Best Practices"
+   - Description: A deep dive into core methodologies, key pitfalls to avoid, and real-world case studies for implementing ${topic} at enterprise scale.
+   - Ideal Speaker: Senior Systems Architect or Principal Lead in ${event.category || 'Technology'}.
 
-2. 🚀 **"The Future of ${topic}: Emerging Trends & Next-Gen Innovations"**
-   - **Description:** An inspiring forward-looking keynote exploring how ${topic} will transform corporate workflows over the next 3-5 years.
-   - **Ideal Speaker:** Industry Analyst, Futurist, or Enterprise R&D Specialist.
+2. "The Future of ${topic}: Emerging Trends and Next-Gen Innovations"
+   - Description: A forward-looking keynote exploring how ${topic} will transform corporate workflows over the next 3 to 5 years.
+   - Ideal Speaker: Industry Analyst, Enterprise Strategist, or R&D Specialist.
 
-3. 🛠️ **"Interactive Workshop: Hands-on ${topic} in Practice"**
-   - **Description:** Practical live demonstrations, architectural patterns, and collaborative exercises designed to help attendees apply ${topic} directly.
-   - **Ideal Speaker:** Technical Evangelist or Hands-on Engineering Lead.`
+3. "Interactive Technical Workshop: ${topic} in Practice"
+   - Description: Practical architectural patterns and collaborative exercises designed to help engineering teams apply ${topic} directly.
+   - Ideal Speaker: Technical Evangelist or Hands-on Engineering Lead.`
   );
 };
 

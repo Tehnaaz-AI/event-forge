@@ -19,9 +19,9 @@ export default function EventPulse({ eventId }) {
   // SSE Real-time Subscription
   useEffect(() => {
     if (!eventId) return;
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('eventforge_token') || localStorage.getItem('token');
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3100/api';
-    const streamUrl = `${apiUrl}/events/${eventId}/intelligence/stream${token ? `?token=${token}` : ''}`;
+    const streamUrl = `${apiUrl}/events/${eventId}/intelligence/stream${token ? `?token=${encodeURIComponent(token)}` : ''}`;
 
     let eventSource = null;
     try {

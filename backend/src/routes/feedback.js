@@ -4,10 +4,10 @@ import * as c from '../controllers/feedbackController.js';
 
 const r = Router({ mergeParams: true });
 
-// Organizer viewing all feedback for an event
-r.get('/', authenticate, eventAccess, c.getEventFeedback);
+// Public reading of conference reviews and ratings
+r.get('/', c.getEventFeedback);
 
-// Attendee submitting feedback (they just need to be authenticated, maybe we should check if they registered but for now just auth is fine)
+// Attendee submitting feedback (requires verified attendee authentication)
 r.post('/', authenticate, c.submitFeedback);
 
 export default r;

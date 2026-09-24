@@ -194,6 +194,8 @@ export default function OrganizerOverview() {
                   dataKey="capacity" 
                   fill="url(#barGradient)" 
                   radius={[8, 8, 0, 0]} 
+                  barSize={32}
+                  maxBarSize={38}
                   name="Max Capacity" 
                 />
               </BarChart>

@@ -16,6 +16,8 @@ import EventSettings from '../../components/organizer/EventSettings';
 import StaffManager from '../../components/organizer/StaffManager';
 import TicketManager from '../../components/organizer/TicketManager';
 import WaitlistManager from '../../components/organizer/WaitlistManager';
+import EventRegistrations from '../../components/organizer/EventRegistrations';
+import StageRunOfShow from '../../components/organizer/StageRunOfShow';
 import EventPulse from '../../components/organizer/EventPulse';
 import PostEventReport from '../../components/organizer/PostEventReport';
 
@@ -48,8 +50,9 @@ export default function EventDashboard() {
 
   const tabs = [
     { id: 'overview', label: 'Executive Overview' },
-    { id: 'pulse', label: '⚡ Live Event Pulse & OS' },
+    { id: 'registrations', label: '👥 Registered Attendees' },
     { id: 'waitlist', label: '👑 VIP Waitlist' },
+    { id: 'pulse', label: '⚡ Live Event Pulse & OS' },
     { id: 'stage', label: '🎙️ Stage Run-of-Show' },
     { id: 'tickets', label: 'Tickets & Pricing Tiers' },
     { id: 'staff', label: 'Door Staff & Crew' },
@@ -123,6 +126,10 @@ export default function EventDashboard() {
       <div>
         {currentTab === 'overview' && (
           <EventOverview eventId={event._id} />
+        )}
+
+        {currentTab === 'registrations' && (
+          <EventRegistrations eventId={event._id} />
         )}
 
         {currentTab === 'pulse' && (

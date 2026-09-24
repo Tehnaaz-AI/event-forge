@@ -439,8 +439,8 @@ Format your response as a clear, concise operational brief with:
   const fallbackSynthesizer = () => {
     if (intent === 'ATTENTION_RISKS') {
       const topAlerts = pulse.alerts.length > 0 
-        ? pulse.alerts.map(a => `• ⚠️ **${a.title}** (${a.severity} severity)\n  Evidence: ${a.evidence.join('; ')}\n  Recommended Action: ${a.recommendedAction}`).join('\n\n')
-        : '• ✅ All operational parameters are currently within normal thresholds. Room headroom and arrival flows are healthy.';
+        ? pulse.alerts.map(a => `• [${a.severity}] ${a.title}\n  Evidence: ${a.evidence.join('; ')}\n  Recommended Action: ${a.recommendedAction}`).join('\n\n')
+        : '• All operational parameters are currently within normal thresholds. Room headroom and arrival flows are healthy.';
 
       return {
         answer: pulse.alerts.length > 0

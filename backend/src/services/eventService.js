@@ -483,6 +483,25 @@ export const cancelRegistration = async (req, res) => {
   };
 };
 
+// 📋 All Event Registrations & Registered Delegates Directory
+export const getEventRegistrations = async (req, res) => {
+  const registrations = await Registration.find({ event: req.event._id })
+    .populate('attendee', 'name email role avatar phone')
+    .populate('ticketCategory', 'name price capacity availableQuantity')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const regIds = registrations.map(r => r._id);
+  const tickets = await Ticket.find({ registration: { $in: regIds } }).lean();
+  const ticketMap = new Map();
+  tickets.forEach(t => ticketMap.set(String(t.registration), t));
+
+  return registrations.map(r => ({
+    ...r,
+    ticket: ticketMap.get(String(r._id)) || null
+  }));
+};
+
 // 👑 VIP & Priority Waitlist Management Endpoints
 export const getEventWaitlist = async (req, res) => {
   const registrations = await Registration.find({

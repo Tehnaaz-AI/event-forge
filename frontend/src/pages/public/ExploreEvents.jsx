@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Calendar, MapPin, Ticket, Sparkles, Filter, 
   ArrowRight, Users, CheckCircle2, Eye, X, Clock, ShieldCheck,
-  Award, Building, Layers
+  Award, Building, Layers, Bookmark
 } from 'lucide-react';
 import { api } from '../../services/api';
 import Breadcrumbs from '../../components/common/Breadcrumbs';
@@ -17,6 +17,26 @@ export default function ExploreEvents() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [quickPeekEvent, setQuickPeekEvent] = useState(null);
+  const [savedEventIds, setSavedEventIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('eventforge_saved_events') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const toggleSaveEvent = (e, event) => {
+    e.stopPropagation();
+    e.preventDefault();
+    let updated;
+    if (savedEventIds.includes(event._id)) {
+      updated = savedEventIds.filter(id => id !== event._id);
+    } else {
+      updated = [...savedEventIds, event._id];
+    }
+    setSavedEventIds(updated);
+    localStorage.setItem('eventforge_saved_events', JSON.stringify(updated));
+  };
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['explore-events-list'],
@@ -152,12 +172,26 @@ export default function ExploreEvents() {
                         {event.category || 'Executive'}
                       </span>
                       
-                      <button
-                        onClick={() => setQuickPeekEvent(event)}
-                        className="px-2.5 py-1 rounded-full bg-white hover:bg-[#B45309]/10 text-stone-600 hover:text-[#B45309] border border-[#EFE8DA] text-xs font-bold transition-colors flex items-center gap-1"
-                      >
-                        <Eye size={13} /> Quick Peek
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={(e) => toggleSaveEvent(e, event)}
+                          title={savedEventIds.includes(event._id) ? "Remove Bookmark" : "Save Conference"}
+                          className={`p-1.5 rounded-full border transition-colors ${
+                            savedEventIds.includes(event._id)
+                              ? 'bg-amber-100 text-[#B45309] border-[#B45309]'
+                              : 'bg-white text-stone-500 hover:text-[#B45309] border-[#EFE8DA]'
+                          }`}
+                        >
+                          <Bookmark size={14} className={savedEventIds.includes(event._id) ? "fill-[#B45309]" : ""} />
+                        </button>
+
+                        <button
+                          onClick={() => setQuickPeekEvent(event)}
+                          className="px-2.5 py-1 rounded-full bg-white hover:bg-[#B45309]/10 text-stone-600 hover:text-[#B45309] border border-[#EFE8DA] text-xs font-bold transition-colors flex items-center gap-1"
+                        >
+                          <Eye size={13} /> Quick Peek
+                        </button>
+                      </div>
                     </div>
 
                     <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 line-clamp-2 leading-snug group-hover:text-[#B45309] transition-colors">
