@@ -18,26 +18,40 @@ export default function WaitlistPage() {
 
   const [selectedEvent, setSelectedEvent] = useState('');
   const [joined, setJoined] = useState(false);
-  const [queueNumber, setQueueNumber] = useState(14);
+  const [queueNumber, setQueueNumber] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const { data: events } = useQuery({
     queryKey: ['public-events-list'],
     queryFn: () => api.get('/events')
   });
 
-  const handleJoin = (e) => {
+  const handleJoin = async (e) => {
     e.preventDefault();
     if (!user) {
       navigate('/login?redirect=/waitlist');
       return;
     }
+
+    const targetEventId = selectedEvent || events?.[0]?._id;
+    if (!targetEventId) {
+      setErrorMessage('Please select an active conference to join its VIP waitlist.');
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
-      setQueueNumber(Math.floor(Math.random() * 8) + 7);
+    setErrorMessage('');
+
+    try {
+      const res = await api.post(`/events/${targetEventId}/waitlist/join`);
+      setQueueNumber(res?.position || 1);
       setJoined(true);
+    } catch (err) {
+      setErrorMessage(err.message || 'Failed to secure VIP waitlist position.');
+    } finally {
       setIsSubmitting(false);
-    }, 400);
+    }
   };
 
   return (
@@ -142,6 +156,12 @@ export default function WaitlistPage() {
                 AUTHENTICATED
               </span>
             </div>
+
+            {errorMessage && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold">
+                {errorMessage}
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-stone-700">Target Summit for VIP Priority</label>

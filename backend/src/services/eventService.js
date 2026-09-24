@@ -440,6 +440,87 @@ export const registerAttendee = async (req, res) => {
   }
 };
 
+export const joinVipWaitlist = async (req, res) => {
+  const eventId = req.params.eventId;
+  const event = await Event.findById(eventId);
+  if (!event) throw new Error('Event not found');
+
+  const existing = await Registration.findOne({
+    event: eventId,
+    attendee: req.user._id,
+    registrationStatus: { $ne: 'CANCELLED' }
+  });
+
+  if (existing) {
+    if (existing.registrationStatus === 'CONFIRMED') {
+      throw new Error('You already hold a confirmed pass for this conference.');
+    }
+    return {
+      success: true,
+      message: 'You are already in the VIP standby waitlist queue.',
+      registration: existing,
+      position: existing.waitlistPosition || 1,
+      isVIP: existing.isVIP
+    };
+  }
+
+  // Find VIP ticket category or default category
+  let vipCategory = await TicketCategory.findOne({ 
+    event: eventId, 
+    $or: [{ isVipEligible: true }, { tier: 'VIP' }, { tier: 'EXECUTIVE' }] 
+  });
+
+  if (!vipCategory) {
+    vipCategory = await TicketCategory.findOne({ event: eventId });
+    if (!vipCategory) {
+      vipCategory = await TicketCategory.create({
+        event: event._id,
+        name: 'Executive VIP Pass',
+        description: 'Priority standby pass for keynotes and VIP tracks.',
+        tier: 'VIP',
+        isVipEligible: true,
+        price: 499,
+        capacity: 100,
+        availableQuantity: 0
+      });
+    }
+  }
+
+  const waitlistCount = await Registration.countDocuments({
+    event: event._id,
+    ticketCategory: vipCategory._id,
+    registrationStatus: 'WAITLISTED'
+  });
+  const waitlistPosition = waitlistCount + 1;
+
+  const registration = await Registration.create({
+    event: event._id,
+    attendee: req.user._id,
+    ticketCategory: vipCategory._id,
+    registrationStatus: 'WAITLISTED',
+    isVIP: true,
+    priorityScore: 10,
+    waitlistPosition,
+    amount: vipCategory.price || 0
+  });
+
+  // Broadcast realtime waitlist notification to organizer dashboards
+  eventBus.broadcast(String(event._id), 'WAITLIST_JOINED', {
+    attendee: req.user.name || req.user.email,
+    isVIP: true,
+    position: waitlistPosition,
+    category: vipCategory.name
+  });
+
+  return {
+    success: true,
+    message: 'Successfully claimed VIP priority waitlist position.',
+    registration,
+    position: waitlistPosition,
+    isVIP: true
+  };
+};
+
 // Waitlist Auto-Promotion Engine & Ticket Cancellation
 export const cancelRegistration = async (req, res) => {
   const { registrationId } = req.params;

@@ -141,6 +141,15 @@ export const registerAttendee = async (req, res, next) => {
   }
 };
 
+export const joinVipWaitlist = async (req, res, next) => {
+  try {
+    const result = await eventService.joinVipWaitlist(req, res);
+    ok(res, result, result.message || 'Added to VIP priority waitlist', 201);
+  } catch (e) {
+    fail(res, e.message, e.message.includes('already') ? 409 : 400);
+  }
+};
+
 export const checkInTicket = async (req, res, next) => {
   try { ok(res, await eventService.checkInTicket(req, res), 'Check-in successful'); } catch (e) { fail(res, e.message, 400); }
 };

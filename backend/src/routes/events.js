@@ -35,6 +35,7 @@ r.post('/:eventId/check-in', authenticate, eventAccess, c.checkInTicket);
 r.get('/:eventId/registrations', authenticate, eventAccess, c.getEventRegistrations);
 
 // VIP & Priority Waitlist Sub-resource
+r.post('/:eventId/waitlist/join', authenticate, c.joinVipWaitlist);
 r.get('/:eventId/waitlist', authenticate, eventAccess, c.getEventWaitlist);
 r.post('/:eventId/waitlist/:registrationId/promote', authenticate, eventAccess, c.promoteWaitlistedAttendee);
 r.patch('/:eventId/waitlist/:registrationId/priority', authenticate, eventAccess, c.updateWaitlistPriority);
