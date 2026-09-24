@@ -470,14 +470,47 @@ export const joinVipWaitlist = async (req, res) => {
 
   if (existing) {
     if (existing.registrationStatus === 'CONFIRMED') {
-      throw new Error('You already hold a confirmed pass for this conference.');
+      return {
+        success: true,
+        alreadyConfirmed: true,
+        message: 'You already hold an active confirmed pass for this conference.',
+        registration: existing,
+        isVIP: existing.isVIP
+      };
     }
+
+    // If already waitlisted, upgrade to VIP priority tier if not already VIP
+    if (!existing.isVIP) {
+      existing.isVIP = true;
+      existing.priorityScore = 10;
+      await existing.save();
+
+      // Recalculate deterministic waitlist positions
+      const waitlist = await Registration.find({
+        event: event._id,
+        ticketCategory: existing.ticketCategory,
+        registrationStatus: 'WAITLISTED'
+      }).sort({ isVIP: -1, priorityScore: -1, createdAt: 1 });
+
+      for (let i = 0; i < waitlist.length; i++) {
+        waitlist[i].waitlistPosition = i + 1;
+        await waitlist[i].save();
+      }
+
+      eventBus.broadcast(String(event._id), 'WAITLIST_PRIORITY_UPDATED', {
+        registrationId: existing._id,
+        isVIP: true,
+        priorityScore: 10
+      });
+      eventBus.broadcast(String(event._id), 'PULSE_UPDATED', { eventId: String(event._id) });
+    }
+
     return {
       success: true,
-      message: 'You are already in the VIP standby waitlist queue.',
+      message: 'You are registered in the VIP priority waitlist queue.',
       registration: existing,
       position: existing.waitlistPosition || 1,
-      isVIP: existing.isVIP
+      isVIP: true
     };
   }
 

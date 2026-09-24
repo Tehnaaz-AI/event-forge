@@ -21,6 +21,8 @@ export default function WaitlistPage() {
   const [selectedEvent, setSelectedEvent] = useState(eventParam);
   const [joined, setJoined] = useState(false);
   const [queueNumber, setQueueNumber] = useState(1);
+  const [isAlreadyConfirmed, setIsAlreadyConfirmed] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -55,7 +57,14 @@ export default function WaitlistPage() {
 
     try {
       const res = await api.post(`/events/${targetEventId}/waitlist/join`);
-      setQueueNumber(res?.position || 1);
+      if (res?.alreadyConfirmed) {
+        setIsAlreadyConfirmed(true);
+        setStatusMessage(res.message || 'You already hold an active confirmed pass for this conference.');
+      } else {
+        setIsAlreadyConfirmed(false);
+        setQueueNumber(res?.position || 1);
+        setStatusMessage(res?.message || 'You are registered in the VIP priority waitlist queue.');
+      }
       setJoined(true);
     } catch (err) {
       setErrorMessage(err.message || 'Failed to secure VIP waitlist position.');
@@ -132,22 +141,39 @@ export default function WaitlistPage() {
             </div>
             
             <div className="space-y-1">
-              <h3 className="text-xl font-extrabold text-stone-900">You're on the Priority List!</h3>
-              <p className="text-xs font-bold text-emerald-700">Estimated Priority Queue Position: #{queueNumber}</p>
+              <h3 className="text-xl font-extrabold text-stone-900">
+                {isAlreadyConfirmed ? 'Confirmed Pass Active' : "You're on the VIP Priority List!"}
+              </h3>
+              {!isAlreadyConfirmed && (
+                <p className="text-xs font-bold text-emerald-700">Estimated Priority Queue Position: #{queueNumber}</p>
+              )}
             </div>
 
             <p className="text-xs text-stone-600 leading-relaxed">
-              We've registered your verified account <strong>{user.email}</strong>. When a pass tier unlocks, your private 24-hour reservation code will be emailed immediately.
+              {isAlreadyConfirmed 
+                ? 'Your delegate account already holds a valid, active pass for this conference. You do not need to wait in the standby queue.'
+                : `We've registered your verified account ${user.email}. When a pass tier unlocks, your private reservation code will be activated immediately.`
+              }
             </p>
 
-            <div className="pt-2">
-              <Link
-                to="/explore"
-                className="inline-flex items-center gap-2 text-xs font-bold text-[#B45309] hover:underline"
-              >
-                <span>Browse Other Active Conferences</span>
-                <ArrowRight size={13} />
-              </Link>
+            <div className="pt-2 flex flex-col gap-2 items-center">
+              {isAlreadyConfirmed ? (
+                <Link
+                  to="/dashboard/attendee"
+                  className="inline-flex items-center gap-2 bg-[#B45309] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm"
+                >
+                  <span>View Pass &amp; QR Badge in Dashboard</span>
+                  <ArrowRight size={13} />
+                </Link>
+              ) : (
+                <Link
+                  to="/explore"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-[#B45309] hover:underline"
+                >
+                  <span>Browse Other Active Conferences</span>
+                  <ArrowRight size={13} />
+                </Link>
+              )}
             </div>
           </motion.div>
         ) : (
