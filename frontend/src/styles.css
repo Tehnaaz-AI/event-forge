@@ -235,6 +235,8 @@
 
 /* Accent Card Tints in Dark Mode */
 .dark .bg-amber-50,
+.dark .bg-amber-50\/30,
+.dark .bg-amber-50\/50,
 .dark .bg-amber-50\/60,
 .dark .bg-amber-50\/80 {
   background-color: rgba(180, 83, 9, 0.16) !important;
@@ -243,6 +245,8 @@
 }
 
 .dark .bg-emerald-50,
+.dark .bg-emerald-50\/30,
+.dark .bg-emerald-50\/50,
 .dark .bg-emerald-50\/60,
 .dark .bg-emerald-50\/80 {
   background-color: rgba(4, 120, 87, 0.16) !important;
@@ -251,6 +255,8 @@
 }
 
 .dark .bg-rose-50,
+.dark .bg-rose-50\/30,
+.dark .bg-rose-50\/50,
 .dark .bg-rose-50\/60,
 .dark .bg-rose-50\/80 {
   background-color: rgba(225, 29, 72, 0.16) !important;
@@ -259,6 +265,8 @@
 }
 
 .dark .bg-blue-50,
+.dark .bg-blue-50\/30,
+.dark .bg-blue-50\/50,
 .dark .bg-blue-50\/60,
 .dark .bg-blue-50\/80 {
   background-color: rgba(30, 58, 138, 0.22) !important;
@@ -278,6 +286,29 @@
   background-color: rgba(124, 45, 18, 0.22) !important;
   border-color: rgba(249, 115, 22, 0.25) !important;
   color: #FED7AA !important;
+}
+
+/* Gradients Inversion in Dark Mode */
+.dark .from-amber-50,
+.dark .from-amber-100 {
+  --tw-gradient-from: #1C1917 !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #221C16, var(--tw-gradient-to) !important;
+}
+
+.dark .to-orange-50,
+.dark .to-amber-50,
+.dark .to-amber-100 {
+  --tw-gradient-to: #181513 !important;
+}
+
+.dark .from-emerald-50,
+.dark .from-emerald-100 {
+  --tw-gradient-from: #0F1F17 !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #0D1A14, var(--tw-gradient-to) !important;
+}
+
+.dark .to-emerald-50 {
+  --tw-gradient-to: #0D1A14 !important;
 }
 
 /* Badges & Pills in Dark Mode */
@@ -377,12 +408,168 @@
   border-color: #2E2A24 !important;
 }
 
+.dark .border-amber-200 {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+.dark .border-emerald-200 {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+.dark .border-rose-200 {
+  border-color: rgba(244, 63, 94, 0.35) !important;
+}
+
+.dark .border-blue-200 {
+  border-color: rgba(59, 130, 246, 0.35) !important;
+}
+
 .dark .divide-\[\#EFE8DA\] > * + *,
 .dark .divide-stone-100 > * + *,
 .dark .divide-stone-200 > * + *,
 .dark .divide-slate-100 > * + *,
 .dark .divide-slate-200 > * + * {
   border-color: #2E2A24 !important;
+}
+
+/* ==========================================================================
+   🌙 DARK MODE COMPREHENSIVE HOVER STATES (Prevents Elements Turning White) 🌙
+   ========================================================================== */
+
+/* 1. Neutral Surfaces on Hover */
+.dark .hover\:bg-white:hover,
+.dark .hover\:bg-stone-50:hover,
+.dark .hover\:bg-stone-50\/50:hover,
+.dark .hover\:bg-stone-50\/70:hover,
+.dark .hover\:bg-stone-50\/80:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-50\/50:hover,
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-\[\#FAF8F5\]:hover,
+.dark .hover\:bg-\[\#FAF8F5\]\/50:hover,
+.dark .hover\:bg-\[\#FAF8F5\]\/80:hover,
+.dark .hover\:bg-\[\#FDFAF5\]:hover,
+.dark .hover\:bg-\[\#F5F2EB\]:hover {
+  background-color: #24211D !important;
+  color: #F5F2EB !important;
+  border-color: #3C3730 !important;
+}
+
+.dark .hover\:bg-stone-100:hover,
+.dark .hover\:bg-stone-100\/70:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-gray-100:hover {
+  background-color: #2E2A24 !important;
+  color: #F5F2EB !important;
+  border-color: #44403C !important;
+}
+
+.dark .hover\:bg-stone-200:hover,
+.dark .hover\:bg-slate-200:hover,
+.dark .hover\:bg-gray-200:hover {
+  background-color: #38332B !important;
+  color: #F5F2EB !important;
+  border-color: #57534E !important;
+}
+
+.dark .hover\:bg-stone-800:hover,
+.dark .hover\:bg-stone-900:hover {
+  background-color: #292524 !important;
+  color: #F5F2EB !important;
+}
+
+/* 2. Semi-Transparent & Glass Overlays on Hover */
+.dark .hover\:bg-white\/10:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .hover\:bg-white\/20:hover {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .hover\:bg-white\/25:hover {
+  background-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* 3. Accent Tints on Hover */
+.dark .hover\:bg-amber-50:hover,
+.dark .hover\:bg-amber-100:hover,
+.dark .hover\:bg-\[\#B45309\]\/10:hover,
+.dark .hover\:bg-\[\#B45309\]\/20:hover {
+  background-color: rgba(180, 83, 9, 0.28) !important;
+  color: #FCD34D !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+.dark .hover\:bg-emerald-50:hover,
+.dark .hover\:bg-emerald-100:hover {
+  background-color: rgba(4, 120, 87, 0.28) !important;
+  color: #6EE7B7 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+.dark .hover\:bg-rose-50:hover,
+.dark .hover\:bg-rose-100:hover {
+  background-color: rgba(225, 29, 72, 0.28) !important;
+  color: #FDA4AF !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+.dark .hover\:bg-blue-50:hover,
+.dark .hover\:bg-blue-100:hover {
+  background-color: rgba(30, 58, 138, 0.35) !important;
+  color: #93C5FD !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+/* 4. Text Contrast on Hover */
+.dark .hover\:text-stone-900:hover,
+.dark .hover\:text-stone-800:hover,
+.dark .hover\:text-stone-700:hover,
+.dark .hover\:text-slate-900:hover,
+.dark .hover\:text-slate-800:hover,
+.dark .hover\:text-gray-900:hover,
+.dark .hover\:text-gray-800:hover,
+.dark .hover\:text-black:hover {
+  color: #F5F2EB !important;
+}
+
+.dark .hover\:text-stone-600:hover,
+.dark .hover\:text-stone-500:hover,
+.dark .hover\:text-slate-600:hover,
+.dark .hover\:text-slate-500:hover,
+.dark .hover\:text-gray-600:hover,
+.dark .hover\:text-gray-500:hover {
+  color: #E2DDD5 !important;
+}
+
+.dark .hover\:text-\[\#B45309\]:hover {
+  color: #FCD34D !important;
+}
+
+.dark .hover\:text-rose-600:hover,
+.dark .hover\:text-rose-700:hover {
+  color: #FDA4AF !important;
+}
+
+.dark .hover\:text-emerald-600:hover,
+.dark .hover\:text-emerald-700:hover {
+  color: #6EE7B7 !important;
+}
+
+/* 5. Border on Hover */
+.dark .hover\:border-stone-200:hover,
+.dark .hover\:border-stone-300:hover,
+.dark .hover\:border-stone-400:hover,
+.dark .hover\:border-slate-200:hover,
+.dark .hover\:border-slate-300:hover,
+.dark .hover\:border-\[\#EFE8DA\]:hover {
+  border-color: #57534E !important;
+}
+
+.dark .hover\:border-\[\#B45309\]:hover,
+.dark .hover\:border-\[\#B45309\]\/30:hover {
+  border-color: rgba(245, 158, 11, 0.5) !important;
 }
 
 /* Tables & Sticky Headers */
@@ -394,7 +581,7 @@
 }
 
 .dark tr:hover {
-  background-color: rgba(255, 255, 255, 0.03) !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
 }
 
 /* Form Controls */
