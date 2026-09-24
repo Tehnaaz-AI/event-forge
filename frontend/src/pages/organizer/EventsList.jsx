@@ -65,7 +65,7 @@ export default function EventsList() {
                 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none"></div>
-                <span className="relative z-10 text-[10px] font-extrabold text-stone-900 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider shadow-xs">
+                <span className="relative z-10 text-[10px] font-extrabold text-stone-900 dark:text-amber-300 bg-white/95 dark:bg-[#1C1917]/95 backdrop-blur-md px-3 py-1 rounded-full uppercase tracking-wider shadow-xs border border-white/20 dark:border-amber-500/30">
                   {event.category || 'CONFERENCE'}
                 </span>
                 <span className={`relative z-10 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase shadow-xs ${

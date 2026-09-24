@@ -175,7 +175,9 @@
   color: #F5F2EB !important;
 }
 
-.dark .bg-\[\#FAF8F5\] {
+.dark .bg-\[\#FAF8F5\],
+.dark .bg-\[\#FDFAF5\],
+.dark .bg-\[\#F5F2EB\] {
   background-color: #0F0E0D !important;
   color: #F5F2EB !important;
 }
@@ -187,14 +189,38 @@
   box-shadow: 0 12px 35px -5px rgba(15, 23, 42, 0.8), 0 0 15px rgba(245, 158, 11, 0.15) !important;
 }
 
+/* Cards & Surfaces */
 .dark .bg-white {
   background-color: #171614 !important;
   border-color: #2E2A24 !important;
   color: #F5F2EB !important;
 }
 
+.dark .bg-stone-50,
+.dark .bg-slate-50,
+.dark .bg-gray-50 {
+  background-color: #1C1917 !important;
+  border-color: #2E2A24 !important;
+  color: #F5F2EB !important;
+}
+
+.dark .bg-stone-100,
+.dark .bg-slate-100,
+.dark .bg-gray-100 {
+  background-color: #24211D !important;
+  border-color: #3C3730 !important;
+  color: #F5F2EB !important;
+}
+
+.dark .bg-stone-200,
+.dark .bg-slate-200 {
+  background-color: #2E2A24 !important;
+  border-color: #44403C !important;
+  color: #F5F2EB !important;
+}
+
 .dark .bg-\[\#FAF8F5\]\/50,
-.dark .bg-\[\#FAF8F5\] {
+.dark .bg-\[\#FAF8F5\]\/80 {
   background-color: #1A1815 !important;
   border-color: #2E2A24 !important;
 }
@@ -207,35 +233,186 @@
   --tw-gradient-stops: var(--tw-gradient-from), #12110F, var(--tw-gradient-to) !important;
 }
 
-.dark .text-stone-900 {
+/* Accent Card Tints in Dark Mode */
+.dark .bg-amber-50,
+.dark .bg-amber-50\/60,
+.dark .bg-amber-50\/80 {
+  background-color: rgba(180, 83, 9, 0.16) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+  color: #FDE68A !important;
+}
+
+.dark .bg-emerald-50,
+.dark .bg-emerald-50\/60,
+.dark .bg-emerald-50\/80 {
+  background-color: rgba(4, 120, 87, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+  color: #A7F3D0 !important;
+}
+
+.dark .bg-rose-50,
+.dark .bg-rose-50\/60,
+.dark .bg-rose-50\/80 {
+  background-color: rgba(225, 29, 72, 0.16) !important;
+  border-color: rgba(244, 63, 94, 0.25) !important;
+  color: #FECDD3 !important;
+}
+
+.dark .bg-blue-50,
+.dark .bg-blue-50\/60,
+.dark .bg-blue-50\/80 {
+  background-color: rgba(30, 58, 138, 0.22) !important;
+  border-color: rgba(59, 130, 246, 0.25) !important;
+  color: #BFDBFE !important;
+}
+
+.dark .bg-purple-50,
+.dark .bg-purple-50\/60 {
+  background-color: rgba(88, 28, 135, 0.22) !important;
+  border-color: rgba(168, 85, 247, 0.25) !important;
+  color: #E9D5FF !important;
+}
+
+.dark .bg-orange-50,
+.dark .bg-orange-50\/60 {
+  background-color: rgba(124, 45, 18, 0.22) !important;
+  border-color: rgba(249, 115, 22, 0.25) !important;
+  color: #FED7AA !important;
+}
+
+/* Badges & Pills in Dark Mode */
+.dark .bg-amber-100 {
+  background-color: rgba(180, 83, 9, 0.3) !important;
+  color: #FCD34D !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+.dark .bg-emerald-100 {
+  background-color: rgba(4, 120, 87, 0.3) !important;
+  color: #6EE7B7 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+.dark .bg-rose-100 {
+  background-color: rgba(225, 29, 72, 0.3) !important;
+  color: #FDA4AF !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+.dark .bg-blue-100 {
+  background-color: rgba(30, 58, 138, 0.35) !important;
+  color: #93C5FD !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Typography Overrides */
+.dark .text-stone-900,
+.dark .text-slate-900,
+.dark .text-gray-900 {
   color: #F5F2EB !important;
 }
 
 .dark .text-stone-800,
-.dark .text-stone-700 {
+.dark .text-stone-700,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark .text-gray-800,
+.dark .text-gray-700 {
   color: #E2DDD5 !important;
 }
 
 .dark .text-stone-600,
-.dark .text-stone-500 {
+.dark .text-stone-500,
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-gray-600,
+.dark .text-gray-500 {
   color: #A8A196 !important;
 }
 
-.dark .text-stone-400 {
-  color: #7A746B !important;
+.dark .text-stone-400,
+.dark .text-slate-400,
+.dark .text-gray-400 {
+  color: #8C8478 !important;
 }
 
+.dark .text-amber-700,
+.dark .text-amber-800,
+.dark .text-amber-900 {
+  color: #FCD34D !important;
+}
+
+.dark .text-emerald-600,
+.dark .text-emerald-700,
+.dark .text-emerald-800,
+.dark .text-emerald-900 {
+  color: #6EE7B7 !important;
+}
+
+.dark .text-rose-600,
+.dark .text-rose-700,
+.dark .text-rose-800,
+.dark .text-rose-900 {
+  color: #FDA4AF !important;
+}
+
+.dark .text-blue-700,
+.dark .text-blue-800 {
+  color: #93C5FD !important;
+}
+
+.dark .text-purple-700,
+.dark .text-purple-800 {
+  color: #D8B4FE !important;
+}
+
+/* Borders & Dividers */
 .dark .border-\[\#EFE8DA\],
-.dark .border-stone-100 {
+.dark .border-stone-100,
+.dark .border-stone-200,
+.dark .border-stone-300,
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300 {
   border-color: #2E2A24 !important;
 }
 
+.dark .divide-\[\#EFE8DA\] > * + *,
+.dark .divide-stone-100 > * + *,
+.dark .divide-stone-200 > * + *,
+.dark .divide-slate-100 > * + *,
+.dark .divide-slate-200 > * + * {
+  border-color: #2E2A24 !important;
+}
+
+/* Tables & Sticky Headers */
+.dark thead,
+.dark th {
+  background-color: #1C1917 !important;
+  color: #D6D3D1 !important;
+  border-color: #2E2A24 !important;
+}
+
+.dark tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Form Controls */
 .dark input,
 .dark textarea,
 .dark select {
   background-color: #1F1D1A !important;
   border-color: #3C3730 !important;
   color: #F5F2EB !important;
+}
+
+.dark option {
+  background-color: #1F1D1A !important;
+  color: #F5F2EB !important;
+}
+
+.dark input[type="datetime-local"] {
+  color-scheme: dark;
 }
 
 .dark input::placeholder,
@@ -250,16 +427,24 @@
   box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25) !important;
 }
 
-.dark ::-webkit-scrollbar-track {
-  background: #0F0E0D;
+/* Scrollbars in Dark Mode */
+.dark ::-webkit-scrollbar-track,
+.dark .scrollbar-beige::-webkit-scrollbar-track {
+  background: #0F0E0D !important;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #2E2A24;
+.dark ::-webkit-scrollbar-thumb,
+.dark .scrollbar-beige::-webkit-scrollbar-thumb {
+  background: #2E2A24 !important;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #D97706;
+.dark ::-webkit-scrollbar-thumb:hover,
+.dark .scrollbar-beige::-webkit-scrollbar-thumb:hover {
+  background: #D97706 !important;
+}
+
+.dark .scrollbar-beige {
+  scrollbar-color: #2E2A24 #0F0E0D;
 }
 
 /* 🌟 Distinct Non-Black Luxury Twilight Sapphire Footer in Dark Mode 🌟 */

@@ -119,7 +119,7 @@ export default function NewEvent() {
               }}
             >
               <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]"></div>
-              <span className="relative z-10 text-[10px] font-extrabold bg-white/90 text-stone-900 px-2.5 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-md">
+              <span className="relative z-10 text-[10px] font-extrabold bg-white/95 dark:bg-[#1C1917]/95 text-stone-900 dark:text-amber-300 px-2.5 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-md border border-white/20 dark:border-amber-500/30">
                 {formData.category || 'CONFERENCE'}
               </span>
               <span className="relative z-10 text-[10px] font-extrabold bg-[#B45309] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
