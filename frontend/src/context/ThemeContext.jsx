@@ -14,7 +14,8 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
+    const isDarkMode = theme === 'dark';
+    if (isDarkMode) {
       root.classList.add('dark');
       root.setAttribute('data-theme', 'dark');
     } else {
@@ -22,6 +23,27 @@ export function ThemeProvider({ children }) {
       root.setAttribute('data-theme', 'light');
     }
     localStorage.setItem('eventforge_theme', theme);
+
+    // Dynamically update browser tab favicon on theme change
+    try {
+      const iconHref = isDarkMode ? '/favicon-dark.svg' : '/favicon-light.svg';
+      const themeColor = isDarkMode ? '#0E0C0A' : '#FAF5EC';
+      
+      const iconLinks = document.querySelectorAll("link[rel*='icon']");
+      if (iconLinks && iconLinks.length > 0) {
+        iconLinks.forEach(el => {
+          // If media query is specified, leave it for browser auto-detect, otherwise update default
+          if (!el.getAttribute('media')) {
+            el.setAttribute('href', iconHref);
+          }
+        });
+      }
+      
+      const themeColorMeta = document.querySelector("meta[name='theme-color']");
+      if (themeColorMeta) {
+        themeColorMeta.setAttribute('content', themeColor);
+      }
+    } catch (e) {}
   }, [theme]);
 
   const toggleTheme = () => {
