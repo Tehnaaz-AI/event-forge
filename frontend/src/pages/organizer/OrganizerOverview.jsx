@@ -24,8 +24,6 @@ export default function OrganizerOverview() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'DRAFT'
   const [selectedConferenceId, setSelectedConferenceId] = useState(null);
-  const [chartZoom, setChartZoom] = useState(1);
-  const chartContainerRef = useRef(null);
 
   const { data: events, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['organizer-events-overview'],
@@ -43,22 +41,6 @@ export default function OrganizerOverview() {
     enabled: Boolean(selectedEvent?._id),
     refetchInterval: 10000
   });
-
-  useEffect(() => {
-    const el = chartContainerRef.current;
-    if (!el) return;
-    const onWheel = (e) => {
-      e.preventDefault();
-      const step = 0.15;
-      if (e.deltaY < 0) {
-        setChartZoom(prev => Math.min(3.0, Number((prev + step).toFixed(2))));
-      } else if (e.deltaY > 0) {
-        setChartZoom(prev => Math.max(0.75, Number((prev - step).toFixed(2))));
-      }
-    };
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, [singleConferenceAnalytics]);
 
   const totalEvents = events?.length || 0;
   const activeEvents = events?.filter(e => ['PUBLISHED', 'REGISTRATION_OPEN', 'LIVE'].includes(e.status))?.length || 0;
@@ -334,51 +316,14 @@ export default function OrganizerOverview() {
             <div className="pt-2">
               <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-stone-500 mb-2.5">
                 <span>Daily Registration Trajectory &amp; Revenue Inflow</span>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                      <span className="text-stone-700 dark:text-stone-300">Daily Passes</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#B45309]"></span>
-                      <span className="text-stone-700 dark:text-stone-300">Revenue ($)</span>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <span className="text-stone-700 dark:text-stone-300">Daily Passes</span>
                   </div>
-
-                  {/* Zoom Controls */}
-                  <div className="inline-flex items-center gap-1 bg-[#FAF8F5] dark:bg-stone-900 border border-[#EFE8DA] dark:border-stone-800 p-1 rounded-xl shadow-xs">
-                    <button
-                      type="button"
-                      title="Zoom Out"
-                      disabled={chartZoom <= 0.8}
-                      onClick={() => setChartZoom(prev => Math.max(0.75, Number((prev - 0.25).toFixed(2))))}
-                      className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 disabled:opacity-40 transition-colors"
-                    >
-                      <ZoomOut size={14} />
-                    </button>
-                    <span className="text-[11px] font-mono font-bold text-stone-700 dark:text-stone-300 px-1.5 min-w-[42px] text-center">
-                      {Math.round(chartZoom * 100)}%
-                    </span>
-                    <button
-                      type="button"
-                      title="Zoom In"
-                      disabled={chartZoom >= 2.5}
-                      onClick={() => setChartZoom(prev => Math.min(2.5, Number((prev + 0.25).toFixed(2))))}
-                      className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 disabled:opacity-40 transition-colors"
-                    >
-                      <ZoomIn size={14} />
-                    </button>
-                    {chartZoom !== 1 && (
-                      <button
-                        type="button"
-                        title="Reset Zoom"
-                        onClick={() => setChartZoom(1)}
-                        className="p-1 rounded-lg hover:bg-[#B45309]/10 text-[#B45309] transition-colors ml-0.5"
-                      >
-                        <RotateCcw size={13} />
-                      </button>
-                    )}
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#B45309]"></span>
+                    <span className="text-stone-700 dark:text-stone-300">Revenue ($)</span>
                   </div>
                 </div>
               </div>
@@ -388,114 +333,102 @@ export default function OrganizerOverview() {
                   <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : singleConferenceAnalytics?.timelineData?.length > 0 ? (
-                <div 
-                  ref={chartContainerRef}
-                  className="w-full overflow-x-auto overflow-y-auto max-h-[380px] sm:max-h-[440px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom cursor-crosshair select-none"
-                >
-                  <div 
-                    style={{ 
-                      minWidth: `${Math.round(1100 * chartZoom)}px`, 
-                      height: `${Math.round(460 * chartZoom)}px`,
-                      transition: 'min-width 0.15s ease-out, height 0.15s ease-out'
-                    }} 
-                    className="w-full px-3"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 20, right: 35, left: 10, bottom: 30 }}>
-                        <defs>
-                          <linearGradient id="singleRevGlow" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#B45309" stopOpacity={0.35}/>
-                            <stop offset="95%" stopColor="#B45309" stopOpacity={0.0}/>
-                          </linearGradient>
-                          <linearGradient id="singleRegGlow" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.35}/>
-                            <stop offset="95%" stopColor="#10B981" stopOpacity={0.0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#2E2A24" strokeOpacity={0.12} vertical={false} />
-                        <XAxis 
-                          dataKey="day" 
-                          stroke="#78716C" 
-                          fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
-                          fontWeight={700} 
-                          tickLine={true} 
-                          tickMargin={Math.round(8 * chartZoom)}
-                          height={45}
-                          dy={6}
-                          axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.15 }}
-                          interval={0}
-                        />
-                        {/* Primary Y-Axis: No. of Registrations (Passes) */}
-                        <YAxis 
-                          yAxisId="regAxis"
-                          stroke="#10B981" 
-                          fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
-                          fontWeight={700} 
-                          tickLine={false} 
-                          tickMargin={6}
-                          axisLine={false}
-                          allowDecimals={false}
-                          domain={[0, (dataMax) => Math.max(4, Math.ceil(dataMax * 1.15))]}
-                          tickCount={Math.min(12, Math.max(4, Math.round(5 * chartZoom)))}
-                          width={40}
-                          label={{ value: 'No. of Registrations', angle: -90, position: 'insideLeft', fill: '#10B981', fontSize: 10, fontWeight: 700, dy: 50, dx: 0 }}
-                        />
-                        {/* Secondary Y-Axis: Revenue ($) */}
-                        <YAxis 
-                          yAxisId="revAxis"
-                          orientation="right"
-                          stroke="#B45309" 
-                          fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
-                          fontWeight={700} 
-                          tickLine={false} 
-                          tickMargin={6}
-                          axisLine={false}
-                          allowDecimals={false}
-                          domain={[0, (dataMax) => Math.max(100, Math.ceil(dataMax * 1.15))]}
-                          tickCount={Math.min(12, Math.max(4, Math.round(5 * chartZoom)))}
-                          width={45}
-                          tickFormatter={(val) => `$${val}`}
-                        />
-                        <Tooltip 
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              const d = payload[0].payload;
-                              return (
-                                <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1.5 min-w-[170px]">
-                                  <p className="font-black text-[#F59E0B] text-xs border-b border-stone-800 pb-1">{d.day || d.date}</p>
-                                  <div className="space-y-1 text-stone-300 font-mono text-[11px]">
-                                    <p className="flex justify-between"><span>Registrations:</span> <strong className="text-emerald-400 font-bold">{d.registrations} passes</strong></p>
-                                    <p className="flex justify-between"><span>Gross Revenue:</span> <strong className="text-amber-300 font-bold">${d.revenue.toLocaleString()}</strong></p>
-                                  </div>
+                <div className="w-full h-[320px] sm:h-[360px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] p-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 20, right: 35, left: 10, bottom: 30 }}>
+                      <defs>
+                        <linearGradient id="singleRevGlow" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#B45309" stopOpacity={0.35}/>
+                          <stop offset="95%" stopColor="#B45309" stopOpacity={0.0}/>
+                        </linearGradient>
+                        <linearGradient id="singleRegGlow" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.35}/>
+                          <stop offset="95%" stopColor="#10B981" stopOpacity={0.0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2E2A24" strokeOpacity={0.12} vertical={false} />
+                      <XAxis 
+                        dataKey="day" 
+                        stroke="#78716C" 
+                        fontSize={11} 
+                        fontWeight={700} 
+                        tickLine={true} 
+                        tickMargin={8}
+                        height={45}
+                        dy={6}
+                        axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.15 }}
+                        interval={0}
+                      />
+                      {/* Primary Y-Axis: No. of Registrations (Passes) */}
+                      <YAxis 
+                        yAxisId="regAxis"
+                        stroke="#10B981" 
+                        fontSize={11} 
+                        fontWeight={700} 
+                        tickLine={false} 
+                        tickMargin={6}
+                        axisLine={false}
+                        allowDecimals={false}
+                        domain={[0, (dataMax) => Math.max(4, Math.ceil(dataMax * 1.15))]}
+                        tickCount={5}
+                        width={40}
+                        label={{ value: 'No. of Registrations', angle: -90, position: 'insideLeft', fill: '#10B981', fontSize: 10, fontWeight: 700, dy: 50, dx: 0 }}
+                      />
+                      {/* Secondary Y-Axis: Revenue ($) */}
+                      <YAxis 
+                        yAxisId="revAxis"
+                        orientation="right"
+                        stroke="#B45309" 
+                        fontSize={11} 
+                        fontWeight={700} 
+                        tickLine={false} 
+                        tickMargin={6}
+                        axisLine={false}
+                        allowDecimals={false}
+                        domain={[0, (dataMax) => Math.max(100, Math.ceil(dataMax * 1.15))]}
+                        tickCount={5}
+                        width={45}
+                        tickFormatter={(val) => `$${val}`}
+                      />
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const d = payload[0].payload;
+                            return (
+                              <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1.5 min-w-[170px]">
+                                <p className="font-black text-[#F59E0B] text-xs border-b border-stone-800 pb-1">{d.day || d.date}</p>
+                                <div className="space-y-1 text-stone-300 font-mono text-[11px]">
+                                  <p className="flex justify-between"><span>Registrations:</span> <strong className="text-emerald-400 font-bold">{d.registrations} passes</strong></p>
+                                  <p className="flex justify-between"><span>Gross Revenue:</span> <strong className="text-amber-300 font-bold">${d.revenue.toLocaleString()}</strong></p>
                                 </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Area 
-                          yAxisId="regAxis"
-                          type="monotone" 
-                          dataKey="registrations" 
-                          stroke="#10B981" 
-                          strokeWidth={2.5}
-                          fillOpacity={1} 
-                          fill="url(#singleRegGlow)" 
-                          name="Daily Registrations"
-                        />
-                        <Area 
-                          yAxisId="revAxis"
-                          type="monotone" 
-                          dataKey="revenue" 
-                          stroke="#B45309" 
-                          strokeWidth={2}
-                          fillOpacity={1} 
-                          fill="url(#singleRevGlow)" 
-                          name="Revenue ($)"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Area 
+                        yAxisId="regAxis"
+                        type="monotone" 
+                        dataKey="registrations" 
+                        stroke="#10B981" 
+                        strokeWidth={2.5}
+                        fillOpacity={1} 
+                        fill="url(#singleRegGlow)" 
+                        name="Daily Registrations"
+                      />
+                      <Area 
+                        yAxisId="revAxis"
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke="#B45309" 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#singleRevGlow)" 
+                        name="Revenue ($)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               ) : (
                 <div className="p-8 text-center bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-dashed border-[#EFE8DA] dark:border-stone-800">

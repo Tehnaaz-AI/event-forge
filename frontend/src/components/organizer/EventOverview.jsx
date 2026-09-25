@@ -14,29 +14,10 @@ import { api } from '../../services/api';
 const LUXURY_COLORS = ['#B45309', '#C28E27', '#854D0E', '#D97706', '#78716C'];
 
 export default function EventOverview({ eventId }) {
-  const [chartZoom, setChartZoom] = useState(1);
-  const chartContainerRef = useRef(null);
-
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ['event-analytics', eventId],
     queryFn: () => api.get(`/events/${eventId}/analytics`)
   });
-
-  useEffect(() => {
-    const el = chartContainerRef.current;
-    if (!el) return;
-    const onWheel = (e) => {
-      e.preventDefault();
-      const step = 0.15;
-      if (e.deltaY < 0) {
-        setChartZoom(prev => Math.min(3.0, Number((prev + step).toFixed(2))));
-      } else if (e.deltaY > 0) {
-        setChartZoom(prev => Math.max(0.75, Number((prev - step).toFixed(2))));
-      }
-    };
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, [stats]);
 
   if (isLoading) {
     return (
@@ -166,58 +147,12 @@ export default function EventOverview({ eventId }) {
               <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live DB Telemetry
               </span>
-
-              {/* Zoom Controls */}
-              <div className="inline-flex items-center gap-1 bg-[#FAF8F5] dark:bg-stone-900 border border-[#EFE8DA] dark:border-stone-800 p-1 rounded-xl shadow-xs">
-                <button
-                  type="button"
-                  title="Zoom Out"
-                  disabled={chartZoom <= 0.8}
-                  onClick={() => setChartZoom(prev => Math.max(0.75, Number((prev - 0.25).toFixed(2))))}
-                  className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 disabled:opacity-40 transition-colors"
-                >
-                  <ZoomOut size={14} />
-                </button>
-                <span className="text-[11px] font-mono font-bold text-stone-700 dark:text-stone-300 px-1.5 min-w-[42px] text-center">
-                  {Math.round(chartZoom * 100)}%
-                </span>
-                <button
-                  type="button"
-                  title="Zoom In"
-                  disabled={chartZoom >= 2.5}
-                  onClick={() => setChartZoom(prev => Math.min(2.5, Number((prev + 0.25).toFixed(2))))}
-                  className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 disabled:opacity-40 transition-colors"
-                >
-                  <ZoomIn size={14} />
-                </button>
-                {chartZoom !== 1 && (
-                  <button
-                    type="button"
-                    title="Reset Zoom"
-                    onClick={() => setChartZoom(1)}
-                    className="p-1 rounded-lg hover:bg-[#B45309]/10 text-[#B45309] transition-colors ml-0.5"
-                  >
-                    <RotateCcw size={13} />
-                  </button>
-                )}
-              </div>
             </div>
           </div>
 
-          <div 
-            ref={chartContainerRef}
-            className="w-full overflow-x-auto overflow-y-auto max-h-[380px] sm:max-h-[440px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom cursor-crosshair select-none"
-          >
-            <div 
-              style={{ 
-                minWidth: `${Math.round(1100 * chartZoom)}px`, 
-                height: `${Math.round(460 * chartZoom)}px`,
-                transition: 'min-width 0.15s ease-out, height 0.15s ease-out'
-              }} 
-              className="px-3"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={timelineData} margin={{ top: 15, right: 30, left: 0, bottom: 25 }}>
+          <div className="w-full h-[320px] sm:h-[360px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={timelineData} margin={{ top: 15, right: 30, left: 0, bottom: 25 }}>
                   <defs>
                     <linearGradient id="colorBeigeReg" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#B45309" stopOpacity={0.4}/>
@@ -232,10 +167,10 @@ export default function EventOverview({ eventId }) {
                   <XAxis 
                     dataKey="day" 
                     stroke="#78716C" 
-                    fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
+                    fontSize={11} 
                     fontWeight={700} 
                     tickLine={true} 
-                    tickMargin={Math.round(8 * chartZoom)}
+                    tickMargin={8}
                     height={40}
                     dy={6}
                     axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.15 }}
@@ -244,28 +179,28 @@ export default function EventOverview({ eventId }) {
                   <YAxis 
                     yAxisId="regAxis"
                     stroke="#B45309" 
-                    fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
+                    fontSize={11} 
                     fontWeight={700} 
                     tickLine={false} 
                     tickMargin={6}
                     axisLine={false}
                     allowDecimals={false}
                     domain={[0, (dataMax) => Math.max(4, Math.ceil(dataMax * 1.15))]}
-                    tickCount={Math.min(12, Math.max(4, Math.round(5 * chartZoom)))}
+                    tickCount={5}
                     width={40}
                   />
                   <YAxis 
                     yAxisId="revAxis"
                     orientation="right"
                     stroke="#10B981" 
-                    fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
+                    fontSize={11} 
                     fontWeight={700} 
                     tickLine={false} 
                     tickMargin={6}
                     axisLine={false}
                     allowDecimals={false}
                     domain={[0, (dataMax) => Math.max(100, Math.ceil(dataMax * 1.15))]}
-                    tickCount={Math.min(12, Math.max(4, Math.round(5 * chartZoom)))}
+                    tickCount={5}
                     width={50}
                     tickFormatter={(val) => `$${val}`}
                   />
@@ -310,7 +245,6 @@ export default function EventOverview({ eventId }) {
               </ResponsiveContainer>
             </div>
           </div>
-        </div>
 
         {/* Ticket Tier Distribution Donut */}
         <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#EFE8DA] shadow-sm flex flex-col justify-between space-y-4">

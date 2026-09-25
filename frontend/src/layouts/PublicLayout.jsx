@@ -58,7 +58,7 @@ export default function PublicLayout() {
       <AppNavbar />
 
       {/* Main Page Canvas */}
-      <main className="flex-1 w-full relative">
+      <main className="flex-1 w-full relative z-10">
         <Outlet />
       </main>
 

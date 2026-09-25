@@ -112,11 +112,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-transparent text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative transition-colors duration-300">
       
-      {/* Live Moving Ambient Dynamic Background */}
-      <AmbientLiveBackground />
-
-      {/* Editorial Luxury Hero Section */}
-      <section className="relative pt-16 pb-28 px-6 overflow-hidden border-b border-[#EFE8DA] dark:border-stone-800/80 bg-gradient-to-b from-[#FDFAF5]/60 via-[#FAF8F5]/40 to-[#F5F2EB]/60 dark:from-transparent dark:via-black/20 dark:to-transparent backdrop-blur-xs">
+      {/* Editorial Luxury Hero Section - Seamless */}
+      <section className="relative pt-12 pb-24 px-6 overflow-hidden">
         
         {/* Ambient Warm Floating Glow */}
         <motion.div 

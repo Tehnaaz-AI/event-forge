@@ -82,10 +82,10 @@ export default function FeaturesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-28 text-stone-900 font-sans">
+    <div className="min-h-screen bg-transparent pb-28 text-stone-900 dark:text-stone-100 font-sans">
       
-      {/* Hero Header */}
-      <section className="bg-gradient-to-b from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] pt-8 pb-20 px-6">
+      {/* Hero Header - Seamless */}
+      <section className="pt-6 pb-16 px-6 relative">
         <div className="max-w-5xl mx-auto px-4 mb-4">
           <Breadcrumbs items={[{ label: 'Platform Capabilities' }]} />
         </div>

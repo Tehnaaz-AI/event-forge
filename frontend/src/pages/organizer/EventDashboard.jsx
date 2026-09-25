@@ -110,20 +110,20 @@ export default function EventDashboard() {
   }
 
   const tabs = [
-    { id: 'overview', label: 'Executive Overview' },
+    { id: 'overview', label: '🏛️ Executive Overview' },
     { id: 'registrations', label: '👥 Registered Attendees' },
     { id: 'waitlist', label: '👑 VIP Waitlist' },
     { id: 'pulse', label: '⚡ Live Event Pulse & OS' },
     { id: 'stage', label: '🎙️ Stage Run-of-Show' },
-    { id: 'tickets', label: 'Tickets & Pricing Tiers' },
-    { id: 'staff', label: 'Door Staff & Crew' },
-    { id: 'sessions', label: 'Sessions & Multi-Track' },
-    { id: 'speakers', label: 'Speakers' },
-    { id: 'sponsors', label: 'Sponsors & Lead Capture' },
-    { id: 'ai', label: 'AI Content Assistant' },
-    { id: 'announcements', label: 'Broadcasts' },
+    { id: 'tickets', label: '🎟️ Tickets & Pricing Tiers' },
+    { id: 'staff', label: '🛡️ Door Staff & Crew' },
+    { id: 'sessions', label: '🗓️ Sessions & Multi-Track' },
+    { id: 'speakers', label: '🎤 Keynote Speakers' },
+    { id: 'sponsors', label: '💼 Sponsors & Partners' },
+    { id: 'ai', label: '✨ AI Content Assistant' },
+    { id: 'announcements', label: '📢 Live Broadcasts' },
     { id: 'post-event', label: '📊 Post-Event AI Report' },
-    { id: 'settings', label: 'Event Configuration' }
+    { id: 'settings', label: '⚙️ Event Configuration' }
   ];
 
   const handleTabChange = (tabId) => {
@@ -163,18 +163,18 @@ export default function EventDashboard() {
         </div>
       </div>
 
-      {/* Tab Navigation Ribbon */}
-      <div className="flex items-center gap-2 border-b border-[#EFE8DA] overflow-x-auto pb-1 scrollbar-beige">
+      {/* Tab Navigation Ribbon - Modern Segmented Glass Capsule */}
+      <div className="bg-[#FAF6EF]/90 dark:bg-[#141210]/90 backdrop-blur-md p-1.5 rounded-2xl border border-[#E8DFC8] dark:border-stone-800 shadow-sm flex items-center gap-1.5 overflow-x-auto scrollbar-sleek">
         {tabs.map(tab => {
           const isActive = currentTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`py-3 px-4 text-xs font-bold whitespace-nowrap transition-all border-b-2 -mb-px shrink-0 ${
+              className={`py-2.5 px-4 text-xs font-bold whitespace-nowrap transition-all rounded-xl shrink-0 flex items-center gap-2 ${
                 isActive 
-                  ? 'border-[#B45309] text-[#B45309] bg-white rounded-t-xl shadow-xs' 
-                  : 'border-transparent text-stone-500 hover:text-stone-800 hover:border-stone-300'
+                  ? 'bg-gradient-to-r from-[#B45309] via-[#D97706] to-[#C28E27] text-white shadow-md shadow-[#B45309]/25 font-extrabold scale-[1.02]' 
+                  : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-stone-800/80'
               }`}
             >
               {tab.label}

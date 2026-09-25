@@ -116,7 +116,7 @@ export default function EventPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center space-y-3 text-stone-500 font-sans">
+      <div className="min-h-screen bg-transparent flex flex-col items-center justify-center space-y-3 text-stone-500 dark:text-stone-400 font-sans">
         <div className="w-10 h-10 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
         <p className="text-xs font-bold uppercase tracking-wider">Loading conference agenda &amp; passes...</p>
       </div>
@@ -125,9 +125,9 @@ export default function EventPage() {
 
   if (error || !event) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans">
-        <h2 className="text-2xl font-extrabold text-stone-900">Conference Not Found</h2>
-        <p className="text-xs text-stone-500">The requested event is either not published or has concluded.</p>
+      <div className="min-h-screen bg-transparent flex flex-col items-center justify-center p-6 text-center space-y-4 font-sans">
+        <h2 className="text-2xl font-extrabold text-stone-900 dark:text-white">Conference Not Found</h2>
+        <p className="text-xs text-stone-500 dark:text-stone-400">The requested event is either not published or has concluded.</p>
         <Link to="/explore" className="text-xs font-bold text-[#B45309] hover:underline">
           &larr; Return to Featured Conferences
         </Link>
@@ -140,15 +140,15 @@ export default function EventPage() {
   const filteredSessions = event.sessions?.filter(s => selectedRoomFilter === 'ALL' || s.room === selectedRoomFilter) || [];
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-28 text-stone-900 font-sans selection:bg-[#B45309] selection:text-white">
+    <div className="min-h-screen bg-transparent pb-28 text-stone-900 dark:text-stone-100 font-sans selection:bg-[#B45309] selection:text-white">
       
       {/* Breadcrumb Bar */}
       <div className="max-w-6xl mx-auto px-6 pt-4">
         <Breadcrumbs items={[{ label: 'Explore Summits', path: '/explore' }, { label: event.title }]} />
       </div>
 
-      {/* Luxury Editorial Hero Section */}
-      <section className="bg-gradient-to-b from-[#FDFAF5] via-[#FAF8F5] to-[#F5F2EB] border-b border-[#EFE8DA] pt-8 pb-24 px-6 relative overflow-hidden">
+      {/* Luxury Editorial Hero Section - Seamless */}
+      <section className="pt-6 pb-20 px-6 relative">
         <div className="max-w-4xl mx-auto relative z-10 text-center space-y-6">
           <motion.span 
             initial={{ opacity: 0, scale: 0.9 }}

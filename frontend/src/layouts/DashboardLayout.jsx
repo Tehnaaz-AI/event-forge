@@ -9,6 +9,7 @@ import {
 import AppNavbar from '../components/common/AppNavbar';
 import AppFooter from '../components/common/AppFooter';
 import AmbientLiveBackground from '../components/common/AmbientLiveBackground';
+import ScrollProgressBar from '../components/common/ScrollProgressBar';
 
 export default function DashboardLayout() {
   const location = useLocation();
@@ -42,11 +43,14 @@ export default function DashboardLayout() {
       {/* Live Moving Ambient Dynamic Background */}
       <AmbientLiveBackground />
 
+      {/* Scroll Physics Progress Bar */}
+      <ScrollProgressBar />
+
       {/* Curved Floating Navbar with Role-Differentiated Links */}
       <AppNavbar />
 
       {/* Main Workspace Body */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8 relative z-10">
         
         {/* Sub-Header Context Bar */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DA] pb-4">

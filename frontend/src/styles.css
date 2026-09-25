@@ -108,97 +108,84 @@
   scrollbar-color: #B45309 transparent !important;
   overflow: auto;
 }
+
+*::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.scrollbar-custom,
+.scrollbar-beige,
+.scrollbar-sleek {
+  scrollbar-width: thin;
+  scrollbar-color: #D97706 rgba(239, 232, 218, 0.3);
+}
+
 .dark .scrollbar-custom,
-.dark .scrollbar-beige {
-  scrollbar-color: #B45309 transparent !important;
+.dark .scrollbar-beige,
+.dark .scrollbar-sleek {
+  scrollbar-color: #D97706 rgba(28, 25, 23, 0.4) !important;
 }
+
 .scrollbar-custom::-webkit-scrollbar,
-.scrollbar-beige::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+.scrollbar-beige::-webkit-scrollbar,
+.scrollbar-sleek::-webkit-scrollbar {
+  width: 6px;
+  height: 4px;
 }
+
 .scrollbar-custom::-webkit-scrollbar-track,
-.scrollbar-beige::-webkit-scrollbar-track {
-  background: rgba(239, 232, 218, 0.5);
+.scrollbar-beige::-webkit-scrollbar-track,
+.scrollbar-sleek::-webkit-scrollbar-track {
+  background: rgba(239, 232, 218, 0.35);
   border-radius: 9999px;
 }
+
 .dark .scrollbar-custom::-webkit-scrollbar-track,
-.dark .scrollbar-beige::-webkit-scrollbar-track {
-  background: rgba(28, 25, 23, 0.7);
+.dark .scrollbar-beige::-webkit-scrollbar-track,
+.dark .scrollbar-sleek::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 9999px;
 }
+
 .scrollbar-custom::-webkit-scrollbar-thumb,
-.scrollbar-beige::-webkit-scrollbar-thumb {
-  background: #B45309 !important;
+.scrollbar-beige::-webkit-scrollbar-thumb,
+.scrollbar-sleek::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #B45309, #D97706, #C28E27) !important;
   border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  transition: all 0.2s ease;
 }
-.dark .scrollbar-custom::-webkit-scrollbar-thumb,
-.dark .scrollbar-beige::-webkit-scrollbar-thumb {
-  background: #B45309 !important;
-  border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
+
 .scrollbar-custom::-webkit-scrollbar-thumb:hover,
-.scrollbar-beige::-webkit-scrollbar-thumb:hover {
-  background: #92400E !important;
-}
-.dark .scrollbar-beige::-webkit-scrollbar-thumb {
-  background: #B45309 !important;
+.scrollbar-beige::-webkit-scrollbar-thumb:hover,
+.scrollbar-sleek::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #92400E, #B45309, #D97706) !important;
 }
 
 /* ========================================================
-   LUXURY LIVE MOVING FLUID GRADIENT BACKGROUND
+   HIGH-TECH DOT MATRIX & CONSTELLATION SYSTEM
    ======================================================== */
-@keyframes fluidMeshBlob1 {
-  0%, 100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
-  33% { transform: translate(120px, -90px) scale(1.3) rotate(60deg); }
-  66% { transform: translate(-80px, 100px) scale(0.85) rotate(-40deg); }
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.3); }
 }
 
-@keyframes fluidMeshBlob2 {
-  0%, 100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
-  33% { transform: translate(-130px, 80px) scale(0.9) rotate(-50deg); }
-  66% { transform: translate(100px, -110px) scale(1.25) rotate(45deg); }
+@keyframes spotlightBreathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
 }
 
-@keyframes fluidMeshBlob3 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.6; }
-  50% { transform: translate(90px, 110px) scale(1.35); opacity: 0.95; }
+.animate-twinkle-fast {
+  animation: starTwinkle 3s ease-in-out infinite alternate;
 }
 
-@keyframes fluidMeshBlob4 {
-  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.5; }
-  50% { transform: translate(-100px, -70px) scale(1.2); opacity: 0.85; }
+.animate-twinkle-slow {
+  animation: starTwinkle 5s ease-in-out infinite alternate;
 }
 
-@keyframes dynamicCanvasShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animate-ambient-1 {
-  animation: fluidMeshBlob1 22s ease-in-out infinite alternate;
-}
-
-.animate-ambient-2 {
-  animation: fluidMeshBlob2 28s ease-in-out infinite alternate;
-}
-
-.animate-ambient-3 {
-  animation: fluidMeshBlob3 20s ease-in-out infinite alternate;
-}
-
-.animate-ambient-4 {
-  animation: fluidMeshBlob4 24s ease-in-out infinite alternate;
-}
-
-.animate-canvas-shift {
-  background-size: 300% 300%;
-  animation: dynamicCanvasShift 18s ease infinite;
+.animate-spotlight-breathe {
+  animation: spotlightBreathe 12s ease-in-out infinite alternate;
 }
 
 /* Unified Expressive Cursive Script for Logos, Masterpiece, and Accent Headings */

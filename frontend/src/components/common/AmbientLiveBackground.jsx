@@ -2,48 +2,63 @@ import React from 'react';
 
 export default function AmbientLiveBackground() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 select-none">
       
-      {/* Light theme rich dynamic ambient gradient mesh */}
-      <div className="dark:hidden absolute inset-0 bg-[#F5ECE0]">
-        {/* Animated Moving Gradient Base Canvas */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FAF3EA] via-[#EEDCC7] to-[#F7EEE3] animate-canvas-shift opacity-95" />
-
-        {/* Soft Warm Amber Ambient Orb */}
-        <div className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full bg-gradient-to-br from-[#B45309]/30 via-[#F59E0B]/20 to-transparent blur-[70px] animate-ambient-1" />
+      {/* ========================================================
+          LIGHT MODE: Clean Luminous Foundation with Warm Amber Dot Matrix
+          ======================================================== */}
+      <div className="dark:hidden absolute inset-0 bg-[#FAF8F5]">
         
-        {/* Soft Champagne Honey Glow */}
-        <div className="absolute top-1/4 -right-32 w-[750px] h-[750px] rounded-full bg-gradient-to-bl from-[#D99B4B]/40 via-[#D97706]/25 to-transparent blur-[80px] animate-ambient-2" />
-        
-        {/* Soft Sand Dune Horizon Blob */}
-        <div className="absolute -bottom-40 left-1/4 w-[800px] h-[800px] rounded-full bg-gradient-to-tr from-[#C4A47C]/45 via-[#B45309]/25 to-transparent blur-[80px] animate-ambient-3" />
+        {/* Overhead Warm Ambient Spotlight Beam */}
+        <div 
+          className="absolute inset-0 opacity-100 animate-spotlight-breathe"
+          style={{
+            background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.08) 45%, transparent 80%)'
+          }}
+        />
 
-        {/* Floating Accent Blob */}
-        <div className="absolute top-2/3 right-1/4 w-[650px] h-[650px] rounded-full bg-gradient-to-tl from-[#FDE68A]/45 via-[#E6CA9A]/50 to-transparent blur-[60px] animate-ambient-4" />
+        {/* High-Definition Warm Amber Dot Matrix Grid */}
+        <div 
+          className="absolute inset-0 opacity-80"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(180, 83, 9, 0.25) 1.5px, transparent 1.5px)',
+            backgroundSize: '26px 26px',
+            maskImage: 'radial-gradient(ellipse 90% 80% at 50% 20%, black 40%, rgba(0,0,0,0.3) 70%, transparent 95%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 90% 80% at 50% 20%, black 40%, rgba(0,0,0,0.3) 70%, transparent 95%)'
+          }}
+        />
       </div>
 
-      {/* Dark theme rich luminous fluid gradient mesh */}
-      <div className="hidden dark:block absolute inset-0 bg-[#0C0A09]">
-        {/* Animated Moving Gradient Base Canvas */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0C0A09] via-[#1A120B] to-[#0C0A09] animate-canvas-shift opacity-80" />
-
-        {/* Deep Amber Furnace Flame */}
-        <div className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full bg-gradient-to-br from-[#B45309]/30 via-[#78350F]/20 to-transparent blur-[140px] animate-ambient-1" />
+      {/* ========================================================
+          DARK MODE: Deep Obsidian Velvet with Glowing Cyber-Amber Dot Matrix
+          ======================================================== */}
+      <div className="hidden dark:block absolute inset-0 bg-[#09090B]">
         
-        {/* Molten Gold Beacon */}
-        <div className="absolute top-1/4 -right-32 w-[750px] h-[750px] rounded-full bg-gradient-to-bl from-[#F59E0B]/22 via-[#D97706]/15 to-transparent blur-[150px] animate-ambient-2" />
-        
-        {/* Deep Warm Copper Nebula */}
-        <div className="absolute top-2/3 left-1/4 w-[750px] h-[750px] rounded-full bg-gradient-to-tr from-[#9A3412]/25 via-[#B45309]/15 to-transparent blur-[140px] animate-ambient-3" />
+        {/* Overhead Glowing Amber Cyber-Spotlight */}
+        <div 
+          className="absolute inset-0 opacity-100 animate-spotlight-breathe"
+          style={{
+            background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(217, 119, 6, 0.32) 0%, rgba(180, 83, 9, 0.14) 50%, transparent 80%)'
+          }}
+        />
 
-        {/* Signature Warm Beige Aura */}
-        <div className="absolute -bottom-40 right-1/3 w-[650px] h-[650px] rounded-full bg-gradient-to-tl from-[#D4B996]/15 via-[#78350F]/20 to-transparent blur-[130px] animate-ambient-4" />
+        {/* High-Definition Cyber-Amber Glowing Dot Matrix Grid */}
+        <div 
+          className="absolute inset-0 opacity-90"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(245, 158, 11, 0.35) 1.5px, transparent 1.5px)',
+            backgroundSize: '26px 26px',
+            maskImage: 'radial-gradient(ellipse 90% 80% at 50% 20%, black 45%, rgba(0,0,0,0.35) 75%, transparent 95%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 90% 80% at 50% 20%, black 45%, rgba(0,0,0,0.35) 75%, transparent 95%)'
+          }}
+        />
       </div>
 
-      {/* Tech Geometry Grid Watermark */}
-      <div 
-        className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(#1C1917_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#FDE68A_1.2px,transparent_1.2px)] [background-size:28px_28px]" 
-      />
     </div>
   );
 }
+
+
+
+
+

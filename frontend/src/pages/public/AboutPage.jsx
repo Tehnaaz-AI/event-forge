@@ -80,10 +80,10 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 font-sans selection:bg-[#B45309] selection:text-white pb-24">
+    <div className="min-h-screen bg-transparent text-stone-900 dark:text-stone-100 font-sans selection:bg-[#B45309] selection:text-white pb-24">
       
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-b from-[#FDFAF5] via-[#FAF8F5] to-[#F5F2EB] border-b border-[#EFE8DA] pt-12 pb-24 px-6 text-center relative overflow-hidden">
+      {/* Hero Banner - Seamless */}
+      <section className="pt-8 pb-16 px-6 text-center relative">
         <div className="max-w-4xl mx-auto px-4 mb-6">
           <Breadcrumbs items={[{ label: 'About EventForge' }]} />
         </div>

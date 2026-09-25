@@ -63,10 +63,10 @@ export default function ExploreEvents() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-24 text-stone-900 font-sans selection:bg-[#B45309] selection:text-white">
+    <div className="min-h-screen bg-transparent pb-24 text-stone-900 dark:text-stone-100 font-sans selection:bg-[#B45309] selection:text-white">
       
-      {/* Header Banner in Luxury Warm Sand */}
-      <section className="bg-gradient-to-b from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] pt-8 pb-12 px-6 relative overflow-hidden">
+      {/* Header Banner - Seamless Flow */}
+      <section className="pt-6 pb-10 px-6 relative">
         <div className="max-w-5xl mx-auto px-4 mb-4">
           <Breadcrumbs items={[{ label: 'Explore Summits' }]} />
         </div>

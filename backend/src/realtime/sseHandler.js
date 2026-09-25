@@ -24,20 +24,44 @@ export const handleEventStream = (req, res) => {
   // Channel listener
   const channel = `event:${eventId}`;
   const listener = (data) => {
-    res.write(`event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`);
+    try {
+      if (!res.writableEnded && !res.closed) {
+        res.write(`event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
+    } catch (e) {
+      console.warn('SSE write error:', e.message);
+    }
   };
 
   eventBus.on(channel, listener);
 
   // Keep-alive heartbeat every 20 seconds
   const heartbeat = setInterval(() => {
-    res.write(': heartbeat\n\n');
+    try {
+      if (!res.writableEnded && !res.closed) {
+        res.write(': heartbeat\n\n');
+      } else {
+        clearInterval(heartbeat);
+      }
+    } catch (e) {
+      clearInterval(heartbeat);
+    }
   }, 20000);
 
-  // Clean up on disconnect
-  req.on('close', () => {
+  // Clean up on disconnect or error
+  const cleanup = () => {
     clearInterval(heartbeat);
     eventBus.removeListener(channel, listener);
-    res.end();
-  });
+    if (!res.writableEnded) {
+      try {
+        res.end();
+      } catch (e) {
+        // ignore
+      }
+    }
+  };
+
+  req.on('close', cleanup);
+  req.on('error', cleanup);
+  res.on('error', cleanup);
 };
