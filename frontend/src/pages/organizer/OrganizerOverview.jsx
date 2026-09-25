@@ -27,22 +27,6 @@ export default function OrganizerOverview() {
   const [chartZoom, setChartZoom] = useState(1);
   const chartContainerRef = useRef(null);
 
-  useEffect(() => {
-    const el = chartContainerRef.current;
-    if (!el) return;
-    const onWheel = (e) => {
-      e.preventDefault();
-      const step = 0.15;
-      if (e.deltaY < 0) {
-        setChartZoom(prev => Math.min(3.0, Number((prev + step).toFixed(2))));
-      } else if (e.deltaY > 0) {
-        setChartZoom(prev => Math.max(0.75, Number((prev - step).toFixed(2))));
-      }
-    };
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, [singleConferenceAnalytics]);
-
   const { data: events, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['organizer-events-overview'],
     queryFn: () => api.get('/events/organizer/me'),
@@ -59,6 +43,22 @@ export default function OrganizerOverview() {
     enabled: Boolean(selectedEvent?._id),
     refetchInterval: 10000
   });
+
+  useEffect(() => {
+    const el = chartContainerRef.current;
+    if (!el) return;
+    const onWheel = (e) => {
+      e.preventDefault();
+      const step = 0.15;
+      if (e.deltaY < 0) {
+        setChartZoom(prev => Math.min(3.0, Number((prev + step).toFixed(2))));
+      } else if (e.deltaY > 0) {
+        setChartZoom(prev => Math.max(0.75, Number((prev - step).toFixed(2))));
+      }
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [singleConferenceAnalytics]);
 
   const totalEvents = events?.length || 0;
   const activeEvents = events?.filter(e => ['PUBLISHED', 'REGISTRATION_OPEN', 'LIVE'].includes(e.status))?.length || 0;
