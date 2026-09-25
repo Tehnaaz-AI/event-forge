@@ -149,69 +149,97 @@ export default function EventOverview({ eventId }) {
             </div>
           </div>
 
-          <div className="h-72 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={timelineData} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorBeigeReg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#B45309" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#B45309" stopOpacity={0.0}/>
-                  </linearGradient>
-                  <linearGradient id="colorGoldRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#C28E27" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#C28E27" stopOpacity={0.0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F5F2EB" vertical={false} />
-                <XAxis 
-                  dataKey="day" 
-                  stroke="#78716C" 
-                  fontSize={11} 
-                  fontWeight={600} 
-                  tickLine={false} 
-                  axisLine={{ stroke: '#EFE8DA' }}
-                />
-                <YAxis 
-                  stroke="#78716C" 
-                  fontSize={11} 
-                  fontWeight={600} 
-                  tickLine={false} 
-                  axisLine={false}
-                  allowDecimals={false}
-                />
-                <Tooltip 
-                  content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-xl border border-stone-800 space-y-1.5 text-xs font-sans">
-                          <p className="font-extrabold text-[#C28E27] uppercase tracking-wider text-[10px]">{label}</p>
-                          <div className="flex items-center justify-between gap-4">
-                            <span className="text-stone-300">New Registrations:</span>
-                            <span className="font-bold text-white font-mono">{payload[0]?.value || 0}</span>
-                          </div>
-                          {payload[0]?.payload?.revenue !== undefined && (
-                            <div className="flex items-center justify-between gap-4 border-t border-stone-800 pt-1">
-                              <span className="text-stone-400">Day Revenue:</span>
-                              <span className="font-bold text-emerald-400 font-mono">${(payload[0]?.payload?.revenue || 0).toLocaleString()}</span>
+          <div className="w-full overflow-x-auto overflow-y-hidden pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
+            <div className="min-w-[1100px] h-72 px-3">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={timelineData} margin={{ top: 15, right: 30, left: 0, bottom: 25 }}>
+                  <defs>
+                    <linearGradient id="colorBeigeReg" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#B45309" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#B45309" stopOpacity={0.0}/>
+                    </linearGradient>
+                    <linearGradient id="colorGoldRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.35}/>
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0.0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2A24" strokeOpacity={0.12} vertical={false} />
+                  <XAxis 
+                    dataKey="day" 
+                    stroke="#78716C" 
+                    fontSize={11} 
+                    fontWeight={700} 
+                    tickLine={true} 
+                    tickMargin={10}
+                    height={40}
+                    dy={6}
+                    axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.15 }}
+                    interval={0}
+                  />
+                  <YAxis 
+                    yAxisId="regAxis"
+                    stroke="#B45309" 
+                    fontSize={11} 
+                    fontWeight={700} 
+                    tickLine={false} 
+                    tickMargin={6}
+                    axisLine={false}
+                    allowDecimals={false}
+                    width={40}
+                  />
+                  <YAxis 
+                    yAxisId="revAxis"
+                    orientation="right"
+                    stroke="#10B981" 
+                    fontSize={11} 
+                    fontWeight={700} 
+                    tickLine={false} 
+                    tickMargin={6}
+                    axisLine={false}
+                    allowDecimals={false}
+                    width={50}
+                    tickFormatter={(val) => `$${val}`}
+                  />
+                  <Tooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const d = payload[0].payload;
+                        return (
+                          <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-xl border border-stone-800 space-y-1.5 text-xs font-sans min-w-[170px]">
+                            <p className="font-extrabold text-[#F59E0B] text-xs border-b border-stone-800 pb-1">{label || d.day}</p>
+                            <div className="space-y-1 text-stone-300 font-mono text-[11px]">
+                              <p className="flex justify-between"><span>Registrations:</span> <strong className="text-amber-400 font-bold">{d.registrations || 0} passes</strong></p>
+                              <p className="flex justify-between"><span>Day Revenue:</span> <strong className="text-emerald-400 font-bold">${(d.revenue || 0).toLocaleString()}</strong></p>
                             </div>
-                          )}
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="registrations" 
-                  stroke="#B45309" 
-                  strokeWidth={3} 
-                  fillOpacity={1} 
-                  fill="url(#colorBeigeReg)" 
-                  name="Daily Registrations" 
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area 
+                    yAxisId="regAxis"
+                    type="monotone" 
+                    dataKey="registrations" 
+                    stroke="#B45309" 
+                    strokeWidth={2.5} 
+                    fillOpacity={1} 
+                    fill="url(#colorBeigeReg)" 
+                    name="Daily Registrations" 
+                  />
+                  <Area 
+                    yAxisId="revAxis"
+                    type="monotone" 
+                    dataKey="revenue" 
+                    stroke="#10B981" 
+                    strokeWidth={2} 
+                    fillOpacity={1} 
+                    fill="url(#colorGoldRevenue)" 
+                    name="Revenue ($)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
@@ -319,98 +347,56 @@ export default function EventOverview({ eventId }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Main Keynote Auditorium */}
-          <div className="p-5 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#B45309] bg-[#B45309]/10 px-2 py-0.5 rounded-md">
-                Main Stage Hall A
-              </span>
-              <span className="text-xs font-mono font-bold text-stone-700">
-                {Math.min(totalSold, Math.round(totalCapacity * 0.75))} / {Math.round(totalCapacity * 0.75) || 400} Seats
-              </span>
-            </div>
+          {stats?.rooms && stats.rooms.length > 0 ? (
+            stats.rooms.map((room, idx) => {
+              const occRate = room.occupancyRate || 0;
+              const barColor = occRate >= 90 ? 'bg-rose-600' : occRate >= 70 ? 'bg-[#B45309]' : 'bg-emerald-600';
+              const badgeBg = occRate >= 90 ? 'bg-rose-100 text-rose-800' : occRate >= 70 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800';
 
-            <h4 className="font-extrabold text-sm text-stone-900">Keynote Auditorium</h4>
-            
-            {/* Occupancy bar */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-[11px] text-stone-500 font-medium">
-                <span>Occupancy</span>
-                <span className="font-bold text-stone-900">
-                  {totalCapacity > 0 ? Math.min(100, Math.round((Math.min(totalSold, totalCapacity * 0.75) / (totalCapacity * 0.75)) * 100)) : 72}%
-                </span>
-              </div>
-              <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
-                <div 
-                  className="bg-[#B45309] h-2 rounded-full transition-all duration-500" 
-                  style={{ width: `${totalCapacity > 0 ? Math.min(100, Math.round((Math.min(totalSold, totalCapacity * 0.75) / (totalCapacity * 0.75)) * 100)) : 72}%` }}
-                ></div>
-              </div>
-            </div>
+              return (
+                <div key={room.id || idx} className="p-5 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#B45309] bg-[#B45309]/10 px-2 py-0.5 rounded-md truncate max-w-[140px]">
+                      {room.track || `Track ${idx + 1}`}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-stone-700">
+                      {room.occupancy || 0} / {room.capacity || 100} Seats
+                    </span>
+                  </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-[#EFE8DA] text-[10px] text-stone-500">
-              <span>Status: <strong className="text-emerald-700">Optimal</strong></span>
-              <span>AV Feed: <strong className="text-stone-700">4K Live</strong></span>
-            </div>
-          </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-stone-900 truncate">{room.name}</h4>
+                    {room.activeSession && (
+                      <p className="text-[11px] text-stone-500 truncate mt-0.5">{room.activeSession}</p>
+                    )}
+                  </div>
+                  
+                  {/* Occupancy bar */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[11px] text-stone-500 font-medium">
+                      <span>Occupancy</span>
+                      <span className="font-bold text-stone-900">{occRate}%</span>
+                    </div>
+                    <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className={`${barColor} h-2 rounded-full transition-all duration-500`} 
+                        style={{ width: `${Math.min(100, occRate)}%` }}
+                      ></div>
+                    </div>
+                  </div>
 
-          {/* Breakout Lab 1 */}
-          <div className="p-5 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
-                Workshop Room 101
-              </span>
-              <span className="text-xs font-mono font-bold text-stone-700">
-                {Math.min(totalSold, 120)} / 150 Seats
-              </span>
+                  <div className="flex items-center justify-between pt-2 border-t border-[#EFE8DA] text-[10px] text-stone-500">
+                    <span>Status: <strong className={`px-1.5 py-0.5 rounded-sm font-semibold ${badgeBg}`}>{room.status || 'Active'}</strong></span>
+                    <span>AV Feed: <strong className="text-stone-700">{room.avStatus || '4K Stream'}</strong></span>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="col-span-3 p-8 text-center bg-[#FAF8F5] rounded-2xl border border-dashed border-[#EFE8DA]">
+              <p className="text-xs font-bold text-stone-600">No rooms or stages configured for this event yet.</p>
             </div>
-
-            <h4 className="font-extrabold text-sm text-stone-900">AI &amp; Systems Lab</h4>
-            
-            <div className="space-y-1">
-              <div className="flex justify-between text-[11px] text-stone-500 font-medium">
-                <span>Occupancy</span>
-                <span className="font-bold text-stone-900">80%</span>
-              </div>
-              <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
-                <div className="bg-amber-600 h-2 rounded-full" style={{ width: '80%' }}></div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-[#EFE8DA] text-[10px] text-stone-500">
-              <span>Status: <strong className="text-amber-700">Filling Up Fast</strong></span>
-              <span>AV Feed: <strong className="text-stone-700">1080p Stream</strong></span>
-            </div>
-          </div>
-
-          {/* Executive Boardroom */}
-          <div className="p-5 rounded-2xl border border-[#EFE8DA] bg-[#FAF8F5] space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-purple-800 bg-purple-100 px-2 py-0.5 rounded-md">
-                Executive Lounge
-              </span>
-              <span className="text-xs font-mono font-bold text-stone-700">
-                {Math.min(totalSold, 45)} / 60 Seats
-              </span>
-            </div>
-
-            <h4 className="font-extrabold text-sm text-stone-900">VIP Speaker Salon</h4>
-            
-            <div className="space-y-1">
-              <div className="flex justify-between text-[11px] text-stone-500 font-medium">
-                <span>Occupancy</span>
-                <span className="font-bold text-stone-900">75%</span>
-              </div>
-              <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
-                <div className="bg-purple-600 h-2 rounded-full" style={{ width: '75%' }}></div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-[#EFE8DA] text-[10px] text-stone-500">
-              <span>Status: <strong className="text-emerald-700">VIP Access Only</strong></span>
-              <span>AV Feed: <strong className="text-stone-700">Private Mic</strong></span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
