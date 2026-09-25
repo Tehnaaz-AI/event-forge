@@ -110,7 +110,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0C0A09] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative transition-colors duration-300">
+    <div className="min-h-screen bg-transparent text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative transition-colors duration-300">
       
       {/* Live Moving Ambient Dynamic Background */}
       <AmbientLiveBackground />

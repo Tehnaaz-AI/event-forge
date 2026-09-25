@@ -5,21 +5,21 @@ export default function AmbientLiveBackground() {
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
       
       {/* Light theme rich dynamic ambient gradient mesh */}
-      <div className="dark:hidden absolute inset-0 bg-[#FBF9F5]">
-        {/* Soft flowing gradient canvas */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FBF9F5] via-[#F3EDE2] to-[#F8F4EC] opacity-95" />
+      <div className="dark:hidden absolute inset-0 bg-gradient-to-br from-[#FAF5EE] via-[#F4ECE0] to-[#FAF2E6]">
+        {/* Animated Moving Gradient Base Canvas */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#FAF5EE] via-[#F1E5D4]/80 to-[#FAF0DF] animate-canvas-shift opacity-90" />
 
         {/* Soft Warm Amber Ambient Orb */}
-        <div className="absolute -top-32 -left-32 w-[650px] h-[650px] rounded-full bg-gradient-to-br from-[#B45309]/14 via-[#F59E0B]/10 to-transparent blur-[120px] animate-ambient-1" />
+        <div className="absolute -top-32 -left-32 w-[650px] h-[650px] rounded-full bg-gradient-to-br from-[#B45309]/20 via-[#F59E0B]/14 to-transparent blur-[100px] animate-ambient-1" />
         
         {/* Soft Champagne Honey Glow */}
-        <div className="absolute top-1/3 -right-32 w-[700px] h-[700px] rounded-full bg-gradient-to-bl from-[#E6CA9A]/30 via-[#D97706]/10 to-transparent blur-[130px] animate-ambient-2" />
+        <div className="absolute top-1/3 -right-32 w-[700px] h-[700px] rounded-full bg-gradient-to-bl from-[#E6CA9A]/40 via-[#D97706]/15 to-transparent blur-[110px] animate-ambient-2" />
         
         {/* Soft Sand Dune Horizon Blob */}
-        <div className="absolute -bottom-40 left-1/4 w-[750px] h-[750px] rounded-full bg-gradient-to-tr from-[#E3D3BD]/45 via-[#B45309]/10 to-transparent blur-[130px] animate-ambient-3" />
+        <div className="absolute -bottom-40 left-1/4 w-[750px] h-[750px] rounded-full bg-gradient-to-tr from-[#DFCCA8]/50 via-[#B45309]/15 to-transparent blur-[110px] animate-ambient-3" />
 
         {/* Floating Accent Blob */}
-        <div className="absolute top-2/3 right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tl from-[#FDE68A]/25 via-[#F3ECE1]/50 to-transparent blur-[110px] animate-ambient-4" />
+        <div className="absolute top-2/3 right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tl from-[#FDE68A]/35 via-[#F1E3D0]/60 to-transparent blur-[90px] animate-ambient-4" />
       </div>
 
       {/* Dark theme rich luminous fluid gradient mesh */}

@@ -232,26 +232,26 @@
 /* Floating Curved Navbar */
 .curved-navbar {
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid #E5DAC6;
-  box-shadow: 0 10px 30px -5px rgba(44, 37, 28, 0.07), 0 4px 10px -2px rgba(44, 37, 28, 0.03);
+  border: 1.5px solid #D4B996;
+  box-shadow: 0 10px 30px -5px rgba(180, 83, 9, 0.08), 0 4px 10px -2px rgba(180, 83, 9, 0.04);
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 /* Warm Beige Glassmorphism & Structured Cards */
 .beige-card {
   background-color: #FFFFFF;
-  border: 1px solid #E5DAC6;
-  box-shadow: 0 4px 20px -2px rgba(44, 37, 28, 0.05), 0 2px 6px -1px rgba(44, 37, 28, 0.03);
+  border: 1.5px solid #D4B996;
+  box-shadow: 0 4px 20px -2px rgba(180, 83, 9, 0.06), 0 2px 6px -1px rgba(180, 83, 9, 0.03);
 }
 
 .beige-glass {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid #E5DAC6;
+  border: 1.5px solid #D4B996;
 }
 
 .glow-warm {
