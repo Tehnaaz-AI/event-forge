@@ -149,8 +149,8 @@ export default function EventOverview({ eventId }) {
             </div>
           </div>
 
-          <div className="w-full overflow-x-auto overflow-y-hidden pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
-            <div className="min-w-[1100px] h-72 px-3">
+          <div className="w-full overflow-x-auto overflow-y-auto max-h-[360px] sm:max-h-[400px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
+            <div className="min-w-[1100px] h-[460px] sm:h-[500px] px-3">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={timelineData} margin={{ top: 15, right: 30, left: 0, bottom: 25 }}>
                   <defs>

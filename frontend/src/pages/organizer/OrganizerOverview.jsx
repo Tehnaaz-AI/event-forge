@@ -332,8 +332,8 @@ export default function OrganizerOverview() {
                   <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : singleConferenceAnalytics?.timelineData?.length > 0 ? (
-                <div className="w-full overflow-x-auto overflow-y-hidden pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
-                  <div className="min-w-[1100px] h-72 sm:h-84 w-full px-3">
+                <div className="w-full overflow-x-auto overflow-y-auto max-h-[360px] sm:max-h-[400px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
+                  <div className="min-w-[1100px] h-[460px] sm:h-[500px] w-full px-3">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 20, right: 35, left: 10, bottom: 30 }}>
                         <defs>
