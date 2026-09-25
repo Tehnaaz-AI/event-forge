@@ -2,34 +2,41 @@ import React from 'react';
 
 export default function AmbientLiveBackground() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Light theme subtle glow orbs */}
-      <div className="dark:hidden">
-        {/* Orb 1: Warm Amber / Terracotta */}
-        <div className="absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full bg-gradient-to-br from-[#B45309]/10 via-[#F59E0B]/8 to-transparent blur-3xl animate-ambient-1" />
+    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+      
+      {/* Light theme pristine background with ultra-subtle ambient warmth */}
+      <div className="dark:hidden absolute inset-0 bg-[#FAF8F5]">
+        {/* Soft Amber Glow */}
+        <div className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#B45309]/8 via-[#F59E0B]/5 to-transparent blur-[140px] animate-ambient-1" />
         
-        {/* Orb 2: Champagne Gold */}
-        <div className="absolute top-1/3 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#FDE68A]/25 via-[#D97706]/10 to-transparent blur-3xl animate-ambient-2" />
+        {/* Soft Sand Gold Glow */}
+        <div className="absolute top-1/3 -right-32 w-[650px] h-[650px] rounded-full bg-gradient-to-br from-[#FDE68A]/15 via-[#D97706]/5 to-transparent blur-[150px] animate-ambient-2" />
         
-        {/* Orb 3: Soft Ivory / Ochre */}
-        <div className="absolute -bottom-40 left-1/4 w-[650px] h-[650px] rounded-full bg-gradient-to-tr from-[#EFE8DA]/60 via-[#B45309]/5 to-transparent blur-3xl animate-ambient-3" />
+        {/* Soft Warm Beige Horizon */}
+        <div className="absolute -bottom-40 left-1/4 w-[700px] h-[700px] rounded-full bg-gradient-to-tr from-[#EFE8DA]/40 via-[#B45309]/4 to-transparent blur-[140px] animate-ambient-3" />
       </div>
 
-      {/* Dark theme luminous ambient flow */}
-      <div className="hidden dark:block">
-        {/* Orb 1: Deep Amber Furnace Glow */}
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#B45309]/18 via-[#78350F]/12 to-transparent blur-3xl animate-ambient-1" />
+      {/* Dark theme rich luminous fluid gradient mesh */}
+      <div className="hidden dark:block absolute inset-0 bg-[#0C0A09]">
+        {/* Animated Moving Gradient Base Canvas */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0C0A09] via-[#1A120B] to-[#0C0A09] animate-canvas-shift opacity-80" />
+
+        {/* Deep Amber Furnace Flame */}
+        <div className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full bg-gradient-to-br from-[#B45309]/30 via-[#78350F]/20 to-transparent blur-[140px] animate-ambient-1" />
         
-        {/* Orb 2: Molten Gold Beacon */}
-        <div className="absolute top-1/4 -right-40 w-[650px] h-[650px] rounded-full bg-gradient-to-bl from-[#F59E0B]/14 via-[#D97706]/8 to-transparent blur-3xl animate-ambient-2" />
+        {/* Molten Gold Beacon */}
+        <div className="absolute top-1/4 -right-32 w-[750px] h-[750px] rounded-full bg-gradient-to-bl from-[#F59E0B]/22 via-[#D97706]/15 to-transparent blur-[150px] animate-ambient-2" />
         
-        {/* Orb 3: Subtle Warm Obsidian Nebula */}
-        <div className="absolute -bottom-40 left-1/3 w-[700px] h-[700px] rounded-full bg-gradient-to-tr from-[#292524]/40 via-[#B45309]/10 to-transparent blur-3xl animate-ambient-3" />
+        {/* Deep Warm Copper Nebula */}
+        <div className="absolute top-2/3 left-1/4 w-[750px] h-[750px] rounded-full bg-gradient-to-tr from-[#9A3412]/25 via-[#B45309]/15 to-transparent blur-[140px] animate-ambient-3" />
+
+        {/* Signature Warm Beige Aura */}
+        <div className="absolute -bottom-40 right-1/3 w-[650px] h-[650px] rounded-full bg-gradient-to-tl from-[#D4B996]/15 via-[#78350F]/20 to-transparent blur-[130px] animate-ambient-4" />
       </div>
 
-      {/* Ultra Subtle Grid Overlay for tech elegance */}
+      {/* Tech Geometry Grid Watermark */}
       <div 
-        className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04] bg-[radial-gradient(#1C1917_1px,transparent_1px)] dark:bg-[radial-gradient(#FEF3C7_1px,transparent_1px)] [background-size:24px_24px]" 
+        className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(#1C1917_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#FDE68A_1.2px,transparent_1.2px)] [background-size:28px_28px]" 
       />
     </div>
   );

@@ -108,7 +108,10 @@ export default function BrandLogo({
         </div>
       )}
       <div className="flex items-baseline leading-none">
-        <span className={`logo-cursive ${cursiveSizes[size] || cursiveSizes.default} font-extrabold ${eventTextColor} mr-0.5 tracking-normal transition-colors duration-200`}>
+        <span 
+          className={`logo-cursive ${cursiveSizes[size] || cursiveSizes.default} font-extrabold mr-0.5 tracking-normal transition-colors duration-200`}
+          style={{ color: '#B45309' }}
+        >
           Event
         </span>
         <span className={`font-black ${forgeTextColor} ${forgeSizes[size] || forgeSizes.default} tracking-wider uppercase transition-colors duration-200 font-sans`}>

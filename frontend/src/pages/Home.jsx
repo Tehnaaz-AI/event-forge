@@ -110,13 +110,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0C0A09] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative transition-colors duration-300">
       
       {/* Live Moving Ambient Dynamic Background */}
       <AmbientLiveBackground />
 
       {/* Editorial Luxury Hero Section */}
-      <section className="relative pt-16 pb-28 px-6 overflow-hidden border-b border-[#EFE8DA] bg-gradient-to-b from-[#FDFAF5]/80 via-[#FAF8F5]/80 to-[#F5F2EB]/80">
+      <section className="relative pt-16 pb-28 px-6 overflow-hidden border-b border-[#EFE8DA] dark:border-stone-800/80 bg-gradient-to-b from-[#FDFAF5]/60 via-[#FAF8F5]/40 to-[#F5F2EB]/60 dark:from-transparent dark:via-black/20 dark:to-transparent backdrop-blur-xs">
         
         {/* Ambient Warm Floating Glow */}
         <motion.div 
@@ -133,20 +133,20 @@ export default function Home() {
         >
           
           {/* Eyebrow Badge */}
-          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-[#EFE8DA] rounded-full text-[#B45309] text-xs font-bold uppercase tracking-widest shadow-sm">
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/90 dark:bg-[#1C1917]/90 border border-[#EFE8DA] dark:border-stone-800 rounded-full text-[#B45309] dark:text-[#FCD34D] text-xs font-bold uppercase tracking-widest shadow-sm backdrop-blur-md">
             <Sparkles size={14} className="text-[#C28E27] animate-spin" />
             <span>AI-Driven Corporate Event Operating System</span>
           </motion.div>
           
           {/* Editorial Headline with Cursive Accent & Dynamic Shimmer */}
-          <motion.h1 variants={itemVariants} className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-stone-900 leading-[1.2]">
+          <motion.h1 variants={itemVariants} className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-stone-900 dark:text-white leading-[1.2]">
             Curate, Scale &amp; <span className="cursive-accent font-normal text-gradient-shimmer text-glow-accent text-float-subtle text-6xl sm:text-7xl md:text-8xl inline-block px-2 align-middle">Masterpiece</span> <br />
-            <span className="font-serif italic font-normal text-stone-800">
+            <span className="font-serif italic font-normal text-stone-800 dark:text-[#E7E5E4]">
               World-Class Conferences
             </span>
           </motion.h1>
 
-          <motion.p variants={itemVariants} className="text-lg md:text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed font-light">
+          <motion.p variants={itemVariants} className="text-lg md:text-xl text-stone-600 dark:text-stone-300 max-w-2xl mx-auto leading-relaxed font-light">
             Unifying enterprise multi-track summits, global symposiums, and corporate exhibitions with intelligent schedule orchestration and high-speed optical verification.
           </motion.p>
 
@@ -362,34 +362,34 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-white rounded-3xl border border-[#EFE8DA] p-8 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+            className="bg-white/85 dark:bg-[#171614]/90 backdrop-blur-xl rounded-3xl border border-[#EFE8DA] dark:border-stone-800 p-8 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
           >
             <div className="lg:col-span-7 space-y-4">
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-amber-50 text-[#B45309] rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-200">
+                <span className="px-3 py-1 bg-amber-50 dark:bg-amber-950/60 text-[#B45309] dark:text-amber-400 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-200 dark:border-amber-900/60">
                   {activeEvent.category || 'Featured Conference'}
                 </span>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-900/60">
                   Registration Open
                 </span>
               </div>
 
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900">
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900 dark:text-white">
                 {activeEvent.title}
               </h2>
 
-              <p className="text-sm text-stone-600 leading-relaxed font-light line-clamp-3">
+              <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed font-light line-clamp-3">
                 {activeEvent.description}
               </p>
 
-              <div className="flex flex-wrap gap-4 pt-2 text-xs font-semibold text-stone-700">
-                <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#EFE8DA]">
+              <div className="flex flex-wrap gap-4 pt-2 text-xs font-semibold text-stone-700 dark:text-stone-300">
+                <div className="flex items-center gap-1.5 bg-[#FAF8F5] dark:bg-[#1C1917] px-3 py-1.5 rounded-xl border border-[#EFE8DA] dark:border-stone-800">
                   <Calendar size={14} className="text-[#B45309]" />
                   <span>{new Date(activeEvent.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
                 {activeEvent.venue?.name && (
-                  <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-3 py-1.5 rounded-xl border border-[#EFE8DA]">
-                    <MapPin size={14} className="text-amber-700" />
+                  <div className="flex items-center gap-1.5 bg-[#FAF8F5] dark:bg-[#1C1917] px-3 py-1.5 rounded-xl border border-[#EFE8DA] dark:border-stone-800">
+                    <MapPin size={14} className="text-amber-700 dark:text-amber-500" />
                     <span>{activeEvent.venue.name}</span>
                   </div>
                 )}
@@ -426,46 +426,46 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-white rounded-3xl border border-[#EFE8DA] p-8 sm:p-12 shadow-xl text-center space-y-6"
+            className="bg-white/85 dark:bg-[#171614]/90 backdrop-blur-xl rounded-3xl border border-[#EFE8DA] dark:border-stone-800 p-8 sm:p-12 shadow-xl text-center space-y-6"
           >
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-amber-100 to-amber-200 text-[#B45309] flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-950 dark:to-stone-900 text-[#B45309] dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner">
               <Radio size={32} className="animate-pulse" />
             </div>
 
             <div className="space-y-2 max-w-xl mx-auto">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest bg-amber-50 text-[#B45309] border border-amber-200 px-3.5 py-1 rounded-full inline-block">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest bg-amber-50 dark:bg-amber-950/60 text-[#B45309] dark:text-amber-400 border border-amber-200 dark:border-amber-900/60 px-3.5 py-1 rounded-full inline-block">
                 Production-Ready Platform Telemetry
               </span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
-                Unified Multi-Track <span className="cursive-accent font-normal text-[#B45309] text-3xl sm:text-5xl align-middle px-1">Conference Engine</span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900 dark:text-white tracking-tight">
+                Unified Multi-Track <span className="cursive-accent font-normal text-[#B45309] dark:text-[#FCD34D] text-3xl sm:text-5xl align-middle px-1">Conference Engine</span>
               </h2>
-              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">
+              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed font-light">
                 All backend systems, optical check-in scanners, and AI itinerary models are active and waiting for new conference publications.
               </p>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto pt-2 text-left">
-              <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA] space-y-1">
+              <div className="p-4 bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-[#EFE8DA] dark:border-stone-800 space-y-1">
                 <span className="text-[10px] font-bold text-stone-400 uppercase">DATABASE</span>
-                <p className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                   <CheckCircle2 size={13} /> MongoDB Atlas Live
                 </p>
               </div>
-              <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA] space-y-1">
+              <div className="p-4 bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-[#EFE8DA] dark:border-stone-800 space-y-1">
                 <span className="text-[10px] font-bold text-stone-400 uppercase">GATE SCANNER</span>
-                <p className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                   <CheckCircle2 size={13} /> &lt;150ms Camera QR
                 </p>
               </div>
-              <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA] space-y-1">
+              <div className="p-4 bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-[#EFE8DA] dark:border-stone-800 space-y-1">
                 <span className="text-[10px] font-bold text-stone-400 uppercase">AGENDA ENGINE</span>
-                <p className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                   <CheckCircle2 size={13} /> 0 Active Collisions
                 </p>
               </div>
-              <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EFE8DA] space-y-1">
+              <div className="p-4 bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-[#EFE8DA] dark:border-stone-800 space-y-1">
                 <span className="text-[10px] font-bold text-stone-400 uppercase">AUTH &amp; SECURITY</span>
-                <p className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                <p className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                   <CheckCircle2 size={13} /> 100% RBAC Isolated
                 </p>
               </div>
@@ -482,7 +482,7 @@ export default function Home() {
 
               <Link
                 to="/features"
-                className="bg-[#FAF8F5] hover:bg-stone-100 border border-[#EFE8DA] text-stone-800 px-6 py-3.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2"
+                className="bg-[#FAF8F5] dark:bg-[#1C1917] hover:bg-stone-100 dark:hover:bg-stone-800 border border-[#EFE8DA] dark:border-stone-800 text-stone-800 dark:text-stone-200 px-6 py-3.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2"
               >
                 <Compass size={15} className="text-[#B45309]" />
                 <span>Explore Platform Capabilities</span>
@@ -535,58 +535,68 @@ export default function Home() {
             transition={{ staggerChildren: 0.1 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {events?.map((event) => (
-              <motion.div 
-                key={event._id} 
-                whileHover={{ y: -8, transition: { duration: 0.25 } }}
-                className="bg-white rounded-3xl border border-[#EFE8DA] overflow-hidden shadow-sm hover:shadow-2xl hover:border-[#B45309]/50 transition-all group flex flex-col justify-between"
-              >
-                
-                {/* Event Card Top Banner in Ivory/Sand */}
-                <div className="p-8 bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="px-3.5 py-1.5 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-xs font-extrabold uppercase tracking-wider shadow-xs">
-                      {event.category || 'Technology'}
-                    </span>
-                    <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-extrabold uppercase">
-                      Open
-                    </span>
-                  </div>
+            {events?.map((event) => {
+              const cardBgStyle = event.bannerImage 
+                ? { backgroundImage: `url(${event.bannerImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                : event.cardColor && event.cardColor !== '#1C1917' 
+                  ? { backgroundColor: event.cardColor }
+                  : null;
 
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 line-clamp-2 leading-snug group-hover:text-[#B45309] transition-colors">
-                    {event.title}
-                  </h3>
-
-                  <p className="text-sm text-stone-600 line-clamp-3 leading-relaxed">
-                    {event.description}
-                  </p>
-                </div>
-
-                {/* Event Card Bottom Body */}
-                <div className="p-6 space-y-5">
-                  <div className="space-y-2.5 text-sm font-semibold text-stone-700">
-                    <div className="flex items-center gap-2.5">
-                      <Calendar className="text-[#B45309]" size={17} />
-                      <span>{new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    </div>
-                    {event.venue?.name && (
-                      <div className="flex items-center gap-2.5">
-                        <MapPin className="text-amber-700" size={17} />
-                        <span className="truncate">{event.venue.name}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <Link 
-                    to={`/e/${event.slug}`}
-                    className="w-full bg-[#FAF8F5] hover:bg-[#B45309] text-stone-900 hover:text-white border border-[#EFE8DA] hover:border-[#B45309] text-center font-extrabold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base shadow-xs group-hover:shadow-md uppercase tracking-wider"
+              return (
+                <motion.div 
+                  key={event._id} 
+                  whileHover={{ y: -8, transition: { duration: 0.25 } }}
+                  className="bg-white/90 dark:bg-[#171614]/90 backdrop-blur-xl rounded-3xl border border-[#EFE8DA] dark:border-stone-800 overflow-hidden shadow-sm hover:shadow-2xl hover:border-[#B45309]/50 transition-all group flex flex-col justify-between"
+                >
+                  {/* Event Card Top Banner in Ivory/Sand with dynamic color option */}
+                  <div 
+                    style={cardBgStyle}
+                    className="p-6 sm:p-7 bg-gradient-to-br from-[#FDFAF5] via-[#FAF8F5] to-[#F5F2EB] dark:from-[#1C1917] dark:via-[#24211D] dark:to-[#171614] border-b border-[#EFE8DA] dark:border-stone-800 space-y-3.5 relative overflow-hidden"
                   >
-                    <span>Explore Conference &amp; Passes</span>
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+                    <div className="flex justify-between items-center gap-2 flex-wrap relative z-10">
+                      <span className="px-3 py-1 bg-white/90 dark:bg-black/50 text-[#B45309] dark:text-[#FCD34D] border border-[#EFE8DA] dark:border-white/10 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs">
+                        {event.category || 'Technology'}
+                      </span>
+                      <span className="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Open
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white line-clamp-2 leading-snug group-hover:text-[#B45309] dark:group-hover:text-[#FCD34D] transition-colors min-h-[56px] flex items-center">
+                      {event.title}
+                    </h3>
+
+                    <p className="text-xs text-stone-600 dark:text-stone-300 line-clamp-3 leading-relaxed">
+                      {event.shortDescription || event.description || 'Verified multi-track executive conference with keynote addresses and digital pass verification.'}
+                    </p>
+                  </div>
+
+                  {/* Event Card Bottom Body */}
+                  <div className="p-6 space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2.5 text-xs font-semibold text-stone-700 dark:text-stone-300">
+                      <div className="flex items-center gap-2.5">
+                        <Calendar className="text-[#B45309] shrink-0" size={15} />
+                        <span>{new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      </div>
+                      {event.venue?.name && (
+                        <div className="flex items-center gap-2.5">
+                          <MapPin className="text-amber-700 dark:text-amber-500 shrink-0" size={15} />
+                          <span className="truncate">{event.venue.name}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <Link 
+                      to={`/e/${event.slug}`}
+                      className="w-full bg-[#B45309] hover:bg-[#92400E] text-white text-center font-black py-3 rounded-2xl transition-all flex items-center justify-center gap-2 text-xs shadow-md shadow-[#B45309]/20 group-hover:shadow-lg uppercase tracking-wider cursor-pointer"
+                    >
+                      <span>Explore Conference &amp; Passes</span>
+                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </div>
+                </motion.div>
+              );
+            })}
 
             {(!events || events.length === 0) && (
               <div className="col-span-full bg-white p-16 text-center rounded-3xl border border-[#EFE8DA] shadow-xs text-stone-600 space-y-4 max-w-xl mx-auto">
