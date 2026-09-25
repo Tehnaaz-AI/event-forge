@@ -50,23 +50,29 @@ export const getEventAnalytics = async (eventId) => {
     statusCounts[stat._id] = stat.count;
   });
 
-  // Format dynamic timeline data from database
-  let timelineData = timelineAgg.map(t => {
-    const d = new Date(t._id);
-    const label = !isNaN(d) ? d.toLocaleDateString([], { month: 'short', day: 'numeric' }) : t._id;
-    return {
-      day: label,
-      date: t._id,
-      registrations: t.registrations,
-      revenue: t.revenue
-    };
+  // Construct a continuous 7-day rolling chronological time series for smooth, dynamic telemetry
+  const timelineMap = {};
+  timelineAgg.forEach(t => {
+    timelineMap[t._id] = { registrations: t.registrations || 0, revenue: t.revenue || 0 };
   });
 
-  if (timelineData.length === 0) {
-    const todayStr = new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
-    timelineData = [
-      { day: todayStr, registrations: 0, revenue: 0 }
-    ];
+  const timelineData = [];
+  const today = new Date();
+  
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateKey = d.toISOString().split('T')[0];
+    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    const dayData = timelineMap[dateKey] || { registrations: 0, revenue: 0 };
+    
+    timelineData.push({
+      day: label,
+      date: dateKey,
+      registrations: dayData.registrations,
+      revenue: dayData.revenue
+    });
   }
 
   return {

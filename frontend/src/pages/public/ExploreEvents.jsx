@@ -38,6 +38,8 @@ export default function ExploreEvents() {
     localStorage.setItem('eventforge_saved_events', JSON.stringify(updated));
   };
 
+  const currentUser = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
+
   const { data: events, isLoading } = useQuery({
     queryKey: ['explore-events-list'],
     queryFn: () => api.get('/events')
@@ -156,87 +158,105 @@ export default function ExploreEvents() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             <AnimatePresence>
-              {filteredEvents.map(event => (
-                <motion.div
-                  layout
-                  key={event._id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                  className="bg-white rounded-3xl border border-[#EFE8DA] overflow-hidden shadow-xs hover:shadow-xl hover:border-[#B45309]/40 transition-all flex flex-col justify-between group"
-                >
-                  <div className="p-8 bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="px-3.5 py-1.5 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-xs font-extrabold uppercase tracking-wider shadow-xs">
-                        {event.category || 'Executive'}
-                      </span>
-                      
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={(e) => toggleSaveEvent(e, event)}
-                          title={savedEventIds.includes(event._id) ? "Remove Bookmark" : "Save Conference"}
-                          className={`p-1.5 rounded-full border transition-colors ${
-                            savedEventIds.includes(event._id)
-                              ? 'bg-amber-100 text-[#B45309] border-[#B45309]'
-                              : 'bg-white text-stone-500 hover:text-[#B45309] border-[#EFE8DA]'
-                          }`}
-                        >
-                          <Bookmark size={14} className={savedEventIds.includes(event._id) ? "fill-[#B45309]" : ""} />
-                        </button>
+              {filteredEvents.map(event => {
+                const isOrganizer = currentUser?.role === 'ORGANIZER';
+                const isEventOwner = isOrganizer && (
+                  String(event.organizer?._id || event.organizer) === String(currentUser?._id) ||
+                  (currentUser?.organization && String(event.organization?._id || event.organization) === String(currentUser?.organization?._id || currentUser?.organization))
+                );
 
+                return (
+                  <motion.div
+                    layout
+                    key={event._id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                    className="bg-white rounded-3xl border border-[#EFE8DA] overflow-hidden shadow-xs hover:shadow-xl hover:border-[#B45309]/40 transition-all flex flex-col justify-between group"
+                  >
+                    <div className="p-8 bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="px-3.5 py-1.5 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-xs font-extrabold uppercase tracking-wider shadow-xs">
+                          {event.category || 'Executive'}
+                        </span>
+                        
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={(e) => toggleSaveEvent(e, event)}
+                            title={savedEventIds.includes(event._id) ? "Remove Bookmark" : "Save Conference"}
+                            className={`p-1.5 rounded-full border transition-colors ${
+                              savedEventIds.includes(event._id)
+                                ? 'bg-amber-100 text-[#B45309] border-[#B45309]'
+                                : 'bg-white text-stone-500 hover:text-[#B45309] border-[#EFE8DA]'
+                            }`}
+                          >
+                            <Bookmark size={14} className={savedEventIds.includes(event._id) ? "fill-[#B45309]" : ""} />
+                          </button>
+
+                          <button
+                            onClick={() => setQuickPeekEvent(event)}
+                            className="px-2.5 py-1 rounded-full bg-white hover:bg-[#B45309]/10 text-stone-600 hover:text-[#B45309] border border-[#EFE8DA] text-xs font-bold transition-colors flex items-center gap-1"
+                          >
+                            <Eye size={13} /> Quick Peek
+                          </button>
+                        </div>
+                      </div>
+
+                      <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 line-clamp-2 leading-snug group-hover:text-[#B45309] transition-colors">
+                        {event.title}
+                      </h3>
+
+                      <p className="text-sm text-stone-600 line-clamp-3 leading-relaxed">
+                        {event.description}
+                      </p>
+                    </div>
+
+                    <div className="p-6 space-y-5">
+                      <div className="space-y-2.5 text-sm font-semibold text-stone-700">
+                        <div className="flex items-center gap-2.5">
+                          <Calendar className="text-[#B45309]" size={17} />
+                          <span>{new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </div>
+                        {event.venue?.name && (
+                          <div className="flex items-center gap-2.5">
+                            <MapPin className="text-amber-700" size={17} />
+                            <span className="truncate">{event.venue.name}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => setQuickPeekEvent(event)}
-                          className="px-2.5 py-1 rounded-full bg-white hover:bg-[#B45309]/10 text-stone-600 hover:text-[#B45309] border border-[#EFE8DA] text-xs font-bold transition-colors flex items-center gap-1"
+                          className="w-full bg-white hover:bg-stone-50 text-stone-800 border border-[#EFE8DA] text-center font-bold py-3.5 rounded-2xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                         >
-                          <Eye size={13} /> Quick Peek
+                          <Eye size={14} className="text-[#B45309]" />
+                          <span>Preview</span>
                         </button>
+
+                        {isEventOwner ? (
+                          <Link 
+                            to={`/dashboard/organizer/events/${event._id}`}
+                            className="w-full bg-stone-900 hover:bg-stone-800 text-white text-center font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider shadow-sm"
+                          >
+                            <Building size={14} className="text-[#C28E27]" />
+                            <span>Manage Event</span>
+                          </Link>
+                        ) : (
+                          <Link 
+                            to={`/e/${event.slug}`}
+                            className="w-full bg-[#B45309] hover:bg-[#92400E] text-white text-center font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider shadow-sm shadow-[#B45309]/20"
+                          >
+                            <Ticket size={14} />
+                            <span>Passes</span>
+                          </Link>
+                        )}
                       </div>
                     </div>
-
-                    <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 line-clamp-2 leading-snug group-hover:text-[#B45309] transition-colors">
-                      {event.title}
-                    </h3>
-
-                    <p className="text-sm text-stone-600 line-clamp-3 leading-relaxed">
-                      {event.description}
-                    </p>
-                  </div>
-
-                  <div className="p-6 space-y-5">
-                    <div className="space-y-2.5 text-sm font-semibold text-stone-700">
-                      <div className="flex items-center gap-2.5">
-                        <Calendar className="text-[#B45309]" size={17} />
-                        <span>{new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      </div>
-                      {event.venue?.name && (
-                        <div className="flex items-center gap-2.5">
-                          <MapPin className="text-amber-700" size={17} />
-                          <span className="truncate">{event.venue.name}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => setQuickPeekEvent(event)}
-                        className="w-full bg-white hover:bg-stone-50 text-stone-800 border border-[#EFE8DA] text-center font-bold py-3.5 rounded-2xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-xs"
-                      >
-                        <Eye size={14} className="text-[#B45309]" />
-                        <span>Preview</span>
-                      </button>
-
-                      <Link 
-                        to={`/e/${event.slug}`}
-                        className="w-full bg-[#B45309] hover:bg-[#92400E] text-white text-center font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider shadow-sm shadow-[#B45309]/20"
-                      >
-                        <span>Passes</span>
-                        <ArrowRight size={14} />
-                      </Link>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
 
             {filteredEvents.length === 0 && (

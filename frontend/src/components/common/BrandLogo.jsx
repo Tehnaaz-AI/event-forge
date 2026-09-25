@@ -40,20 +40,20 @@ export default function BrandLogo({
 
   const forgeColor = variant === 'onDark' 
     ? 'text-white' 
-    : 'text-stone-900 dark:text-white';
+    : 'text-stone-900 dark:text-stone-100 dark:group-hover:text-amber-200';
 
   const content = (
-    <div className={`inline-flex items-center gap-2 sm:gap-2.5 group shrink-0 ${className}`}>
+    <div className={`inline-flex items-center gap-2 sm:gap-2.5 group shrink-0 select-none ${className}`}>
       {showIcon && (
-        <div className={`${iconSizes[size] || iconSizes.default} bg-gradient-to-br from-[#B45309] to-[#D97706] flex items-center justify-center text-white shadow-sm shadow-[#B45309]/20 group-hover:scale-105 transition-transform shrink-0`}>
-          <Calendar size={calendarSizes[size] || 16} className="font-bold" />
+        <div className={`${iconSizes[size] || iconSizes.default} bg-gradient-to-br from-amber-600 to-amber-500 dark:from-amber-500 dark:to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-600/25 dark:shadow-amber-500/20 group-hover:scale-105 group-hover:rotate-1 transition-all duration-300 shrink-0 border border-amber-400/30`}>
+          <Calendar size={calendarSizes[size] || 16} className="font-bold drop-shadow-sm" />
         </div>
       )}
       <div className="flex items-baseline leading-none">
-        <span className={`logo-cursive ${cursiveSizes[size] || cursiveSizes.default} font-extrabold text-[#B45309] dark:text-[#F59E0B] mr-0.5 tracking-normal transition-colors`}>
+        <span className={`logo-cursive ${cursiveSizes[size] || cursiveSizes.default} font-extrabold text-amber-700 dark:text-amber-400 mr-0.5 tracking-normal transition-colors duration-200 drop-shadow-[0_1px_1px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_2px_8px_rgba(245,158,11,0.25)]`}>
           Event
         </span>
-        <span className={`font-extrabold ${forgeColor} ${forgeSizes[size] || forgeSizes.default} tracking-tight uppercase transition-colors`}>
+        <span className={`font-black ${forgeColor} ${forgeSizes[size] || forgeSizes.default} tracking-wider uppercase transition-colors duration-200 font-sans`}>
           FORGE
         </span>
       </div>

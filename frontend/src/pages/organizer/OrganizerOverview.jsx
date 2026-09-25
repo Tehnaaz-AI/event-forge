@@ -253,29 +253,26 @@ export default function OrganizerOverview() {
                   </h3>
                 </div>
                 <p className="text-xs text-stone-500">
-                  Day-by-day delegate registration velocity, revenue inflow, and ticket tier velocity for this summit.
+                  Continuous day-by-day delegate registration velocity, revenue inflow, and ticket tier velocity.
                 </p>
               </div>
 
-              {/* Event Switcher Tabs / Dropdown */}
-              <div className="flex flex-wrap items-center gap-2">
-                {events.map((ev) => {
-                  const isSelected = String(ev._id) === String(selectedEvent?._id);
-                  return (
-                    <button
-                      key={ev._id}
-                      onClick={() => setSelectedConferenceId(ev._id)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
-                        isSelected 
-                          ? 'bg-[#B45309] text-white shadow-md shadow-[#B45309]/20 scale-102'
-                          : 'bg-[#FAF8F5] dark:bg-[#1C1917] hover:bg-stone-100 dark:hover:bg-[#292524] text-stone-700 dark:text-stone-300 border border-[#EFE8DA] dark:border-stone-800'
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${ev.status === 'LIVE' ? 'bg-emerald-400 animate-pulse' : isSelected ? 'bg-amber-300' : 'bg-stone-400'}`}></span>
-                      <span className="truncate max-w-[140px] sm:max-w-[200px]">{ev.title}</span>
-                    </button>
-                  );
-                })}
+              {/* Stylish Luxury Summit Dropdown Selector */}
+              <div className="relative">
+                <div className="flex items-center gap-2 bg-[#FAF8F5] dark:bg-[#1C1917] p-1.5 rounded-2xl border border-[#EFE8DA] dark:border-stone-800 shadow-xs">
+                  <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-widest pl-2 hidden sm:inline">Summit:</span>
+                  <select
+                    value={selectedEvent?._id || ''}
+                    onChange={(e) => setSelectedConferenceId(e.target.value)}
+                    className="bg-white dark:bg-[#292524] text-stone-900 dark:text-white font-extrabold text-xs py-2 px-3.5 rounded-xl border border-[#EFE8DA] dark:border-stone-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#B45309]/30 cursor-pointer pr-8"
+                  >
+                    {events.map((ev) => (
+                      <option key={ev._id} value={ev._id} className="bg-white dark:bg-[#1C1917] text-stone-900 dark:text-white font-bold py-1">
+                        {ev.title} ({ev.status})
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -320,12 +317,12 @@ export default function OrganizerOverview() {
                 <span>Daily Registration Trajectory &amp; Revenue Inflow</span>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                     <span className="text-stone-700 dark:text-stone-300">Daily Passes</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-[#B45309]"></span>
-                    <span className="text-stone-700 dark:text-stone-300">Gross Revenue ($)</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#B45309]"></span>
+                    <span className="text-stone-700 dark:text-stone-300">Revenue ($)</span>
                   </div>
                 </div>
               </div>
@@ -335,9 +332,9 @@ export default function OrganizerOverview() {
                   <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : singleConferenceAnalytics?.timelineData?.length > 0 ? (
-                <div className="h-72 w-full pt-1">
+                <div className="h-64 sm:h-72 w-full pt-1">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                    <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 8, right: 10, left: -22, bottom: 0 }}>
                       <defs>
                         <linearGradient id="singleRevGlow" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#B45309" stopOpacity={0.35}/>
@@ -348,33 +345,35 @@ export default function OrganizerOverview() {
                           <stop offset="95%" stopColor="#10B981" stopOpacity={0.0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#2E2A24" strokeOpacity={0.15} vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2E2A24" strokeOpacity={0.12} vertical={false} />
                       <XAxis 
                         dataKey="day" 
                         stroke="#78716C" 
                         fontSize={11} 
-                        fontWeight={600} 
+                        fontWeight={700} 
                         tickLine={false} 
-                        axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.2 }}
+                        axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.15 }}
+                        interval={0}
                       />
                       <YAxis 
                         stroke="#78716C" 
                         fontSize={11} 
-                        fontWeight={600} 
+                        fontWeight={700} 
                         tickLine={false} 
                         axisLine={false}
                         allowDecimals={false}
+                        width={30}
                       />
                       <Tooltip 
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             const d = payload[0].payload;
                             return (
-                              <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1.5">
-                                <p className="font-extrabold text-[#F59E0B] text-sm">Activity on {d.day || d.date}</p>
-                                <div className="space-y-1 text-stone-300 font-mono text-[11px]">
-                                  <p>Passes Registered: <strong className="text-emerald-400">{d.registrations} passes</strong></p>
-                                  <p>Revenue Inflow: <strong className="text-amber-300">${d.revenue}</strong></p>
+                              <div className="bg-[#1C1917] text-[#FDFAF5] p-3 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1">
+                                <p className="font-extrabold text-[#F59E0B] text-xs">{d.day || d.date}</p>
+                                <div className="space-y-0.5 text-stone-300 font-mono text-[11px]">
+                                  <p>Passes: <strong className="text-emerald-400">{d.registrations} secured</strong></p>
+                                  <p>Revenue: <strong className="text-amber-300">${d.revenue}</strong></p>
                                 </div>
                               </div>
                             );

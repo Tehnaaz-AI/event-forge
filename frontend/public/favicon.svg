@@ -1,13 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <rect width="64" height="64" rx="16" fill="#1C1917"/>
-  <rect x="12" y="14" width="40" height="38" rx="8" stroke="#B45309" stroke-width="4" fill="#292524"/>
-  <path d="M12 24H52" stroke="#B45309" stroke-width="4"/>
-  <path d="M22 8V16" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
-  <path d="M42 8V16" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="24" cy="34" r="3" fill="#F59E0B"/>
-  <circle cx="32" cy="34" r="3" fill="#F59E0B"/>
-  <circle cx="40" cy="34" r="3" fill="#F59E0B"/>
-  <circle cx="24" cy="42" r="3" fill="#F59E0B"/>
-  <circle cx="32" cy="42" r="3" fill="#F59E0B"/>
-  <circle cx="40" cy="42" r="3" fill="#B45309"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1C1917" />
+      <stop offset="100%" stop-color="#09090B" />
+    </linearGradient>
+
+    <!-- Amber Gold Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="35%" stop-color="#F59E0B" />
+      <stop offset="80%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#92400E" />
+    </linearGradient>
+
+    <!-- Spark Glow Gradient -->
+    <radialGradient id="sparkGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FEF08A" stop-opacity="1" />
+      <stop offset="50%" stop-color="#F59E0B" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#B45309" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Border Glow -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#78350F" stop-opacity="0.2" />
+    </linearGradient>
+
+    <!-- Subtle Drop Shadow Filter -->
+    <filter id="forgeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Container Rounded Squircle -->
+  <rect x="4" y="4" width="120" height="120" rx="32" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="3" />
+
+  <!-- Inner Subtle Grid Glow -->
+  <circle cx="64" cy="64" r="44" fill="#F59E0B" fill-opacity="0.04" />
+
+  <!-- Forge Anvil / Calendar Geometry -->
+  <g filter="url(#forgeGlow)">
+    <!-- Main Anvil Top Plate / Conference Header -->
+    <path d="M28 42C28 37.5817 31.5817 34 36 34H92C96.4183 34 100 37.5817 100 42V48C100 50.2091 98.2091 52 96 52H32C29.7909 52 28 50.2091 28 48V42Z" fill="url(#goldGrad)" />
+    
+    <!-- Anvil Body & Horn -->
+    <path d="M38 52H90C90 52 86 70 78 78H50C42 70 38 52 38 52Z" fill="url(#goldGrad)" fill-opacity="0.95" />
+    
+    <!-- Heavy Solid Base / Pedestal -->
+    <path d="M30 84C30 81.7909 31.7909 80 34 80H94C96.2091 80 98 81.7909 98 84V90C98 93.3137 95.3137 96 92 96H36C32.6863 96 30 93.3137 30 90V84Z" fill="url(#goldGrad)" />
+
+    <!-- Calendar Ring Fasteners / Pillars -->
+    <rect x="42" y="24" width="8" height="18" rx="4" fill="#FEF3C7" stroke="#92400E" stroke-width="2" />
+    <rect x="78" y="24" width="8" height="18" rx="4" fill="#FEF3C7" stroke="#92400E" stroke-width="2" />
+
+    <!-- Center Dynamic Spark / Pulse Star -->
+    <path d="M64 56L66.5 63.5L74 66L66.5 68.5L64 76L61.5 68.5L54 66L61.5 63.5L64 56Z" fill="#FFFFFF" />
+    <circle cx="64" cy="66" r="8" fill="url(#sparkGlow)" />
+  </g>
 </svg>
