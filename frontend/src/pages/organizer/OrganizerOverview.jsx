@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,7 +8,7 @@ import {
   Layers, BarChart2, CheckCircle2, Mic, Activity, Radio, 
   Search, Filter, LayoutGrid, List, MapPin, Clock, ArrowUpRight, 
   Zap, ChevronRight, Eye, UserCheck, Ticket, AlertCircle,
-  ZoomIn, ZoomOut, RotateCcw
+  ZoomIn, ZoomOut, RotateCcw, MousePointer
 } from 'lucide-react';
 import { 
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, 
@@ -25,6 +25,23 @@ export default function OrganizerOverview() {
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'DRAFT'
   const [selectedConferenceId, setSelectedConferenceId] = useState(null);
   const [chartZoom, setChartZoom] = useState(1);
+  const chartContainerRef = useRef(null);
+
+  useEffect(() => {
+    const el = chartContainerRef.current;
+    if (!el) return;
+    const onWheel = (e) => {
+      e.preventDefault();
+      const step = 0.15;
+      if (e.deltaY < 0) {
+        setChartZoom(prev => Math.min(3.0, Number((prev + step).toFixed(2))));
+      } else if (e.deltaY > 0) {
+        setChartZoom(prev => Math.max(0.75, Number((prev - step).toFixed(2))));
+      }
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [singleConferenceAnalytics]);
 
   const { data: events, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['organizer-events-overview'],
@@ -371,12 +388,15 @@ export default function OrganizerOverview() {
                   <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : singleConferenceAnalytics?.timelineData?.length > 0 ? (
-                <div className="w-full overflow-x-auto overflow-y-auto max-h-[380px] sm:max-h-[440px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
+                <div 
+                  ref={chartContainerRef}
+                  className="w-full overflow-x-auto overflow-y-auto max-h-[380px] sm:max-h-[440px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom cursor-crosshair select-none"
+                >
                   <div 
                     style={{ 
                       minWidth: `${Math.round(1100 * chartZoom)}px`, 
                       height: `${Math.round(460 * chartZoom)}px`,
-                      transition: 'min-width 0.2s ease, height 0.2s ease'
+                      transition: 'min-width 0.15s ease-out, height 0.15s ease-out'
                     }} 
                     className="w-full px-3"
                   >
@@ -396,10 +416,10 @@ export default function OrganizerOverview() {
                         <XAxis 
                           dataKey="day" 
                           stroke="#78716C" 
-                          fontSize={11} 
+                          fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
                           fontWeight={700} 
                           tickLine={true} 
-                          tickMargin={10}
+                          tickMargin={Math.round(8 * chartZoom)}
                           height={45}
                           dy={6}
                           axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.15 }}
@@ -409,12 +429,14 @@ export default function OrganizerOverview() {
                         <YAxis 
                           yAxisId="regAxis"
                           stroke="#10B981" 
-                          fontSize={11} 
+                          fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
                           fontWeight={700} 
                           tickLine={false} 
                           tickMargin={6}
                           axisLine={false}
                           allowDecimals={false}
+                          domain={[0, (dataMax) => Math.max(4, Math.ceil(dataMax * 1.15))]}
+                          tickCount={Math.min(12, Math.max(4, Math.round(5 * chartZoom)))}
                           width={40}
                           label={{ value: 'No. of Registrations', angle: -90, position: 'insideLeft', fill: '#10B981', fontSize: 10, fontWeight: 700, dy: 50, dx: 0 }}
                         />
@@ -423,12 +445,14 @@ export default function OrganizerOverview() {
                           yAxisId="revAxis"
                           orientation="right"
                           stroke="#B45309" 
-                          fontSize={11} 
+                          fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
                           fontWeight={700} 
                           tickLine={false} 
                           tickMargin={6}
                           axisLine={false}
                           allowDecimals={false}
+                          domain={[0, (dataMax) => Math.max(100, Math.ceil(dataMax * 1.15))]}
+                          tickCount={Math.min(12, Math.max(4, Math.round(5 * chartZoom)))}
                           width={45}
                           tickFormatter={(val) => `$${val}`}
                         />

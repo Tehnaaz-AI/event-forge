@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   DollarSign, Ticket, Users, TrendingUp, BarChart3, PieChart as PieChartIcon, 
@@ -15,10 +15,28 @@ const LUXURY_COLORS = ['#B45309', '#C28E27', '#854D0E', '#D97706', '#78716C'];
 
 export default function EventOverview({ eventId }) {
   const [chartZoom, setChartZoom] = useState(1);
+  const chartContainerRef = useRef(null);
+
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ['event-analytics', eventId],
     queryFn: () => api.get(`/events/${eventId}/analytics`)
   });
+
+  useEffect(() => {
+    const el = chartContainerRef.current;
+    if (!el) return;
+    const onWheel = (e) => {
+      e.preventDefault();
+      const step = 0.15;
+      if (e.deltaY < 0) {
+        setChartZoom(prev => Math.min(3.0, Number((prev + step).toFixed(2))));
+      } else if (e.deltaY > 0) {
+        setChartZoom(prev => Math.max(0.75, Number((prev - step).toFixed(2))));
+      }
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [stats]);
 
   if (isLoading) {
     return (
@@ -186,12 +204,15 @@ export default function EventOverview({ eventId }) {
             </div>
           </div>
 
-          <div className="w-full overflow-x-auto overflow-y-auto max-h-[380px] sm:max-h-[440px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
+          <div 
+            ref={chartContainerRef}
+            className="w-full overflow-x-auto overflow-y-auto max-h-[380px] sm:max-h-[440px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom cursor-crosshair select-none"
+          >
             <div 
               style={{ 
                 minWidth: `${Math.round(1100 * chartZoom)}px`, 
                 height: `${Math.round(460 * chartZoom)}px`,
-                transition: 'min-width 0.2s ease, height 0.2s ease'
+                transition: 'min-width 0.15s ease-out, height 0.15s ease-out'
               }} 
               className="px-3"
             >
@@ -211,10 +232,10 @@ export default function EventOverview({ eventId }) {
                   <XAxis 
                     dataKey="day" 
                     stroke="#78716C" 
-                    fontSize={11} 
+                    fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
                     fontWeight={700} 
                     tickLine={true} 
-                    tickMargin={10}
+                    tickMargin={Math.round(8 * chartZoom)}
                     height={40}
                     dy={6}
                     axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.15 }}
@@ -223,24 +244,28 @@ export default function EventOverview({ eventId }) {
                   <YAxis 
                     yAxisId="regAxis"
                     stroke="#B45309" 
-                    fontSize={11} 
+                    fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
                     fontWeight={700} 
                     tickLine={false} 
                     tickMargin={6}
                     axisLine={false}
                     allowDecimals={false}
+                    domain={[0, (dataMax) => Math.max(4, Math.ceil(dataMax * 1.15))]}
+                    tickCount={Math.min(12, Math.max(4, Math.round(5 * chartZoom)))}
                     width={40}
                   />
                   <YAxis 
                     yAxisId="revAxis"
                     orientation="right"
                     stroke="#10B981" 
-                    fontSize={11} 
+                    fontSize={Math.max(10, Math.min(13, Math.round(11 * Math.sqrt(chartZoom))))} 
                     fontWeight={700} 
                     tickLine={false} 
                     tickMargin={6}
                     axisLine={false}
                     allowDecimals={false}
+                    domain={[0, (dataMax) => Math.max(100, Math.ceil(dataMax * 1.15))]}
+                    tickCount={Math.min(12, Math.max(4, Math.round(5 * chartZoom)))}
                     width={50}
                     tickFormatter={(val) => `$${val}`}
                   />
