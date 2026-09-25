@@ -27,6 +27,11 @@ export default function AdminDashboard() {
   const [userRoleFilter, setUserRoleFilter] = useState('');
   const [eventSearch, setEventSearch] = useState('');
   const [eventStatusFilter, setEventStatusFilter] = useState('');
+  const [inquirySearch, setInquirySearch] = useState('');
+  const [inquiryFilter, setInquiryFilter] = useState('ALL'); // 'ALL' | 'NEW' | 'IN_REVIEW' | 'RESOLVED'
+  const [replyModalInquiry, setReplyModalInquiry] = useState(null);
+  const [replyTemplate, setReplyTemplate] = useState('general');
+  const [customReplyMessage, setCustomReplyMessage] = useState('');
 
   // Modals & Feedback
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -175,6 +180,27 @@ export default function AdminDashboard() {
     const matchesStatus = !eventStatusFilter || e.status === eventStatusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const filteredInquiries = inquiries.filter(i => {
+    const matchesSearch = !inquirySearch || 
+      i.name?.toLowerCase().includes(inquirySearch.toLowerCase()) ||
+      i.email?.toLowerCase().includes(inquirySearch.toLowerCase()) ||
+      i.subject?.toLowerCase().includes(inquirySearch.toLowerCase()) ||
+      i.message?.toLowerCase().includes(inquirySearch.toLowerCase());
+    
+    if (!matchesSearch) return false;
+    if (inquiryFilter === 'NEW') return i.status === 'NEW';
+    if (inquiryFilter === 'IN_REVIEW') return i.status === 'IN_REVIEW';
+    if (inquiryFilter === 'RESOLVED') return i.status === 'RESOLVED';
+    return true;
+  });
+
+  const REPLY_TEMPLATES = {
+    general: (name, subject) => `Hi ${name},\n\nThank you for reaching out to EventForge operations regarding "${subject}".\n\nWe have received your message and our team is actively reviewing your request. We will follow up with any required details shortly.\n\nBest regards,\nEventForge Operations & Executive Support`,
+    technical: (name, subject) => `Hi ${name},\n\nThank you for contacting EventForge technical support regarding "${subject}".\n\nOur engineering team has logged this item in our telemetry monitoring system. We are verifying system connectivity and will notify you as soon as this is resolved.\n\nBest regards,\nEventForge Platform Engineering`,
+    vip: (name, subject) => `Hi ${name},\n\nThank you for your interest in EventForge Executive Summit VIP access and Enterprise Partnerships.\n\nOur partnerships desk is reviewing your submission and will provide attendee pass options and multi-track access details promptly.\n\nWarm regards,\nEventForge Executive Partnerships Desk`,
+    registration: (name, subject) => `Hi ${name},\n\nThank you for contacting us regarding your conference pass and registration for "${subject}".\n\nYour pass verification and check-in QR credentials have been reviewed. If you need pass re-issuance or badge modification, please reply directly to this thread.\n\nBest regards,\nEventForge Delegate Services`
+  };
 
   const getRoleBadge = (role) => {
     switch (role) {
@@ -625,101 +651,236 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* TAB 3: INQUIRIES & HELPDESK MESSAGES */}
+        {/* TAB 3: INBOUND INQUIRIES & HELPDESK CRM SUITE */}
         {activeTab === 'inquiries' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             
-            <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-xs">
-              <div className="space-y-0.5">
-                <h3 className="text-sm font-extrabold text-stone-900">Direct User Inquiries &amp; Support Messages</h3>
-                <p className="text-xs text-stone-500">Messages submitted through the public Contact page routed to the Platform Administrator.</p>
+            {/* Triage Telemetry Overview Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Total Inquiries</p>
+                  <p className="text-2xl font-black text-stone-900">{inquiries.length}</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center font-bold">
+                  <Mail size={18} />
+                </div>
               </div>
-              <button
-                onClick={loadAllAdminData}
-                className="text-xs font-bold text-[#B45309] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <RefreshCw size={12} /> Refresh Messages
-              </button>
+
+              <div className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Needs Triage</p>
+                  <p className="text-2xl font-black text-[#B45309]">
+                    {inquiries.filter(i => i.status === 'NEW').length}
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#B45309] flex items-center justify-center font-bold">
+                  <AlertCircle size={18} />
+                </div>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Under Review</p>
+                  <p className="text-2xl font-black text-blue-600">
+                    {inquiries.filter(i => i.status === 'IN_REVIEW').length}
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                  <Search size={18} />
+                </div>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-[#EFE8DA] shadow-xs flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Resolved</p>
+                  <p className="text-2xl font-black text-emerald-600">
+                    {inquiries.filter(i => i.status === 'RESOLVED').length}
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <CheckCircle2 size={18} />
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-3 max-h-[540px] overflow-y-auto scrollbar-beige pr-1">
-              {inquiries.length === 0 ? (
-                <div className="bg-white p-12 text-center rounded-3xl border border-[#EFE8DA] text-stone-400 space-y-2">
-                  <Mail size={28} className="mx-auto text-stone-300" />
-                  <p className="font-bold text-stone-600 text-sm">No Inquiries Received Yet</p>
-                  <p className="text-xs text-stone-400">Public contact form submissions will appear here in real-time.</p>
-                </div>
-              ) : (
-                inquiries.map((inq) => (
-                  <div 
-                    key={inq._id} 
-                    className={`bg-white rounded-3xl p-6 border shadow-xs transition-all space-y-4 ${
-                      inq.status === 'NEW' ? 'border-[#B45309]/50 ring-1 ring-[#B45309]/20' : 'border-[#EFE8DA]'
+            {/* Inquiries CRM Toolbar & Search */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#EFE8DA] shadow-xs">
+              <div className="relative w-full sm:w-80">
+                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+                <input 
+                  type="text"
+                  placeholder="Search sender, email, subject, or keywords..."
+                  value={inquirySearch}
+                  onChange={(e) => setInquirySearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 text-xs bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl focus:outline-none focus:border-[#B45309]"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl border border-[#EFE8DA] text-xs font-bold">
+                  <button
+                    onClick={() => setInquiryFilter('ALL')}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      inquiryFilter === 'ALL' ? 'bg-white text-[#B45309] shadow-xs font-black' : 'text-stone-600 hover:text-stone-900'
                     }`}
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-bold text-sm">
-                          {inq.name.charAt(0).toUpperCase()}
+                    All ({inquiries.length})
+                  </button>
+                  <button
+                    onClick={() => setInquiryFilter('NEW')}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      inquiryFilter === 'NEW' ? 'bg-white text-[#B45309] shadow-xs font-black' : 'text-stone-600 hover:text-stone-900'
+                    }`}
+                  >
+                    ⚡ New ({inquiries.filter(i => i.status === 'NEW').length})
+                  </button>
+                  <button
+                    onClick={() => setInquiryFilter('IN_REVIEW')}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      inquiryFilter === 'IN_REVIEW' ? 'bg-white text-[#B45309] shadow-xs font-black' : 'text-stone-600 hover:text-stone-900'
+                    }`}
+                  >
+                    In Review ({inquiries.filter(i => i.status === 'IN_REVIEW').length})
+                  </button>
+                  <button
+                    onClick={() => setInquiryFilter('RESOLVED')}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      inquiryFilter === 'RESOLVED' ? 'bg-white text-[#B45309] shadow-xs font-black' : 'text-stone-600 hover:text-stone-900'
+                    }`}
+                  >
+                    Resolved ({inquiries.filter(i => i.status === 'RESOLVED').length})
+                  </button>
+                </div>
+
+                <button
+                  onClick={loadAllAdminData}
+                  className="p-2 text-stone-600 hover:text-[#B45309] rounded-xl hover:bg-stone-50 border border-[#EFE8DA] transition-colors shrink-0"
+                  title="Refresh Inquiries"
+                >
+                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                </button>
+              </div>
+            </div>
+
+            {/* Inquiries Message Feed */}
+            <div className="space-y-4 max-h-[580px] overflow-y-auto scrollbar-beige pr-1">
+              {filteredInquiries.length === 0 ? (
+                <div className="bg-white p-14 text-center rounded-3xl border border-[#EFE8DA] text-stone-400 space-y-2">
+                  <Mail size={32} className="mx-auto text-stone-300" />
+                  <p className="font-bold text-stone-700 text-sm">No Inbound Inquiries Found</p>
+                  <p className="text-xs text-stone-400 max-w-sm mx-auto">
+                    {inquirySearch ? 'No messages matched your search query.' : 'Public helpdesk messages submitted via the Contact page will arrive here in real-time.'}
+                  </p>
+                </div>
+              ) : (
+                filteredInquiries.map((inq) => {
+                  const isNew = inq.status === 'NEW';
+                  const isInReview = inq.status === 'IN_REVIEW';
+
+                  return (
+                    <div 
+                      key={inq._id} 
+                      className={`bg-white rounded-3xl p-6 border shadow-xs transition-all space-y-4 ${
+                        isNew ? 'border-[#B45309]/50 ring-1 ring-[#B45309]/20' : 'border-[#EFE8DA]'
+                      }`}
+                    >
+                      {/* Sender Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-2xl bg-[#B45309]/10 text-[#B45309] flex items-center justify-center font-black text-base uppercase shrink-0 shadow-xs">
+                            {inq.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-extrabold text-stone-900 text-sm">{inq.name}</h4>
+                              <span className="text-[10px] font-mono text-stone-400 bg-stone-100 px-2 py-0.5 rounded-md">
+                                {inq.email}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-stone-500 flex items-center gap-2 mt-0.5">
+                              <span>📅 {new Date(inq.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                              <span>•</span>
+                              <span className="font-mono text-[10px]">ID: {inq._id}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-extrabold text-stone-900 text-sm">{inq.name}</h4>
-                          <a href={`mailto:${inq.email}`} className="text-xs text-[#B45309] hover:underline font-medium">
-                            {inq.email}
-                          </a>
+
+                        {/* Status Badge */}
+                        <div className="flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            isNew 
+                              ? 'bg-amber-100 text-amber-800 border-amber-300' 
+                              : isInReview
+                              ? 'bg-blue-100 text-blue-800 border-blue-300'
+                              : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                          }`}>
+                            {inq.status.replace('_', ' ')}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                          inq.status === 'NEW' 
-                            ? 'bg-amber-100 text-amber-800 border border-amber-200' 
-                            : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                        }`}>
-                          {inq.status}
-                        </span>
-                        <span className="text-[11px] text-stone-400">
-                          {new Date(inq.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                      {/* Subject & Message Content */}
+                      <div className="space-y-2">
+                        <div className="text-xs font-black text-stone-900 flex items-center gap-1.5">
+                          <span className="text-stone-400 font-bold uppercase tracking-wider text-[10px]">Subject:</span>
+                          <span>{inq.subject}</span>
+                        </div>
+                        <div className="text-xs text-stone-700 bg-[#FAF8F5] p-4 sm:p-5 rounded-2xl border border-[#EFE8DA] leading-relaxed whitespace-pre-wrap font-sans">
+                          {inq.message}
+                        </div>
+                      </div>
+
+                      {/* Action Command Bar */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-stone-100 text-xs">
+                        <div className="flex items-center gap-2 text-stone-500 text-[11px]">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>SLA Target: 2-Hour Turnaround</span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* Quick Reply Trigger Modal */}
+                          <button
+                            onClick={() => {
+                              setReplyModalInquiry(inq);
+                              setReplyTemplate('general');
+                              setCustomReplyMessage(REPLY_TEMPLATES.general(inq.name, inq.subject));
+                            }}
+                            className="bg-[#B45309] hover:bg-[#92400E] text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                          >
+                            <Mail size={13} /> Quick Reply &amp; Templates
+                          </button>
+
+                          {/* Triage Status Toggles */}
+                          {inq.status !== 'IN_REVIEW' && inq.status !== 'RESOLVED' && (
+                            <button
+                              onClick={() => handleUpdateInquiryStatus(inq._id, 'IN_REVIEW')}
+                              className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-xl font-bold text-xs transition-colors cursor-pointer"
+                            >
+                              Mark In Review
+                            </button>
+                          )}
+
+                          {inq.status !== 'RESOLVED' ? (
+                            <button
+                              onClick={() => handleUpdateInquiryStatus(inq._id, 'RESOLVED')}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <Check size={13} /> Resolve
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleUpdateInquiryStatus(inq._id, 'NEW')}
+                              className="bg-stone-100 hover:bg-stone-200 text-stone-700 px-3 py-1.5 rounded-xl font-bold text-xs transition-colors cursor-pointer"
+                            >
+                              Reopen Inquiry
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-
-                    <div className="space-y-1">
-                      <p className="text-xs font-bold text-stone-800">Subject: <span className="font-semibold text-stone-700">{inq.subject}</span></p>
-                      <p className="text-xs text-stone-600 bg-[#FAF8F5] p-4 rounded-2xl border border-[#EFE8DA] leading-relaxed whitespace-pre-wrap">
-                        {inq.message}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 text-xs">
-                      <span className="text-[10px] font-mono text-stone-400">ID: {inq._id}</span>
-                      <div className="flex items-center gap-2">
-                        <a 
-                          href={`mailto:${inq.email}?subject=Re: ${encodeURIComponent(inq.subject)}&body=Hi ${encodeURIComponent(inq.name)},%0D%0A%0D%0AThank you for contacting EventForge administration.`}
-                          className="bg-stone-900 hover:bg-stone-800 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors"
-                        >
-                          <Mail size={12} /> Reply by Email
-                        </a>
-
-                        {inq.status === 'NEW' ? (
-                          <button
-                            onClick={() => handleUpdateInquiryStatus(inq._id, 'RESOLVED')}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                          >
-                            <Check size={12} /> Mark Resolved
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleUpdateInquiryStatus(inq._id, 'NEW')}
-                            className="bg-stone-100 hover:bg-stone-200 text-stone-700 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-colors cursor-pointer"
-                          >
-                            Reopen
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
@@ -727,6 +888,111 @@ export default function AdminDashboard() {
         )}
 
       </main>
+
+      {/* 🌟 MODAL: QUICK INQUIRY RESPONDER & TEMPLATES 🌟 */}
+      {replyModalInquiry && (
+        <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-[#EFE8DA] rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl space-y-5 relative animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-[#EFE8DA] pb-4">
+              <div className="space-y-0.5">
+                <div className="inline-flex items-center gap-1.5 text-xs font-black text-[#B45309] uppercase tracking-wider">
+                  <Mail size={14} /> Helpdesk Quick Response Composer
+                </div>
+                <h3 className="text-base font-black text-stone-900">
+                  Replying to {replyModalInquiry.name} ({replyModalInquiry.email})
+                </h3>
+              </div>
+              <button 
+                onClick={() => setReplyModalInquiry(null)} 
+                className="text-stone-400 hover:text-stone-900 p-1"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Template Selector Pills */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                Select Response Template Preset:
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                {[
+                  { id: 'general', label: 'General Ack' },
+                  { id: 'technical', label: 'Tech Support' },
+                  { id: 'vip', label: 'VIP / Sponsor' },
+                  { id: 'registration', label: 'Pass Help' }
+                ].map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => {
+                      setReplyTemplate(tpl.id);
+                      setCustomReplyMessage(REPLY_TEMPLATES[tpl.id](replyModalInquiry.name, replyModalInquiry.subject));
+                    }}
+                    className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold border transition-all text-center ${
+                      replyTemplate === tpl.id 
+                        ? 'bg-[#B45309] text-white border-[#B45309]' 
+                        : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
+                    }`}
+                  >
+                    {tpl.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Editable Response Body */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+                Response Message Preview:
+              </label>
+              <textarea
+                rows={7}
+                value={customReplyMessage}
+                onChange={(e) => setCustomReplyMessage(e.target.value)}
+                className="w-full text-xs p-3.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl text-stone-900 focus:outline-none focus:border-[#B45309] font-sans leading-relaxed"
+              ></textarea>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-[#EFE8DA]">
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(customReplyMessage);
+                  showToast('success', 'Response copied to clipboard!');
+                }}
+                className="w-full sm:w-auto px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition-colors"
+              >
+                Copy Message Text
+              </button>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setReplyModalInquiry(null)}
+                  className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-bold text-stone-600 hover:bg-stone-100 rounded-xl"
+                >
+                  Cancel
+                </button>
+                
+                <a
+                  href={`mailto:${replyModalInquiry.email}?subject=Re: ${encodeURIComponent(replyModalInquiry.subject)}&body=${encodeURIComponent(customReplyMessage)}`}
+                  onClick={() => {
+                    handleUpdateInquiryStatus(replyModalInquiry._id, 'RESOLVED');
+                    setReplyModalInquiry(null);
+                  }}
+                  className="flex-1 sm:flex-none px-5 py-2.5 bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5"
+                >
+                  <Mail size={13} />
+                  <span>Send &amp; Mark Resolved</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* MODAL: ADD USER */}
       {showAddUserModal && (

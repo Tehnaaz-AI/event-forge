@@ -7,7 +7,8 @@ export default function BrandLogo({
   size = 'default', // 'small' | 'default' | 'large' | 'hero'
   showIcon = true,
   className = '',
-  asSpan = false
+  asSpan = false,
+  variant = 'default' // 'default' | 'onDark'
 }) {
   const iconSizes = {
     small: 'w-7 h-7 rounded-xl text-xs',
@@ -37,6 +38,10 @@ export default function BrandLogo({
     hero: 'text-3xl sm:text-4xl'
   };
 
+  const forgeColor = variant === 'onDark' 
+    ? 'text-white' 
+    : 'text-stone-900 dark:text-white';
+
   const content = (
     <div className={`inline-flex items-center gap-2 sm:gap-2.5 group shrink-0 ${className}`}>
       {showIcon && (
@@ -48,7 +53,7 @@ export default function BrandLogo({
         <span className={`logo-cursive ${cursiveSizes[size] || cursiveSizes.default} font-extrabold text-[#B45309] dark:text-[#F59E0B] mr-0.5 tracking-normal transition-colors`}>
           Event
         </span>
-        <span className={`font-extrabold text-stone-900 dark:text-white ${forgeSizes[size] || forgeSizes.default} tracking-tight uppercase transition-colors`}>
+        <span className={`font-extrabold ${forgeColor} ${forgeSizes[size] || forgeSizes.default} tracking-tight uppercase transition-colors`}>
           FORGE
         </span>
       </div>
