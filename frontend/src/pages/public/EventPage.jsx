@@ -23,10 +23,6 @@ export default function EventPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [preselectedTicketId, setPreselectedTicketId] = useState(null);
   const [selectedRoomFilter, setSelectedRoomFilter] = useState('ALL');
-  
-  const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
-  const isOperator = user?.role === 'STAFF' || user?.role === 'PLATFORM_ADMIN';
-
   const [bookmarkedSessions, setBookmarkedSessions] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('eventforge_bookmarked_sessions') || '[]');
@@ -34,11 +30,39 @@ export default function EventPage() {
       return [];
     }
   });
-
+  
+  const user = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
+  
   const { data: event, isLoading, error } = useQuery({
     queryKey: ['public-event', slug],
     queryFn: () => api.get(`/events/public/${slug}`)
   });
+
+  const { data: userTickets } = useQuery({
+    queryKey: ['my-tickets'],
+    queryFn: () => api.get('/events/attendee/my-tickets'),
+    enabled: Boolean(user && user.role === 'ATTENDEE')
+  });
+
+  const hasSecuredPass = Boolean(
+    userTickets?.some(t => {
+      const ticketEventId = String(t.event?._id || t.event?.id || t.event || '');
+      const ticketEventSlug = t.event?.slug;
+      const currentEventId = String(event?._id || event?.id || '');
+      const currentEventSlug = event?.slug || slug;
+      const matchesEvent = (ticketEventId && currentEventId && ticketEventId === currentEventId) || (ticketEventSlug && currentEventSlug && ticketEventSlug === currentEventSlug);
+      const isConfirmed = t.registrationStatus === 'CONFIRMED' || t.status === 'ACTIVE' || t.status === 'CONFIRMED' || (t.ticket && t.ticket.status === 'ACTIVE');
+      return matchesEvent && isConfirmed;
+    })
+  );
+
+  const isPlatformAdmin = user?.role === 'PLATFORM_ADMIN';
+  const isStaff = user?.role === 'STAFF';
+  const isEventOwner = user?.role === 'ORGANIZER' && (
+    String(event?.organizer?._id || event?.organizer) === String(user?._id) ||
+    (user?.organization && String(event?.organization?._id || event?.organization) === String(user?.organization?._id || user?.organization))
+  );
+  const isRestrictedFromBuying = isPlatformAdmin || isStaff || isEventOwner || hasSecuredPass;
 
   useDocumentTitle(
     event ? `${event.title} | EventForge Passes & Schedule` : 'Conference Overview',
@@ -47,18 +71,26 @@ export default function EventPage() {
 
   // Auto-open checkout if redirected back after authenticating or if checkout param present
   useEffect(() => {
-    if (searchParams.get('checkout') === 'true' && !isOperator) {
+    if (searchParams.get('checkout') === 'true' && !isRestrictedFromBuying) {
       setCheckoutOpen(true);
     }
-  }, [searchParams, isOperator]);
+  }, [searchParams, isRestrictedFromBuying]);
 
   const handleOpenCheckout = (ticketCategoryId = null) => {
-    if (isOperator) {
-      if (user?.role === 'STAFF') {
-        navigate('/staff/scanner');
-      } else {
-        navigate('/admin');
-      }
+    if (hasSecuredPass) {
+      navigate('/dashboard/attendee');
+      return;
+    }
+    if (isEventOwner) {
+      navigate(`/dashboard/organizer/events/${event._id}`);
+      return;
+    }
+    if (isPlatformAdmin) {
+      navigate('/dashboard/admin');
+      return;
+    }
+    if (isStaff) {
+      navigate('/dashboard/staff');
       return;
     }
     if (ticketCategoryId) {
@@ -174,21 +206,37 @@ export default function EventPage() {
             </div>
           </div>
 
-          {user?.role === 'STAFF' ? (
+          {hasSecuredPass ? (
             <Link
-              to="/staff/scanner"
+              to="/dashboard/attendee"
+              className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+            >
+              <BookmarkCheck size={18} />
+              Pass Secured (Confirmed) — View Pass in Portal
+            </Link>
+          ) : isEventOwner ? (
+            <Link
+              to={`/dashboard/organizer/events/${event._id}`}
+              className="w-full md:w-auto bg-stone-900 hover:bg-stone-800 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+            >
+              <Building size={18} className="text-[#C28E27]" />
+              Organizer Workspace — Manage Event
+            </Link>
+          ) : isPlatformAdmin ? (
+            <Link
+              to="/dashboard/admin"
+              className="w-full md:w-auto bg-stone-900 hover:bg-stone-800 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+            >
+              <Shield size={18} className="text-[#C28E27]" />
+              Platform Admin Console — Manage Event
+            </Link>
+          ) : isStaff ? (
+            <Link
+              to="/dashboard/staff"
               className="w-full md:w-auto bg-stone-900 hover:bg-stone-800 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
             >
               <QrCode size={18} className="text-[#C28E27]" />
               Door Entrance Scanner
-            </Link>
-          ) : user?.role === 'PLATFORM_ADMIN' ? (
-            <Link
-              to="/admin"
-              className="w-full md:w-auto bg-stone-900 hover:bg-stone-800 text-white px-8 py-4 rounded-2xl font-bold text-sm shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
-            >
-              <Shield size={18} className="text-[#C28E27]" />
-              Manage in Admin Console
             </Link>
           ) : (
             <motion.button 
@@ -212,8 +260,14 @@ export default function EventPage() {
               Conference <span className="cursive-accent font-normal text-gradient-shimmer text-glow-accent text-float-subtle text-3xl sm:text-4xl align-middle px-1">Passes &amp; Admission</span>
             </h2>
             <p className="text-xs sm:text-sm text-stone-500 mt-1">
-              {isOperator 
-                ? 'Operator account: Ticket purchasing is restricted for Staff & Administrators.'
+              {hasSecuredPass 
+                ? 'Your registration is confirmed. Digital QR pass is active in your attendee portal.'
+                : isEventOwner
+                ? 'Organizer view: Manage pass allocations and door scanning in your event workspace.'
+                : isPlatformAdmin
+                ? 'Platform Administrator: Pass issuance is managed via Admin Console.'
+                : isStaff
+                ? 'Staff scanner mode active for door validation.'
                 : 'Select your pass tier for instant digital QR badge issuance'}
             </p>
           </div>
@@ -264,21 +318,37 @@ export default function EventPage() {
                   </div>
                 </div>
 
-                {user?.role === 'STAFF' ? (
+                {hasSecuredPass ? (
                   <Link
-                    to="/staff/scanner"
+                    to="/dashboard/attendee"
+                    className="w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+                  >
+                    <BookmarkCheck size={14} />
+                    <span>Pass Secured — View in Portal</span>
+                  </Link>
+                ) : isEventOwner ? (
+                  <Link
+                    to={`/dashboard/organizer/events/${event._id}`}
+                    className="w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-stone-900 hover:bg-stone-800 text-white shadow-xs"
+                  >
+                    <Building size={14} className="text-[#C28E27]" />
+                    <span>Organizer View — Manage</span>
+                  </Link>
+                ) : isPlatformAdmin ? (
+                  <Link
+                    to="/dashboard/admin"
+                    className="w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-stone-900 hover:bg-stone-800 text-white shadow-xs"
+                  >
+                    <Shield size={14} className="text-[#C28E27]" />
+                    <span>Admin Oversight — Console</span>
+                  </Link>
+                ) : isStaff ? (
+                  <Link
+                    to="/dashboard/staff"
                     className="w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-stone-900 hover:bg-stone-800 text-white shadow-xs"
                   >
                     <QrCode size={14} className="text-[#C28E27]" />
                     <span>Door Scanner Access</span>
-                  </Link>
-                ) : user?.role === 'PLATFORM_ADMIN' ? (
-                  <Link
-                    to="/admin"
-                    className="w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 bg-stone-900 hover:bg-stone-800 text-white shadow-xs"
-                  >
-                    <Shield size={14} className="text-[#C28E27]" />
-                    <span>Admin Oversight</span>
                   </Link>
                 ) : (
                   <motion.button
@@ -306,7 +376,7 @@ export default function EventPage() {
               <p className="text-xs text-stone-500 max-w-md mx-auto">
                 Secure your general admission pass with instant QR badge issuance.
               </p>
-              {!isOperator && (
+              {!isRestrictedFromBuying && (
                 <button
                   onClick={() => handleOpenCheckout()}
                   className="bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold py-3 px-6 rounded-xl shadow-md cursor-pointer"

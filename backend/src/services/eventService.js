@@ -305,6 +305,20 @@ export const registerAttendee = async (req, res) => {
   const event = await Event.findById(eventId);
   if (!event) throw new Error('Event not found');
 
+  // Guard: Platform Admins cannot purchase attendee passes
+  if (req.user?.role === 'PLATFORM_ADMIN') {
+    throw new Error('Platform Administrators cannot register for or purchase attendee passes. Use the Admin Console to manage events.');
+  }
+
+  // Guard: Organizers cannot purchase passes for their own events
+  const isOwner = req.user?.role === 'ORGANIZER' && (
+    String(event.organizer) === String(req.user._id) ||
+    (req.user.organization && String(event.organization) === String(req.user.organization))
+  );
+  if (isOwner) {
+    throw new Error('Organizers cannot purchase attendee passes for their own published conferences. Use the Organizer Workspace to manage event passes.');
+  }
+
   // Enforce Event Lifecycle
   const allowedStatuses = ['REGISTRATION_OPEN', 'PUBLISHED', 'LIVE'];
   if (!allowedStatuses.includes(event.status)) {
@@ -464,6 +478,20 @@ export const joinVipWaitlist = async (req, res) => {
   const eventId = req.params.eventId;
   const event = await Event.findById(eventId);
   if (!event) throw new Error('Event not found');
+
+  // Guard: Platform Admins cannot join attendee waitlists
+  if (req.user?.role === 'PLATFORM_ADMIN') {
+    throw new Error('Platform Administrators cannot join attendee waitlists. Use the Admin Console to manage events.');
+  }
+
+  // Guard: Organizers cannot join waitlists for their own events
+  const isOwner = req.user?.role === 'ORGANIZER' && (
+    String(event.organizer) === String(req.user._id) ||
+    (req.user.organization && String(event.organization) === String(req.user.organization))
+  );
+  if (isOwner) {
+    throw new Error('Organizers cannot join waitlists for their own published conferences.');
+  }
 
   const existing = await Registration.findOne({
     event: eventId,

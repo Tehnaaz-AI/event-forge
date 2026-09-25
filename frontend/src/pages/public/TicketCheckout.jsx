@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   X, CheckCircle, AlertCircle, Sparkles, Ticket as TicketIcon, 
   Tag, ShieldCheck, ArrowRight, UserCheck, Lock, QrCode,
-  User, Mail, Key, Eye, EyeOff, RefreshCw
+  User, Mail, Key, Eye, EyeOff, RefreshCw, BookmarkCheck, Shield, Building
 } from 'lucide-react';
 import { api } from '../../services/api';
 
@@ -34,6 +34,31 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
 
   const [currentUser, setCurrentUser] = useState(() => 
     JSON.parse(localStorage.getItem('eventforge_user') || 'null')
+  );
+
+  const { data: userTickets } = useQuery({
+    queryKey: ['my-tickets'],
+    queryFn: () => api.get('/events/attendee/my-tickets'),
+    enabled: Boolean(currentUser && currentUser.role === 'ATTENDEE')
+  });
+
+  const hasSecuredPass = Boolean(
+    userTickets?.some(t => {
+      const ticketEventId = String(t.event?._id || t.event?.id || t.event || '');
+      const ticketEventSlug = t.event?.slug;
+      const currentEventId = String(event?._id || event?.id || '');
+      const currentEventSlug = event?.slug;
+      const matchesEvent = (ticketEventId && currentEventId && ticketEventId === currentEventId) || (ticketEventSlug && currentEventSlug && ticketEventSlug === currentEventSlug);
+      const isConfirmed = t.registrationStatus === 'CONFIRMED' || t.status === 'ACTIVE' || t.status === 'CONFIRMED' || (t.ticket && t.ticket.status === 'ACTIVE');
+      return matchesEvent && isConfirmed;
+    })
+  );
+
+  const isPlatformAdmin = currentUser?.role === 'PLATFORM_ADMIN';
+  const isStaff = currentUser?.role === 'STAFF';
+  const isEventOwner = currentUser?.role === 'ORGANIZER' && (
+    String(event?.organizer?._id || event?.organizer) === String(currentUser?._id) ||
+    (currentUser?.organization && String(event?.organization?._id || event?.organization) === String(currentUser?.organization?._id || currentUser?.organization))
   );
 
   // Coupon application handler
@@ -241,6 +266,96 @@ export default function TicketCheckout({ event, initialCategoryId = null, onClos
                 <button
                   onClick={onClose}
                   className="bg-white border border-[#EFE8DA] hover:bg-stone-50 text-stone-700 px-4 py-2.5 rounded-xl font-bold text-xs transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          ) : hasSecuredPass ? (
+            <div className="text-center py-8 px-4 space-y-5">
+              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto border border-emerald-200">
+                <BookmarkCheck size={36} />
+              </div>
+              <div>
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-extrabold uppercase tracking-wider mb-2 inline-block">
+                  Pass Already Active
+                </span>
+                <h3 className="text-xl font-extrabold text-stone-900">You already hold an active pass for {event.title}!</h3>
+                <p className="text-xs text-stone-500 mt-1.5 max-w-md mx-auto leading-relaxed">
+                  Your registration is confirmed. You can review your admission badge, download passes, and verify door credentials in your Attendee Portal.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3 pt-3">
+                <button
+                  onClick={() => navigate('/dashboard/attendee')}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2"
+                >
+                  <BookmarkCheck size={16} />
+                  <span>Open My Passes Portal</span>
+                </button>
+                <button
+                  onClick={onClose}
+                  className="bg-white border border-[#EFE8DA] hover:bg-stone-50 text-stone-700 px-5 py-3 rounded-xl font-bold text-xs"
+                >
+                  Back to Conference Details
+                </button>
+              </div>
+            </div>
+          ) : isEventOwner ? (
+            <div className="text-center py-8 px-4 space-y-5">
+              <div className="w-16 h-16 bg-amber-50 text-[#B45309] rounded-2xl flex items-center justify-center mx-auto border border-amber-200">
+                <Building size={36} />
+              </div>
+              <div>
+                <span className="px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-extrabold uppercase tracking-wider mb-2 inline-block">
+                  Host Organizer Workspace
+                </span>
+                <h3 className="text-xl font-extrabold text-stone-900">You are the Organizer of this Summit</h3>
+                <p className="text-xs text-stone-500 mt-1.5 max-w-md mx-auto leading-relaxed">
+                  Organizers do not purchase passes for their own hosted conferences. Manage ticket tiers, delegate rosters, door scanners, and live analytics from your executive workspace.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3 pt-3">
+                <button
+                  onClick={() => navigate(`/dashboard/organizer/events/${event._id}`)}
+                  className="bg-[#B45309] hover:bg-[#92400E] text-white px-6 py-3 rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2"
+                >
+                  <Building size={16} />
+                  <span>Open Organizer Workspace</span>
+                </button>
+                <button
+                  onClick={onClose}
+                  className="bg-white border border-[#EFE8DA] hover:bg-stone-50 text-stone-700 px-5 py-3 rounded-xl font-bold text-xs"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          ) : isPlatformAdmin ? (
+            <div className="text-center py-8 px-4 space-y-5">
+              <div className="w-16 h-16 bg-stone-100 text-stone-800 rounded-2xl flex items-center justify-center mx-auto border border-stone-200">
+                <Shield size={36} />
+              </div>
+              <div>
+                <span className="px-3 py-1 bg-stone-200 text-stone-800 rounded-full text-xs font-extrabold uppercase tracking-wider mb-2 inline-block">
+                  Platform Admin Privileges
+                </span>
+                <h3 className="text-xl font-extrabold text-stone-900">Platform Admin Mode</h3>
+                <p className="text-xs text-stone-500 mt-1.5 max-w-md mx-auto leading-relaxed">
+                  Platform Administrators oversee all summits, manage user rosters, and verify security protocols from the Admin Console. Delegate pass purchasing is disabled for admin accounts.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3 pt-3">
+                <button
+                  onClick={() => navigate('/dashboard/admin')}
+                  className="bg-stone-900 hover:bg-stone-800 text-white px-6 py-3 rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2"
+                >
+                  <Shield size={16} />
+                  <span>Go to Platform Admin Console</span>
+                </button>
+                <button
+                  onClick={onClose}
+                  className="bg-white border border-[#EFE8DA] hover:bg-stone-50 text-stone-700 px-5 py-3 rounded-xl font-bold text-xs"
                 >
                   Close
                 </button>
