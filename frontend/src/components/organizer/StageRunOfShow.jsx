@@ -4,7 +4,7 @@ import {
   Clock, Play, Pause, RotateCcw, Volume2, VolumeX, 
   Maximize2, Minimize2, Mic, Users, MapPin, Sparkles, 
   ChevronRight, ArrowRight, AlertCircle, CheckCircle2, 
-  Timer, Award, Radio, Tv
+  Timer, Award, Radio, Tv, Edit3, Check, X
 } from 'lucide-react';
 import { api } from '../../services/api';
 
@@ -114,6 +114,11 @@ export default function StageRunOfShow({ eventId }) {
     '1. Remind attendees about interactive live Q&A via mobile.\n2. Key sponsor mention: Platinum AI Partner booth in Hall B.\n3. Wrap up precisely on time for the 15-minute networking break.'
   );
 
+  // Editable Clock State
+  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [editMinutes, setEditMinutes] = useState('15');
+  const [editSeconds, setEditSeconds] = useState('00');
+
   const containerRef = useRef(null);
   const currentSession = sessions[activeSessionIndex] || null;
 
@@ -199,12 +204,33 @@ export default function StageRunOfShow({ eventId }) {
   };
 
   const addTime = (mins) => {
-    setSecondsRemaining(prev => prev + mins * 60);
+    setSecondsRemaining(prev => Math.max(0, prev + mins * 60));
   };
 
   const resetTimer = () => {
     setTimerRunning(false);
     setSecondsRemaining(15 * 60);
+  };
+
+  const handleStartEditingTime = () => {
+    setEditMinutes(String(Math.floor(secondsRemaining / 60)).padStart(2, '0'));
+    setEditSeconds(String(secondsRemaining % 60).padStart(2, '0'));
+    setIsEditingTime(true);
+    setTimerRunning(false);
+  };
+
+  const handleSaveTime = () => {
+    const mins = Math.max(0, parseInt(editMinutes, 10) || 0);
+    const secs = Math.max(0, Math.min(59, parseInt(editSeconds, 10) || 0));
+    const total = mins * 60 + secs;
+    setSecondsRemaining(Math.max(1, total));
+    setIsEditingTime(false);
+  };
+
+  const handleSetPreset = (mins) => {
+    setSecondsRemaining(mins * 60);
+    setTimerRunning(false);
+    setIsEditingTime(false);
   };
 
   const getTimerColor = () => {
@@ -300,18 +326,108 @@ export default function StageRunOfShow({ eventId }) {
             {/* Main Giant Timer Card */}
             <div className={`p-8 sm:p-12 rounded-3xl border transition-all text-center flex flex-col items-center justify-center relative shadow-sm ${getTimerBorder()}`}>
               
-              <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-stone-500 dark:text-stone-400 mb-2">
-                <Timer size={16} className="text-[#B45309]" />
-                <span>Current Stage Clock</span>
+              <div className="flex items-center justify-between w-full max-w-md mb-2">
+                <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+                  <Timer size={16} className="text-[#B45309]" />
+                  <span>Current Stage Clock</span>
+                </div>
+                {!isEditingTime && (
+                  <button
+                    type="button"
+                    onClick={handleStartEditingTime}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#B45309] dark:text-amber-400 hover:underline bg-[#B45309]/10 dark:bg-stone-800 px-2.5 py-1 rounded-lg transition-all"
+                    title="Edit stage clock time"
+                  >
+                    <Edit3 size={12} />
+                    <span>Edit Time</span>
+                  </button>
+                )}
               </div>
 
-              {/* Huge Digits */}
-              <div className={`font-mono text-6xl sm:text-8xl md:text-9xl font-black tracking-tighter my-4 ${getTimerColor()}`}>
-                {formatTime(secondsRemaining)}
-              </div>
+              {/* Editable or Display Huge Digits */}
+              {isEditingTime ? (
+                <form 
+                  onSubmit={(e) => { e.preventDefault(); handleSaveTime(); }} 
+                  className="my-3 flex flex-col items-center justify-center space-y-4 w-full max-w-md animate-in zoom-in-95 duration-150"
+                >
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="flex flex-col items-center">
+                      <label className="text-[10px] font-extrabold uppercase text-stone-400 dark:text-stone-500 mb-1 tracking-wider">Minutes</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="360"
+                        value={editMinutes} 
+                        onChange={(e) => setEditMinutes(e.target.value)}
+                        className="w-24 sm:w-32 h-16 sm:h-20 text-center text-4xl sm:text-6xl font-mono font-black rounded-2xl bg-[#FAF8F5] dark:bg-stone-800 border-2 border-[#B45309] text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-4 focus:ring-[#B45309]/20"
+                        autoFocus
+                      />
+                    </div>
+                    <span className="text-4xl sm:text-6xl font-mono font-black text-[#B45309] mt-4">:</span>
+                    <div className="flex flex-col items-center">
+                      <label className="text-[10px] font-extrabold uppercase text-stone-400 dark:text-stone-500 mb-1 tracking-wider">Seconds</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="59"
+                        value={editSeconds} 
+                        onChange={(e) => setEditSeconds(e.target.value)}
+                        className="w-24 sm:w-32 h-16 sm:h-20 text-center text-4xl sm:text-6xl font-mono font-black rounded-2xl bg-[#FAF8F5] dark:bg-stone-800 border-2 border-[#B45309] text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-4 focus:ring-[#B45309]/20"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quick Preset Buttons */}
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+                    {[5, 10, 15, 20, 30, 45, 60].map((mins) => (
+                      <button
+                        key={mins}
+                        type="button"
+                        onClick={() => {
+                          setEditMinutes(String(mins).padStart(2, '0'));
+                          setEditSeconds('00');
+                        }}
+                        className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-[#B45309] hover:text-white text-stone-700 dark:text-stone-300 transition-colors"
+                      >
+                        {mins}m
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Save / Cancel Controls */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="submit"
+                      className="px-5 py-2.5 bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-black rounded-xl flex items-center gap-1.5 shadow-md transition-all active:scale-95"
+                    >
+                      <Check size={14} /> Set Time
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingTime(false)}
+                      className="px-4 py-2.5 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-bold rounded-xl flex items-center gap-1 transition-all"
+                    >
+                      <X size={14} /> Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div 
+                  onClick={handleStartEditingTime}
+                  className="group cursor-pointer relative select-none"
+                  title="Click to edit clock time"
+                >
+                  <div className={`font-mono text-6xl sm:text-8xl md:text-9xl font-black tracking-tighter my-4 transition-transform group-hover:scale-[1.02] ${getTimerColor()}`}>
+                    {formatTime(secondsRemaining)}
+                  </div>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-3 right-0 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 text-[10px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 pointer-events-none">
+                    <Edit3 size={11} /> Click to Edit
+                  </div>
+                </div>
+              )}
 
               {/* Active Session Headline */}
-              <div className="mt-2 mb-8 max-w-md">
+              <div className="mt-2 mb-6 max-w-md">
                 <span className="text-[11px] font-bold text-[#B45309] dark:text-amber-400 uppercase tracking-wider block">
                   {currentSession?.room ? `Room: ${currentSession.room}` : 'Main Keynote Stage'}
                 </span>
@@ -323,6 +439,25 @@ export default function StageRunOfShow({ eventId }) {
                     Speaker: {currentSession.speakers.map(s => s.name).join(', ')}
                   </p>
                 )}
+              </div>
+
+              {/* Quick Presets Bar */}
+              <div className="flex flex-wrap items-center justify-center gap-1.5 mb-6 max-w-md">
+                <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider mr-1">Quick Set:</span>
+                {[5, 10, 15, 20, 30, 45].map((mins) => (
+                  <button
+                    key={mins}
+                    type="button"
+                    onClick={() => handleSetPreset(mins)}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                      secondsRemaining === mins * 60 && !timerRunning
+                        ? 'bg-[#B45309] text-white shadow-xs font-black'
+                        : 'bg-stone-100 dark:bg-stone-800/90 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300'
+                    }`}
+                  >
+                    {mins}m
+                  </button>
+                ))}
               </div>
 
               {/* Play / Pause / Reset Actions */}
@@ -362,6 +497,15 @@ export default function StageRunOfShow({ eventId }) {
                   className="px-3.5 py-3.5 rounded-2xl bg-[#FAF8F5] dark:bg-stone-800/80 border border-[#EFE8DA] dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold text-xs transition-colors"
                 >
                   +5 Min
+                </button>
+
+                <button
+                  onClick={handleStartEditingTime}
+                  className="px-3.5 py-3.5 rounded-2xl bg-[#FAF8F5] dark:bg-stone-800/80 border border-[#EFE8DA] dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold text-xs transition-colors flex items-center gap-1"
+                  title="Custom Time"
+                >
+                  <Edit3 size={13} />
+                  <span>Custom</span>
                 </button>
               </div>
             </div>
