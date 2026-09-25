@@ -7,7 +7,8 @@ import {
   Sparkles, MessageSquare, Settings as SettingsIcon, ShieldCheck, 
   Layers, BarChart2, CheckCircle2, Mic, Activity, Radio, 
   Search, Filter, LayoutGrid, List, MapPin, Clock, ArrowUpRight, 
-  Zap, ChevronRight, Eye, UserCheck, Ticket, AlertCircle
+  Zap, ChevronRight, Eye, UserCheck, Ticket, AlertCircle,
+  ZoomIn, ZoomOut, RotateCcw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, 
@@ -23,6 +24,7 @@ export default function OrganizerOverview() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'DRAFT'
   const [selectedConferenceId, setSelectedConferenceId] = useState(null);
+  const [chartZoom, setChartZoom] = useState(1);
 
   const { data: events, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['organizer-events-overview'],
@@ -313,16 +315,53 @@ export default function OrganizerOverview() {
 
             {/* Single Event Timeline Graph */}
             <div className="pt-2">
-              <div className="flex items-center justify-between text-xs font-bold text-stone-500 mb-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-stone-500 mb-2.5">
                 <span>Daily Registration Trajectory &amp; Revenue Inflow</span>
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                    <span className="text-stone-700 dark:text-stone-300">Daily Passes</span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                      <span className="text-stone-700 dark:text-stone-300">Daily Passes</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#B45309]"></span>
+                      <span className="text-stone-700 dark:text-stone-300">Revenue ($)</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#B45309]"></span>
-                    <span className="text-stone-700 dark:text-stone-300">Revenue ($)</span>
+
+                  {/* Zoom Controls */}
+                  <div className="inline-flex items-center gap-1 bg-[#FAF8F5] dark:bg-stone-900 border border-[#EFE8DA] dark:border-stone-800 p-1 rounded-xl shadow-xs">
+                    <button
+                      type="button"
+                      title="Zoom Out"
+                      disabled={chartZoom <= 0.8}
+                      onClick={() => setChartZoom(prev => Math.max(0.75, Number((prev - 0.25).toFixed(2))))}
+                      className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 disabled:opacity-40 transition-colors"
+                    >
+                      <ZoomOut size={14} />
+                    </button>
+                    <span className="text-[11px] font-mono font-bold text-stone-700 dark:text-stone-300 px-1.5 min-w-[42px] text-center">
+                      {Math.round(chartZoom * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      title="Zoom In"
+                      disabled={chartZoom >= 2.5}
+                      onClick={() => setChartZoom(prev => Math.min(2.5, Number((prev + 0.25).toFixed(2))))}
+                      className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 disabled:opacity-40 transition-colors"
+                    >
+                      <ZoomIn size={14} />
+                    </button>
+                    {chartZoom !== 1 && (
+                      <button
+                        type="button"
+                        title="Reset Zoom"
+                        onClick={() => setChartZoom(1)}
+                        className="p-1 rounded-lg hover:bg-[#B45309]/10 text-[#B45309] transition-colors ml-0.5"
+                      >
+                        <RotateCcw size={13} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -332,8 +371,15 @@ export default function OrganizerOverview() {
                   <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : singleConferenceAnalytics?.timelineData?.length > 0 ? (
-                <div className="w-full overflow-x-auto overflow-y-auto max-h-[360px] sm:max-h-[400px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
-                  <div className="min-w-[1100px] h-[460px] sm:h-[500px] w-full px-3">
+                <div className="w-full overflow-x-auto overflow-y-auto max-h-[380px] sm:max-h-[440px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
+                  <div 
+                    style={{ 
+                      minWidth: `${Math.round(1100 * chartZoom)}px`, 
+                      height: `${Math.round(460 * chartZoom)}px`,
+                      transition: 'min-width 0.2s ease, height 0.2s ease'
+                    }} 
+                    className="w-full px-3"
+                  >
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 20, right: 35, left: 10, bottom: 30 }}>
                         <defs>

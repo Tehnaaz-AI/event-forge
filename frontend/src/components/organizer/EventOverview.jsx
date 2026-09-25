@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   DollarSign, Ticket, Users, TrendingUp, BarChart3, PieChart as PieChartIcon, 
-  CheckCircle2, Clock, Award, ShieldCheck, ArrowUpRight 
+  CheckCircle2, Clock, Award, ShieldCheck, ArrowUpRight,
+  ZoomIn, ZoomOut, RotateCcw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, 
@@ -13,6 +14,7 @@ import { api } from '../../services/api';
 const LUXURY_COLORS = ['#B45309', '#C28E27', '#854D0E', '#D97706', '#78716C'];
 
 export default function EventOverview({ eventId }) {
+  const [chartZoom, setChartZoom] = useState(1);
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ['event-analytics', eventId],
     queryFn: () => api.get(`/events/${eventId}/analytics`)
@@ -135,22 +137,64 @@ export default function EventOverview({ eventId }) {
         
         {/* Registration & Revenue Trend Chart */}
         <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-3xl border border-[#EFE8DA] shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="font-extrabold text-stone-900 text-lg flex items-center gap-2">
                 <TrendingUp size={20} className="text-[#B45309]" /> Registration &amp; Sales Velocity
               </h3>
               <p className="text-xs text-stone-500 mt-0.5">Real-time pace of attendee registrations and cumulative pass volume</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-3">
               <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live DB Telemetry
               </span>
+
+              {/* Zoom Controls */}
+              <div className="inline-flex items-center gap-1 bg-[#FAF8F5] dark:bg-stone-900 border border-[#EFE8DA] dark:border-stone-800 p-1 rounded-xl shadow-xs">
+                <button
+                  type="button"
+                  title="Zoom Out"
+                  disabled={chartZoom <= 0.8}
+                  onClick={() => setChartZoom(prev => Math.max(0.75, Number((prev - 0.25).toFixed(2))))}
+                  className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 disabled:opacity-40 transition-colors"
+                >
+                  <ZoomOut size={14} />
+                </button>
+                <span className="text-[11px] font-mono font-bold text-stone-700 dark:text-stone-300 px-1.5 min-w-[42px] text-center">
+                  {Math.round(chartZoom * 100)}%
+                </span>
+                <button
+                  type="button"
+                  title="Zoom In"
+                  disabled={chartZoom >= 2.5}
+                  onClick={() => setChartZoom(prev => Math.min(2.5, Number((prev + 0.25).toFixed(2))))}
+                  className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 disabled:opacity-40 transition-colors"
+                >
+                  <ZoomIn size={14} />
+                </button>
+                {chartZoom !== 1 && (
+                  <button
+                    type="button"
+                    title="Reset Zoom"
+                    onClick={() => setChartZoom(1)}
+                    className="p-1 rounded-lg hover:bg-[#B45309]/10 text-[#B45309] transition-colors ml-0.5"
+                  >
+                    <RotateCcw size={13} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="w-full overflow-x-auto overflow-y-auto max-h-[360px] sm:max-h-[400px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
-            <div className="min-w-[1100px] h-[460px] sm:h-[500px] px-3">
+          <div className="w-full overflow-x-auto overflow-y-auto max-h-[380px] sm:max-h-[440px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-custom">
+            <div 
+              style={{ 
+                minWidth: `${Math.round(1100 * chartZoom)}px`, 
+                height: `${Math.round(460 * chartZoom)}px`,
+                transition: 'min-width 0.2s ease, height 0.2s ease'
+              }} 
+              className="px-3"
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={timelineData} margin={{ top: 15, right: 30, left: 0, bottom: 25 }}>
                   <defs>
