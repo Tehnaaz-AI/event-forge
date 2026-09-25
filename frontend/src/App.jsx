@@ -74,9 +74,11 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 
-        {/* Platform Master Admin Console */}
+        {/* Platform Master Admin Console & Inquiries */}
         <Route element={<ProtectedRoute allowedRoles={['PLATFORM_ADMIN']} />}>
           <Route path="/dashboard/admin" element={<AdminDashboard />} />
+          <Route path="/dashboard/admin/inquiries" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Route>
         
         {/* Protected Dashboard Routes */}

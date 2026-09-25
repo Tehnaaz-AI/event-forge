@@ -13,442 +13,205 @@ import {
   Ticket, 
   EventStaff, 
   Sponsor, 
-  SponsorshipPackage 
+  SponsorshipPackage,
+  Inquiry
 } from '../src/models/index.js';
 
 export async function seedDevelopmentData() {
   try {
     await connectDb();
-    console.log('🌱 Connected to MongoDB for controlled development bootstrap...');
+    console.log('🌱 Connected to MongoDB for controlled 5-persona development purge & bootstrap...');
 
-    const defaultPassword = process.env.DEV_SEED_PASSWORD || 'EventForge2026!';
+    // ==========================================
+    // 0. PURGE ALL OLD DATA
+    // ==========================================
+    console.log('🧹 Purging all collections for a clean slate...');
+    await Promise.all([
+      User.deleteMany({}),
+      Organization.deleteMany({}),
+      Event.deleteMany({}),
+      Session.deleteMany({}),
+      TicketCategory.deleteMany({}),
+      Registration.deleteMany({}),
+      Ticket.deleteMany({}),
+      EventStaff.deleteMany({}),
+      Sponsor.deleteMany({}),
+      SponsorshipPackage.deleteMany({}),
+      Inquiry ? Inquiry.deleteMany({}) : Promise.resolve()
+    ]);
+    console.log('✓ All collections cleanly wiped.');
+
+    const defaultPassword = process.env.DEV_SEED_PASSWORD || 'Password123!';
     const passwordHash = await bcrypt.hash(defaultPassword, 12);
 
     // ==========================================
-    // 1. ORGANIZATIONS (3 Separate Tenancies)
+    // 1. ORGANIZATIONS (Exactly 2 Tenancies)
     // ==========================================
-    const orgA = await Organization.findOneAndUpdate(
-      { name: 'Nexus Tech Innovations' },
-      {
-        name: 'Nexus Tech Innovations',
-        contactEmail: 'contact@nexus.io',
-        industry: 'Autonomous Systems & AI',
-        subscriptionPlan: 'Enterprise VIP',
-        subscriptionStatus: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
+    const orgA = await Organization.create({
+      name: 'Nexus Tech Innovations',
+      contactEmail: 'contact@nexus.io',
+      industry: 'Autonomous Systems & AI',
+      subscriptionPlan: 'Enterprise VIP',
+      subscriptionStatus: 'ACTIVE'
+    });
 
-    const orgB = await Organization.findOneAndUpdate(
-      { name: 'Vanguard Cloud Systems' },
-      {
-        name: 'Vanguard Cloud Systems',
-        contactEmail: 'contact@vanguard.io',
-        industry: 'Cloud Infrastructure & DevOps',
-        subscriptionPlan: 'Enterprise VIP',
-        subscriptionStatus: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
-
-    const orgC = await Organization.findOneAndUpdate(
-      { name: 'Summit Enterprise Media' },
-      {
-        name: 'Summit Enterprise Media',
-        contactEmail: 'contact@summitcorp.io',
-        industry: 'FinTech & Capital Markets',
-        subscriptionPlan: 'Enterprise VIP',
-        subscriptionStatus: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
+    const orgB = await Organization.create({
+      name: 'Vanguard Cloud Systems',
+      contactEmail: 'contact@vanguard.io',
+      industry: 'Cloud Infrastructure & DevOps',
+      subscriptionPlan: 'Enterprise VIP',
+      subscriptionStatus: 'ACTIVE'
+    });
 
     // ==========================================
-    // 2. USERS (Exactly 6: 1 Admin, 1 Staff, 1 Attendee, 3 Organizers)
+    // 2. USERS (Exactly 5 Core Personas)
     // ==========================================
-    // Platform Admin
-    const admin = await User.findOneAndUpdate(
-      { email: 'admin@eventforge.com' },
-      {
-        name: 'Platform Super Admin',
-        email: 'admin@eventforge.com',
-        passwordHash,
-        role: 'PLATFORM_ADMIN',
-        status: 'ACTIVE',
-        organization: orgA._id
-      },
-      { upsert: true, new: true }
-    );
+    
+    // 1. Platform Super Admin
+    const admin = await User.create({
+      name: 'Platform Super Admin',
+      email: 'admin@eventforge.com',
+      passwordHash,
+      role: 'PLATFORM_ADMIN',
+      status: 'ACTIVE',
+      organization: orgA._id
+    });
 
-    // Organizer A
-    const organizerA = await User.findOneAndUpdate(
-      { email: 'organizer.a@nexus.io' },
-      {
-        name: 'Dr. Elena Vance (Organizer A)',
-        email: 'organizer.a@nexus.io',
-        passwordHash,
-        role: 'ORGANIZER',
-        organization: orgA._id,
-        bio: 'VP of AI Infrastructure at Nexus Tech.',
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
+    // 2. Organizer A (Nexus AI)
+    const organizerA = await User.create({
+      name: 'Dr. Elena Vance (Organizer A)',
+      email: 'organizer.a@nexus.io',
+      passwordHash,
+      role: 'ORGANIZER',
+      organization: orgA._id,
+      bio: 'VP of AI Systems & Architecture at Nexus Tech Innovations.',
+      status: 'ACTIVE'
+    });
 
-    // Organizer B
-    const organizerB = await User.findOneAndUpdate(
-      { email: 'organizer.b@vanguard.io' },
-      {
-        name: 'Marcus Sterling (Organizer B)',
-        email: 'organizer.b@vanguard.io',
-        passwordHash,
-        role: 'ORGANIZER',
-        organization: orgB._id,
-        bio: 'Principal Cloud Architect at Vanguard.',
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
+    // 3. Organizer B (Vanguard Cloud)
+    const organizerB = await User.create({
+      name: 'Marcus Sterling (Organizer B)',
+      email: 'organizer.b@vanguard.io',
+      passwordHash,
+      role: 'ORGANIZER',
+      organization: orgB._id,
+      bio: 'Principal Cloud & Security Architect at Vanguard Cloud Systems.',
+      status: 'ACTIVE'
+    });
 
-    // Organizer C
-    const organizerC = await User.findOneAndUpdate(
-      { email: 'organizer.c@summitcorp.io' },
-      {
-        name: 'Victoria Song (Organizer C)',
-        email: 'organizer.c@summitcorp.io',
-        passwordHash,
-        role: 'ORGANIZER',
-        organization: orgC._id,
-        bio: 'Managing Director at Summit Enterprise Media.',
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
+    // 4. Door Check-In Staff
+    const staff = await User.create({
+      name: 'Alex Rivera (Door Staff)',
+      email: 'staff@eventforge.com',
+      passwordHash,
+      role: 'STAFF',
+      organization: orgA._id,
+      status: 'ACTIVE'
+    });
 
-    // Staff
-    const staff = await User.findOneAndUpdate(
-      { email: 'staff@eventforge.com' },
-      {
-        name: 'Alex Rivera (Door Staff)',
-        email: 'staff@eventforge.com',
-        passwordHash,
-        role: 'STAFF',
-        organization: orgA._id,
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
+    // 5. Verified Attendee
+    const attendee = await User.create({
+      name: 'Sarah Jenkins (Delegate)',
+      email: 'attendee@eventforge.com',
+      passwordHash,
+      role: 'ATTENDEE',
+      organization: orgA._id,
+      status: 'ACTIVE'
+    });
 
-    // Attendee 1 (Confirmed Standard)
-    const attendee = await User.findOneAndUpdate(
-      { email: 'attendee@eventforge.com' },
-      {
-        name: 'Sarah Jenkins (Delegate)',
-        email: 'attendee@eventforge.com',
-        passwordHash,
-        role: 'ATTENDEE',
-        organization: orgA._id,
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
-
-    // Attendee 2 (Confirmed Executive VIP)
-    const vipAttendee = await User.findOneAndUpdate(
-      { email: 'vip.attendee@eventforge.com' },
-      {
-        name: 'David Thorne (VIP Executive)',
-        email: 'vip.attendee@eventforge.com',
-        passwordHash,
-        role: 'ATTENDEE',
-        organization: orgA._id,
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
-
-    // Attendee 3 (VIP Waitlisted #1)
-    const vipWaitlistUser = await User.findOneAndUpdate(
-      { email: 'vip.waitlist@eventforge.com' },
-      {
-        name: 'Rachel Adams (VIP Standby)',
-        email: 'vip.waitlist@eventforge.com',
-        passwordHash,
-        role: 'ATTENDEE',
-        organization: orgA._id,
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
-
-    // Attendee 4 (Standard Waitlisted #2)
-    const standardWaitlistUser = await User.findOneAndUpdate(
-      { email: 'standard.waitlist@eventforge.com' },
-      {
-        name: 'Liam Chen (Standard Standby)',
-        email: 'standard.waitlist@eventforge.com',
-        passwordHash,
-        role: 'ATTENDEE',
-        organization: orgA._id,
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
-
-    console.log('✓ Provisioned Development Users: 1 Admin, 3 Organizers, 1 Staff, 4 Attendees (Confirmed + VIP + Waitlist)');
+    console.log('✓ Provisioned exactly 5 Users (1 Admin, 2 Organizers, 1 Staff, 1 Attendee)');
 
     // ==========================================
-    // 3. EVENTS (Exactly 3 Conferences: 1 per Organizer)
+    // 3. CONFERENCES (2 Separate Tenancies)
     // ==========================================
     const now = new Date();
     const startDate1 = new Date(now.getTime() + 7 * 24 * 3600000);
     const endDate1 = new Date(startDate1.getTime() + 2 * 24 * 3600000);
 
-    // Conference 1 -> Organizer A
-    const event1 = await Event.findOneAndUpdate(
-      { slug: 'global-ai-summit-2026' },
-      {
-        title: 'Global AI & Autonomous Systems Summit 2026',
-        slug: 'global-ai-summit-2026',
-        description: 'The premier global executive conference on autonomous agents, enterprise LLM architectures, and zero-trust cloud infrastructure.',
-        eventType: 'CONFERENCE',
-        category: 'Artificial Intelligence',
-        startDate: startDate1,
-        endDate: endDate1,
-        capacity: 500,
-        status: 'REGISTRATION_OPEN',
-        organization: orgA._id,
-        organizer: organizerA._id,
-        venue: {
-          name: 'Moscone Convention Center',
-          address: '747 Howard St',
-          city: 'San Francisco',
-          state: 'CA',
-          country: 'USA'
-        },
-        registrationSettings: {
-          isRegistrationOpen: true,
-          waitlistEnabled: true
-        }
+    // Event 1 -> Organizer A (Nexus AI)
+    const event1 = await Event.create({
+      title: 'Global AI & Autonomous Systems Summit 2026',
+      slug: 'global-ai-summit-2026',
+      description: 'The premier global executive conference on autonomous multi-agent systems, enterprise LLM architectures, and real-time AI security.',
+      eventType: 'CONFERENCE',
+      category: 'Artificial Intelligence',
+      startDate: startDate1,
+      endDate: endDate1,
+      capacity: 500,
+      status: 'REGISTRATION_OPEN',
+      organization: orgA._id,
+      organizer: organizerA._id,
+      venue: {
+        name: 'Moscone Center Executive Hall',
+        address: '747 Howard St',
+        city: 'San Francisco',
+        state: 'CA',
+        country: 'USA'
       },
-      { upsert: true, new: true }
-    );
+      registrationSettings: {
+        isRegistrationOpen: true,
+        waitlistEnabled: true
+      }
+    });
 
-    // Conference 2 -> Organizer B
+    // Event 2 -> Organizer B (Vanguard Cloud)
     const startDate2 = new Date(now.getTime() + 14 * 24 * 3600000);
     const endDate2 = new Date(startDate2.getTime() + 2 * 24 * 3600000);
 
-    const event2 = await Event.findOneAndUpdate(
-      { slug: 'cloudscale-devops-world-2026' },
-      {
-        title: 'CloudScale DevOps & Security World 2026',
-        slug: 'cloudscale-devops-world-2026',
-        description: 'Deep architectural breakdowns of multi-region Kubernetes, continuous resilience, and automated edge compliance.',
-        eventType: 'CONFERENCE',
-        category: 'Cybersecurity',
-        startDate: startDate2,
-        endDate: endDate2,
-        capacity: 400,
-        status: 'REGISTRATION_OPEN',
-        organization: orgB._id,
-        organizer: organizerB._id,
-        venue: {
-          name: 'Seattle Convention Center',
-          address: '705 Pike St',
-          city: 'Seattle',
-          state: 'WA',
-          country: 'USA'
-        },
-        registrationSettings: {
-          isRegistrationOpen: true,
-          waitlistEnabled: true
-        }
+    const event2 = await Event.create({
+      title: 'CloudScale DevOps & Security World 2026',
+      slug: 'cloudscale-devops-world-2026',
+      description: 'Deep architectural breakdowns of multi-region Kubernetes, zero-trust cloud infrastructure, and continuous enterprise compliance.',
+      eventType: 'CONFERENCE',
+      category: 'Cloud Infrastructure',
+      startDate: startDate2,
+      endDate: endDate2,
+      capacity: 400,
+      status: 'REGISTRATION_OPEN',
+      organization: orgB._id,
+      organizer: organizerB._id,
+      venue: {
+        name: 'Seattle Convention Center',
+        address: '705 Pike St',
+        city: 'Seattle',
+        state: 'WA',
+        country: 'USA'
       },
-      { upsert: true, new: true }
-    );
+      registrationSettings: {
+        isRegistrationOpen: true,
+        waitlistEnabled: true
+      }
+    });
 
-    // Conference 3 -> Organizer C
-    const startDate3 = new Date(now.getTime() + 21 * 24 * 3600000);
-    const endDate3 = new Date(startDate3.getTime() + 2 * 24 * 3600000);
-
-    const event3 = await Event.findOneAndUpdate(
-      { slug: 'future-fintech-expo-2026' },
-      {
-        title: 'Future of FinTech & Digital Assets Expo 2026',
-        slug: 'future-fintech-expo-2026',
-        description: 'Executive symposium on real-time cross-border settlement, AI risk modeling, and institutional digital asset compliance.',
-        eventType: 'CONFERENCE',
-        category: 'Finance & Banking',
-        startDate: startDate3,
-        endDate: endDate3,
-        capacity: 600,
-        status: 'REGISTRATION_OPEN',
-        organization: orgC._id,
-        organizer: organizerC._id,
-        venue: {
-          name: 'Javits Center',
-          address: '429 11th Ave',
-          city: 'New York',
-          state: 'NY',
-          country: 'USA'
-        },
-        registrationSettings: {
-          isRegistrationOpen: true,
-          waitlistEnabled: true
-        }
-      },
-      { upsert: true, new: true }
-    );
-
-    console.log('✓ Provisioned 3 Conferences (Strict Ownership: Event 1 -> Org A, Event 2 -> Org B, Event 3 -> Org C)');
+    console.log('✓ Provisioned 2 Published Conferences across the 2 Organizers');
 
     // ==========================================
-    // 4. TICKET CATEGORIES & REGISTRATIONS FOR EVENT 1
+    // 4. TICKET CATEGORIES & SESSIONS FOR EVENT 1
     // ==========================================
-    const catStandard = await TicketCategory.findOneAndUpdate(
-      { event: event1._id, name: 'General Admission Pass' },
-      {
-        event: event1._id,
-        name: 'General Admission Pass',
-        description: 'Full conference access, keynotes, masterclasses, and networking.',
-        tier: 'STANDARD',
-        isVipEligible: false,
-        price: 299,
-        capacity: 400,
-        availableQuantity: 398
-      },
-      { upsert: true, new: true }
-    );
+    const cat1Standard = await TicketCategory.create({
+      event: event1._id,
+      name: 'General Admission Pass',
+      description: 'Full conference access, keynotes, multi-track symposiums, and evening networking.',
+      tier: 'STANDARD',
+      isVipEligible: false,
+      price: 299,
+      capacity: 400,
+      availableQuantity: 399
+    });
 
-    const catVIP = await TicketCategory.findOneAndUpdate(
-      { event: event1._id, name: 'Executive VIP Pass' },
-      {
-        event: event1._id,
-        name: 'Executive VIP Pass',
-        description: 'Fast-track entrance, VIP lounge, and private speaker reception.',
-        tier: 'VIP',
-        isVipEligible: true,
-        price: 699,
-        capacity: 100,
-        availableQuantity: 99
-      },
-      { upsert: true, new: true }
-    );
+    const cat1VIP = await TicketCategory.create({
+      event: event1._id,
+      name: 'Executive VIP Pass',
+      description: 'Fast-track priority entrance, VIP executive lounge, and private speaker dinner reception.',
+      tier: 'VIP',
+      isVipEligible: true,
+      price: 699,
+      capacity: 100,
+      availableQuantity: 100
+    });
 
-    // 1. Confirmed Standard Registration
-    const reg1 = await Registration.findOneAndUpdate(
-      { event: event1._id, attendee: attendee._id },
-      {
-        event: event1._id,
-        attendee: attendee._id,
-        ticketCategory: catStandard._id,
-        registrationStatus: 'CONFIRMED',
-        isVIP: false,
-        priorityScore: 0,
-        amount: 299
-      },
-      { upsert: true, new: true }
-    );
-
-    const ticketNumber1 = `EF-2026-CONF-1001`;
-    const qrCode1 = await QRCode.toDataURL(JSON.stringify({
-      registration: String(reg1._id),
-      ticketNumber: ticketNumber1,
-      attendee: attendee.name,
-      event: event1.title
-    }));
-
-    await Ticket.findOneAndUpdate(
-      { registration: reg1._id },
-      {
-        registration: reg1._id,
-        ticketNumber: ticketNumber1,
-        qrCode: qrCode1,
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
-
-    // 2. Confirmed VIP Registration
-    const reg2 = await Registration.findOneAndUpdate(
-      { event: event1._id, attendee: vipAttendee._id },
-      {
-        event: event1._id,
-        attendee: vipAttendee._id,
-        ticketCategory: catVIP._id,
-        registrationStatus: 'CONFIRMED',
-        isVIP: true,
-        priorityScore: 10,
-        amount: 699
-      },
-      { upsert: true, new: true }
-    );
-
-    const ticketNumber2 = `EF-VIP-2026-CONF-2001`;
-    const qrCode2 = await QRCode.toDataURL(JSON.stringify({
-      registration: String(reg2._id),
-      ticketNumber: ticketNumber2,
-      attendee: vipAttendee.name,
-      event: event1.title
-    }));
-
-    await Ticket.findOneAndUpdate(
-      { registration: reg2._id },
-      {
-        registration: reg2._id,
-        ticketNumber: ticketNumber2,
-        qrCode: qrCode2,
-        status: 'ACTIVE'
-      },
-      { upsert: true, new: true }
-    );
-
-    // 3. VIP Waitlisted Registration (Priority Standby #1)
-    await Registration.findOneAndUpdate(
-      { event: event1._id, attendee: vipWaitlistUser._id },
-      {
-        event: event1._id,
-        attendee: vipWaitlistUser._id,
-        ticketCategory: catVIP._id,
-        registrationStatus: 'WAITLISTED',
-        isVIP: true,
-        priorityScore: 10,
-        waitlistPosition: 1,
-        amount: 699
-      },
-      { upsert: true, new: true }
-    );
-
-    // 4. Standard Waitlisted Registration (Standby #2)
-    await Registration.findOneAndUpdate(
-      { event: event1._id, attendee: standardWaitlistUser._id },
-      {
-        event: event1._id,
-        attendee: standardWaitlistUser._id,
-        ticketCategory: catStandard._id,
-        registrationStatus: 'WAITLISTED',
-        isVIP: false,
-        priorityScore: 0,
-        waitlistPosition: 2,
-        amount: 299
-      },
-      { upsert: true, new: true }
-    );
-
-    // Assign Staff to Event 1
-    await EventStaff.findOneAndUpdate(
-      { event: event1._id, user: staff._id },
-      {
-        event: event1._id,
-        user: staff._id,
-        role: 'CHECK_IN'
-      },
-      { upsert: true, new: true }
-    );
-
-    // Add Keynote Sessions for Event 1
-    await Session.findOneAndUpdate(
-      { event: event1._id, title: 'Architecting Autonomous Multi-Agent AI Systems' },
+    // Sessions for Event 1
+    await Session.create([
       {
         event: event1._id,
         title: 'Architecting Autonomous Multi-Agent AI Systems',
@@ -456,23 +219,123 @@ export async function seedDevelopmentData() {
         room: 'Grand Ballroom A',
         capacity: 400,
         startTime: new Date(startDate1.getTime() + 9 * 3600000),
-        endTime: new Date(startDate1.getTime() + 10.5 * 3600000)
+        endTime: new Date(startDate1.getTime() + 10.5 * 3600000),
+        status: 'PUBLISHED'
       },
-      { upsert: true, new: true }
-    );
+      {
+        event: event1._id,
+        title: 'Zero-Trust LLM Gateway & Prompt Defense',
+        description: 'Deep-dive session into prompt firewalls, runtime token telemetry, and enterprise data sandboxing.',
+        room: 'Breakout Hall 1',
+        capacity: 150,
+        startTime: new Date(startDate1.getTime() + 11 * 3600000),
+        endTime: new Date(startDate1.getTime() + 12.5 * 3600000),
+        status: 'PUBLISHED'
+      }
+    ]);
 
-    console.log('✅ Controlled development seed completed successfully.');
-    console.log('--------------------------------------------------');
-    console.log('Admin:                admin@eventforge.com             | ' + defaultPassword);
-    console.log('Organizer A:          organizer.a@nexus.io             | ' + defaultPassword);
-    console.log('Organizer B:          organizer.b@vanguard.io          | ' + defaultPassword);
-    console.log('Organizer C:          organizer.c@summitcorp.io        | ' + defaultPassword);
-    console.log('Staff:                staff@eventforge.com             | ' + defaultPassword);
-    console.log('Attendee (Confirmed): attendee@eventforge.com          | ' + defaultPassword);
-    console.log('Attendee (VIP):       vip.attendee@eventforge.com      | ' + defaultPassword);
-    console.log('Waitlist (VIP #1):    vip.waitlist@eventforge.com      | ' + defaultPassword);
-    console.log('Waitlist (Std #2):    standard.waitlist@eventforge.com | ' + defaultPassword);
-    console.log('--------------------------------------------------');
+    // Assign Door Staff Alex Rivera to Event 1
+    await EventStaff.create({
+      event: event1._id,
+      user: staff._id,
+      role: 'CHECK_IN'
+    });
+
+    // ==========================================
+    // 5. TICKET CATEGORIES & SESSIONS FOR EVENT 2
+    // ==========================================
+    await TicketCategory.create([
+      {
+        event: event2._id,
+        name: 'Standard Technical Pass',
+        description: 'Full access to Kubernetes tracks, DevOps masterclasses, and open-source expo.',
+        tier: 'STANDARD',
+        isVipEligible: false,
+        price: 199,
+        capacity: 300,
+        availableQuantity: 300
+      },
+      {
+        event: event2._id,
+        name: 'All-Access VIP Pass',
+        description: 'Includes private workshops, certification exam voucher, and VIP lounge access.',
+        tier: 'VIP',
+        isVipEligible: true,
+        price: 499,
+        capacity: 100,
+        availableQuantity: 100
+      }
+    ]);
+
+    await Session.create([
+      {
+        event: event2._id,
+        title: 'Kubernetes at Massive Scale: Lessons from 10k Nodes',
+        description: 'Production strategies for multi-cluster fleet management, eBPF telemetry, and chaos engineering.',
+        room: 'Cloud Arena 1',
+        capacity: 300,
+        startTime: new Date(startDate2.getTime() + 9 * 3600000),
+        endTime: new Date(startDate2.getTime() + 10.5 * 3600000),
+        status: 'PUBLISHED'
+      }
+    ]);
+
+    // ==========================================
+    // 6. CONFIRMED ATTENDEE REGISTRATION & DIGITAL BADGE
+    // ==========================================
+    const regAttendee = await Registration.create({
+      event: event1._id,
+      attendee: attendee._id,
+      ticketCategory: cat1Standard._id,
+      registrationStatus: 'CONFIRMED',
+      isVIP: false,
+      priorityScore: 0,
+      amount: 299
+    });
+
+    const ticketNumber = `EF-2026-CONF-8891`;
+    const qrCode = await QRCode.toDataURL(JSON.stringify({
+      registration: String(regAttendee._id),
+      ticketNumber: ticketNumber,
+      attendee: attendee.name,
+      event: event1.title
+    }));
+
+    await Ticket.create({
+      registration: regAttendee._id,
+      ticketNumber: ticketNumber,
+      qrCode: qrCode,
+      status: 'ACTIVE'
+    });
+
+    // Add Inbound Contact Inquiries for Admin CRM
+    if (Inquiry) {
+      await Inquiry.create([
+        {
+          name: 'Chief Information Officer, AlphaCorp',
+          email: 'cio@alphacorp.io',
+          subject: 'Enterprise Multi-Conference Tier Inquiry',
+          message: 'We are looking to host 4 annual developer summits on EventForge and require custom SSO integration and on-premise gateway telemetry.',
+          status: 'NEW'
+        },
+        {
+          name: 'Sarah Lin, Global Events Director',
+          email: 'slin@summitmgmt.org',
+          subject: 'Door Scanner Hardware Compatibility',
+          message: 'Do you support optical laser Honeywell scanners alongside the mobile camera optical scanner?',
+          status: 'IN_REVIEW'
+        }
+      ]);
+    }
+
+    console.log('✅ Fresh 5-Persona bootstrap completed successfully.');
+    console.log('==================================================');
+    console.log('1. Super Admin:        admin@eventforge.com        | ' + defaultPassword);
+    console.log('2. Organizer A (Nexus): organizer.a@nexus.io        | ' + defaultPassword);
+    console.log('3. Organizer B (Cloud): organizer.b@vanguard.io     | ' + defaultPassword);
+    console.log('4. Door Staff:          staff@eventforge.com        | ' + defaultPassword);
+    console.log('5. Attendee (Sarah):    attendee@eventforge.com     | ' + defaultPassword);
+    console.log('==================================================');
     
     process.exit(0);
   } catch (error) {

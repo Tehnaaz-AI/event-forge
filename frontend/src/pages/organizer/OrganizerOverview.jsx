@@ -22,8 +22,7 @@ export default function OrganizerOverview() {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'DRAFT'
-  const [chartMetric, setChartMetric] = useState('capacity'); // 'capacity' | 'timeline'
-  const [selectedConferenceId, setSelectedConferenceId] = useState('ALL');
+  const [selectedConferenceId, setSelectedConferenceId] = useState(null);
 
   const { data: events, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['organizer-events-overview'],
@@ -32,14 +31,15 @@ export default function OrganizerOverview() {
     refetchOnWindowFocus: true
   });
 
+  const effectiveEventId = selectedConferenceId || events?.[0]?._id;
+  const selectedEvent = events?.find(e => String(e._id) === String(effectiveEventId)) || events?.[0];
+
   const { data: singleConferenceAnalytics, isLoading: isSingleAnalyticsLoading } = useQuery({
-    queryKey: ['event-analytics', selectedConferenceId],
-    queryFn: () => api.get(`/events/${selectedConferenceId}/analytics`),
-    enabled: selectedConferenceId !== 'ALL',
+    queryKey: ['event-analytics', selectedEvent?._id],
+    queryFn: () => api.get(`/events/${selectedEvent._id}/analytics`),
+    enabled: Boolean(selectedEvent?._id),
     refetchInterval: 10000
   });
-
-  const selectedEvent = events?.find(e => String(e._id) === String(selectedConferenceId));
 
   const totalEvents = events?.length || 0;
   const activeEvents = events?.filter(e => ['PUBLISHED', 'REGISTRATION_OPEN', 'LIVE'].includes(e.status))?.length || 0;
@@ -236,279 +236,191 @@ export default function OrganizerOverview() {
 
       </div>
 
-      {/* 🌟 Interactive Trajectory & Conference Analytics Matrix 🌟 */}
+      {/* 🌟 Single Event Telemetry & Trajectory Studio 🌟 */}
       <div className="bg-white dark:bg-[#171614] p-6 sm:p-8 rounded-3xl border border-[#EFE8DA] dark:border-stone-800 shadow-xs space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#EFE8DA] dark:border-stone-800 pb-5">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-[#B45309]/10 text-[#B45309] dark:text-[#F59E0B] flex items-center justify-center">
-                <BarChart2 size={18} />
+        
+        {/* Summit Switcher Bar (For Organizers managing multiple summits) */}
+        {events && events.length > 0 ? (
+          <div className="space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#EFE8DA] dark:border-stone-800 pb-5">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#B45309]/10 text-[#B45309] dark:text-[#F59E0B] flex items-center justify-center">
+                    <BarChart2 size={18} />
+                  </div>
+                  <h3 className="font-black text-stone-900 dark:text-[#F5F2EB] text-lg tracking-tight">
+                    {selectedEvent?.title || 'Conference'} Telemetry
+                  </h3>
+                </div>
+                <p className="text-xs text-stone-500">
+                  Day-by-day delegate registration velocity, revenue inflow, and ticket tier velocity for this summit.
+                </p>
               </div>
-              <h3 className="font-black text-stone-900 dark:text-[#F5F2EB] text-lg tracking-tight">
-                {selectedConferenceId === 'ALL' 
-                  ? 'Portfolio Trajectory & Capacity Scale'
-                  : `${selectedEvent?.title || 'Conference'} Analytics Telemetry`}
-              </h3>
-            </div>
-            <p className="text-xs text-stone-500">
-              {selectedConferenceId === 'ALL'
-                ? 'Dual-curve capacity allocation vs registration velocity across your managed portfolio.'
-                : `Day-by-day pass registration trajectory and revenue telemetry for ${selectedEvent?.title}.`}
-            </p>
-          </div>
 
-          {/* Conference Selector Dropdown & Legend */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative">
-              <select
-                value={selectedConferenceId}
-                onChange={(e) => setSelectedConferenceId(e.target.value)}
-                className="bg-[#FAF8F5] dark:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-xl px-3.5 py-2 text-xs font-bold text-stone-900 dark:text-[#F5F2EB] focus:outline-none focus:border-[#B45309] cursor-pointer pr-8"
-              >
-                <option value="ALL">🌐 All Managed Conferences (Portfolio)</option>
-                {events?.map((ev) => (
-                  <option key={ev._id} value={ev._id}>
-                    {ev.title} ({ev.status})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs font-bold text-stone-600 dark:text-stone-300">
-              {selectedConferenceId === 'ALL' ? (
-                <>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-[#B45309]"></span>
-                    <span>Seat Capacity</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                    <span>Registration Velocity</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-                    <span>Daily Passes</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-[#B45309]"></span>
-                    <span>Revenue ($)</span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Dynamic Conference Metric Bar (When a specific summit is selected) */}
-        {selectedConferenceId !== 'ALL' && selectedEvent && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#FAF8F5] dark:bg-[#1C1917] p-4 rounded-2xl border border-[#EFE8DA] dark:border-stone-800">
-            <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Gross Revenue</p>
-              <p className="text-lg font-extrabold text-[#B45309] dark:text-[#F59E0B]">
-                ${(singleConferenceAnalytics?.totalRevenue || 0).toLocaleString()}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Passes Secured</p>
-              <p className="text-lg font-extrabold text-stone-900 dark:text-[#F5F2EB]">
-                {singleConferenceAnalytics?.totalSold || 0}
-                <span className="text-xs text-stone-400 font-normal"> / {singleConferenceAnalytics?.totalCapacity || selectedEvent.capacity || 100}</span>
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Door Check-Ins</p>
-              <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
-                {singleConferenceAnalytics?.checkedIn || 0}
-                <span className="text-xs text-stone-400 font-normal"> Verified</span>
-              </p>
-            </div>
-            <div className="flex items-center justify-end">
-              <Link
-                to={`/dashboard/organizer/events/${selectedConferenceId}`}
-                className="bg-stone-900 hover:bg-stone-800 text-white text-[11px] font-bold px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5"
-              >
-                <span>Event Workspace</span>
-                <ArrowRight size={12} />
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Dynamic Chart Display */}
-        {selectedConferenceId === 'ALL' ? (
-          trajectoryChartData.length > 0 ? (
-            <div className="h-72 w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trajectoryChartData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="capacityGlow" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#B45309" stopOpacity={0.35}/>
-                      <stop offset="95%" stopColor="#B45309" stopOpacity={0.0}/>
-                    </linearGradient>
-                    <linearGradient id="velocityGlow" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.35}/>
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0.0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2E2A24" strokeOpacity={0.15} vertical={false} />
-                  <XAxis 
-                    dataKey="name" 
-                    stroke="#78716C" 
-                    fontSize={11} 
-                    fontWeight={600} 
-                    tickLine={false} 
-                    axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.2 }}
-                  />
-                  <YAxis 
-                    stroke="#78716C" 
-                    fontSize={11} 
-                    fontWeight={600} 
-                    tickLine={false} 
-                    axisLine={false}
-                    allowDecimals={false}
-                  />
-                  <Tooltip 
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const d = payload[0].payload;
-                        return (
-                          <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1.5">
-                            <p className="font-extrabold text-[#F59E0B] text-sm">{d.fullTitle}</p>
-                            <div className="space-y-1 text-stone-300 font-mono text-[11px]">
-                              <p>Max Capacity: <strong className="text-white">{d.capacity} seats</strong></p>
-                              <p>Velocity Metric: <strong className="text-emerald-400">{d.estimatedVelocity} delegates</strong></p>
-                              <p>Lifecycle Status: <span className="font-bold text-amber-300 uppercase">{d.status}</span></p>
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="capacity" 
-                    stroke="#B45309" 
-                    strokeWidth={2.5}
-                    fillOpacity={1} 
-                    fill="url(#capacityGlow)" 
-                    name="Seat Capacity"
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="estimatedVelocity" 
-                    stroke="#10B981" 
-                    strokeWidth={2}
-                    fillOpacity={1} 
-                    fill="url(#velocityGlow)" 
-                    name="Registration Velocity"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="p-12 text-center bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-dashed border-[#EFE8DA] dark:border-stone-800 space-y-2">
-              <BarChart2 size={32} className="mx-auto text-stone-400" />
-              <p className="text-xs font-bold text-stone-700 dark:text-stone-300">No Portfolio Summits Created</p>
-              <p className="text-[11px] text-stone-400">Create your first conference to activate dynamic trajectory telemetry.</p>
-            </div>
-          )
-        ) : (
-          /* Specific Conference Timeline & Velocity */
-          <div className="space-y-6">
-            {isSingleAnalyticsLoading ? (
-              <div className="h-64 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
+              {/* Event Switcher Tabs / Dropdown */}
+              <div className="flex flex-wrap items-center gap-2">
+                {events.map((ev) => {
+                  const isSelected = String(ev._id) === String(selectedEvent?._id);
+                  return (
+                    <button
+                      key={ev._id}
+                      onClick={() => setSelectedConferenceId(ev._id)}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+                        isSelected 
+                          ? 'bg-[#B45309] text-white shadow-md shadow-[#B45309]/20 scale-102'
+                          : 'bg-[#FAF8F5] dark:bg-[#1C1917] hover:bg-stone-100 dark:hover:bg-[#292524] text-stone-700 dark:text-stone-300 border border-[#EFE8DA] dark:border-stone-800'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full ${ev.status === 'LIVE' ? 'bg-emerald-400 animate-pulse' : isSelected ? 'bg-amber-300' : 'bg-stone-400'}`}></span>
+                      <span className="truncate max-w-[140px] sm:max-w-[200px]">{ev.title}</span>
+                    </button>
+                  );
+                })}
               </div>
-            ) : singleConferenceAnalytics?.timelineData?.length > 0 ? (
-              <div className="h-72 w-full pt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="singleRevGlow" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#B45309" stopOpacity={0.35}/>
-                        <stop offset="95%" stopColor="#B45309" stopOpacity={0.0}/>
-                      </linearGradient>
-                      <linearGradient id="singleRegGlow" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.35}/>
-                        <stop offset="95%" stopColor="#10B981" stopOpacity={0.0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2E2A24" strokeOpacity={0.15} vertical={false} />
-                    <XAxis 
-                      dataKey="day" 
-                      stroke="#78716C" 
-                      fontSize={11} 
-                      fontWeight={600} 
-                      tickLine={false} 
-                      axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.2 }}
-                    />
-                    <YAxis 
-                      stroke="#78716C" 
-                      fontSize={11} 
-                      fontWeight={600} 
-                      tickLine={false} 
-                      axisLine={false}
-                      allowDecimals={false}
-                    />
-                    <Tooltip 
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const d = payload[0].payload;
-                          return (
-                            <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1.5">
-                              <p className="font-extrabold text-[#F59E0B] text-sm">Activity on {d.day || d.date}</p>
-                              <div className="space-y-1 text-stone-300 font-mono text-[11px]">
-                                <p>Passes Registered: <strong className="text-emerald-400">{d.registrations} passes</strong></p>
-                                <p>Revenue Inflow: <strong className="text-amber-300">${d.revenue}</strong></p>
-                              </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="registrations" 
-                      stroke="#10B981" 
-                      strokeWidth={2.5}
-                      fillOpacity={1} 
-                      fill="url(#singleRegGlow)" 
-                      name="Daily Registrations"
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="#B45309" 
-                      strokeWidth={2}
-                      fillOpacity={1} 
-                      fill="url(#singleRevGlow)" 
-                      name="Revenue ($)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="p-8 text-center bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-dashed border-[#EFE8DA] dark:border-stone-800">
-                <p className="text-xs font-bold text-stone-600 dark:text-stone-300">No registration activity recorded yet for this summit.</p>
+            </div>
+
+            {/* Dynamic Event KPI Ribbon */}
+            {selectedEvent && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#FAF8F5] dark:bg-[#1C1917] p-4 rounded-2xl border border-[#EFE8DA] dark:border-stone-800">
+                <div>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Gross Revenue</p>
+                  <p className="text-xl font-black text-[#B45309] dark:text-[#F59E0B]">
+                    ${(singleConferenceAnalytics?.totalRevenue || 0).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Passes Secured</p>
+                  <p className="text-xl font-black text-stone-900 dark:text-[#F5F2EB]">
+                    {singleConferenceAnalytics?.totalSold || 0}
+                    <span className="text-xs text-stone-400 font-normal"> / {singleConferenceAnalytics?.totalCapacity || selectedEvent.capacity || 100}</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Door Check-Ins</p>
+                  <p className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                    {singleConferenceAnalytics?.checkedIn || 0}
+                    <span className="text-xs text-stone-400 font-normal"> Verified</span>
+                  </p>
+                </div>
+                <div className="flex items-center justify-end">
+                  <Link
+                    to={`/dashboard/organizer/events/${selectedEvent._id}`}
+                    className="bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-colors flex items-center gap-1.5 shadow-xs"
+                  >
+                    <span>Event Workspace</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
               </div>
             )}
 
+            {/* Single Event Timeline Graph */}
+            <div className="pt-2">
+              <div className="flex items-center justify-between text-xs font-bold text-stone-500 mb-2">
+                <span>Daily Registration Trajectory &amp; Revenue Inflow</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    <span className="text-stone-700 dark:text-stone-300">Daily Passes</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-[#B45309]"></span>
+                    <span className="text-stone-700 dark:text-stone-300">Gross Revenue ($)</span>
+                  </div>
+                </div>
+              </div>
+
+              {isSingleAnalyticsLoading ? (
+                <div className="h-64 flex items-center justify-center">
+                  <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : singleConferenceAnalytics?.timelineData?.length > 0 ? (
+                <div className="h-72 w-full pt-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 10, right: 15, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="singleRevGlow" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#B45309" stopOpacity={0.35}/>
+                          <stop offset="95%" stopColor="#B45309" stopOpacity={0.0}/>
+                        </linearGradient>
+                        <linearGradient id="singleRegGlow" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.35}/>
+                          <stop offset="95%" stopColor="#10B981" stopOpacity={0.0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2E2A24" strokeOpacity={0.15} vertical={false} />
+                      <XAxis 
+                        dataKey="day" 
+                        stroke="#78716C" 
+                        fontSize={11} 
+                        fontWeight={600} 
+                        tickLine={false} 
+                        axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.2 }}
+                      />
+                      <YAxis 
+                        stroke="#78716C" 
+                        fontSize={11} 
+                        fontWeight={600} 
+                        tickLine={false} 
+                        axisLine={false}
+                        allowDecimals={false}
+                      />
+                      <Tooltip 
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const d = payload[0].payload;
+                            return (
+                              <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1.5">
+                                <p className="font-extrabold text-[#F59E0B] text-sm">Activity on {d.day || d.date}</p>
+                                <div className="space-y-1 text-stone-300 font-mono text-[11px]">
+                                  <p>Passes Registered: <strong className="text-emerald-400">{d.registrations} passes</strong></p>
+                                  <p>Revenue Inflow: <strong className="text-amber-300">${d.revenue}</strong></p>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="registrations" 
+                        stroke="#10B981" 
+                        strokeWidth={2.5}
+                        fillOpacity={1} 
+                        fill="url(#singleRegGlow)" 
+                        name="Daily Registrations"
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke="#B45309" 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#singleRevGlow)" 
+                        name="Revenue ($)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-dashed border-[#EFE8DA] dark:border-stone-800">
+                  <p className="text-xs font-bold text-stone-600 dark:text-stone-300">No registration activity recorded yet for this summit.</p>
+                </div>
+              )}
+            </div>
+
             {/* Ticket Tier Breakdown Matrix */}
             {singleConferenceAnalytics?.ticketCategories?.length > 0 && (
-              <div className="pt-2 border-t border-[#EFE8DA] dark:border-stone-800">
+              <div className="pt-3 border-t border-[#EFE8DA] dark:border-stone-800">
                 <p className="text-[11px] font-extrabold text-stone-500 uppercase tracking-wider mb-3">
                   Pass Tier Distribution &amp; Velocity
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {singleConferenceAnalytics.ticketCategories.map((cat) => {
                     const fillPercent = cat.capacity > 0 ? Math.min(100, Math.round((cat.sold / cat.capacity) * 100)) : 0;
                     return (
-                      <div key={cat._id} className="bg-[#FAF8F5] dark:bg-[#1C1917] p-3.5 rounded-2xl border border-[#EFE8DA] dark:border-stone-800 space-y-2">
+                      <div key={cat._id} className="bg-[#FAF8F5] dark:bg-[#1C1917] p-4 rounded-2xl border border-[#EFE8DA] dark:border-stone-800 space-y-2">
                         <div className="flex justify-between items-center text-xs">
                           <span className="font-extrabold text-stone-900 dark:text-[#F5F2EB]">{cat.name}</span>
                           <span className="font-mono font-bold text-[#B45309]">${cat.price}</span>
@@ -529,6 +441,18 @@ export default function OrganizerOverview() {
                 </div>
               </div>
             )}
+          </div>
+        ) : (
+          <div className="p-12 text-center bg-[#FAF8F5] dark:bg-[#1C1917] rounded-2xl border border-dashed border-[#EFE8DA] dark:border-stone-800 space-y-3">
+            <BarChart2 size={36} className="mx-auto text-stone-400" />
+            <h4 className="text-sm font-bold text-stone-800 dark:text-stone-200">No Conferences Created Yet</h4>
+            <p className="text-xs text-stone-400 max-w-sm mx-auto">Create your first summit to activate dynamic registration curves and door scanning telemetry.</p>
+            <Link
+              to="/dashboard/organizer/events/new"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#B45309] hover:bg-[#92400E] text-white rounded-xl text-xs font-bold shadow-md shadow-[#B45309]/20"
+            >
+              <Plus size={14} /> Create Conference
+            </Link>
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import { 
   ShieldCheck, Users, Calendar, DollarSign, Building, Trash2, 
@@ -12,9 +12,28 @@ import AppFooter from '../../components/common/AppFooter';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const currentUser = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
 
-  const [activeTab, setActiveTab] = useState('users'); // 'users' | 'events' | 'inquiries'
+  const getInitialTab = () => {
+    if (location.pathname.includes('/inquiries') || searchParams.get('tab') === 'inquiries') return 'inquiries';
+    if (searchParams.get('tab') === 'events') return 'events';
+    return 'users';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab); // 'users' | 'events' | 'inquiries'
+
+  useEffect(() => {
+    if (location.pathname.includes('/inquiries') || searchParams.get('tab') === 'inquiries') {
+      setActiveTab('inquiries');
+    } else if (searchParams.get('tab') === 'events') {
+      setActiveTab('events');
+    } else {
+      setActiveTab('users');
+    }
+  }, [location.pathname, searchParams]);
+
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [events, setEvents] = useState([]);

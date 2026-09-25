@@ -273,12 +273,12 @@ export default function Login() {
                     <span className="text-[10px] font-mono text-stone-400 dark:text-stone-500">Pass: Password123!</span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {/* Super Admin */}
                     <button
                       type="button"
                       onClick={() => handleQuickLogin('admin@eventforge.com', 'Password123!')}
-                      className="p-3 rounded-2xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                      className="p-2.5 rounded-2xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
                     >
                       <div className="flex items-center justify-between w-full">
                         <span className="text-[10px] font-extrabold text-rose-800 dark:text-rose-400 uppercase tracking-wider">Super Admin</span>
@@ -288,31 +288,45 @@ export default function Login() {
                       <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">admin@eventforge.com</p>
                     </button>
 
-                    {/* Organizer */}
+                    {/* Organizer A */}
                     <button
                       type="button"
-                      onClick={() => handleQuickLogin('organizer@eventforge.com', 'Password123!')}
-                      className="p-3 rounded-2xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                      onClick={() => handleQuickLogin('organizer.a@nexus.io', 'Password123!')}
+                      className="p-2.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
                     >
                       <div className="flex items-center justify-between w-full">
-                        <span className="text-[10px] font-extrabold text-[#B45309] dark:text-amber-400 uppercase tracking-wider">Organizer</span>
-                        <span className="text-[9px] bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                        <span className="text-[10px] font-extrabold text-[#B45309] dark:text-amber-400 uppercase tracking-wider">Organizer A</span>
+                        <span className="text-[9px] bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 px-1.5 py-0.5 rounded-md font-bold">Nexus AI</span>
                       </div>
-                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Elena Rostova</p>
-                      <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">organizer@eventforge.com</p>
+                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Dr. Elena Vance</p>
+                      <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">organizer.a@nexus.io</p>
+                    </button>
+
+                    {/* Organizer B */}
+                    <button
+                      type="button"
+                      onClick={() => handleQuickLogin('organizer.b@vanguard.io', 'Password123!')}
+                      className="p-2.5 rounded-2xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-[10px] font-extrabold text-blue-800 dark:text-blue-400 uppercase tracking-wider">Organizer B</span>
+                        <span className="text-[9px] bg-blue-200/80 dark:bg-blue-900 text-blue-900 dark:text-blue-200 px-1.5 py-0.5 rounded-md font-bold">Cloud</span>
+                      </div>
+                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Marcus Sterling</p>
+                      <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">organizer.b@vanguard.io</p>
                     </button>
 
                     {/* Door Staff */}
                     <button
                       type="button"
                       onClick={() => handleQuickLogin('staff@eventforge.com', 'Password123!')}
-                      className="p-3 rounded-2xl border border-orange-200 dark:border-orange-900/40 bg-orange-50/60 dark:bg-orange-950/20 hover:bg-orange-100 dark:hover:bg-orange-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                      className="p-2.5 rounded-2xl border border-orange-200 dark:border-orange-900/40 bg-orange-50/60 dark:bg-orange-950/20 hover:bg-orange-100 dark:hover:bg-orange-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
                     >
                       <div className="flex items-center justify-between w-full">
                         <span className="text-[10px] font-extrabold text-orange-800 dark:text-orange-400 uppercase tracking-wider">Door Staff</span>
                         <span className="text-[9px] bg-orange-200/80 dark:bg-orange-900 text-orange-900 dark:text-orange-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
                       </div>
-                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">David Miller</p>
+                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Alex Rivera</p>
                       <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">staff@eventforge.com</p>
                     </button>
 
@@ -320,13 +334,13 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => handleQuickLogin('attendee@eventforge.com', 'Password123!')}
-                      className="p-3 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer"
+                      className="p-2.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-950/40 text-left transition-all group flex flex-col justify-between cursor-pointer col-span-2 sm:col-span-2"
                     >
                       <div className="flex items-center justify-between w-full">
                         <span className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Attendee Pass</span>
-                        <span className="text-[9px] bg-emerald-200/80 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 px-1.5 py-0.5 rounded-md font-bold">1-Click</span>
+                        <span className="text-[9px] bg-emerald-200/80 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 px-1.5 py-0.5 rounded-md font-bold">1-Click Active Pass</span>
                       </div>
-                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Marcus Vance</p>
+                      <p className="text-xs font-bold text-stone-900 dark:text-white truncate mt-1">Sarah Jenkins (Delegate)</p>
                       <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono truncate">attendee@eventforge.com</p>
                     </button>
                   </div>

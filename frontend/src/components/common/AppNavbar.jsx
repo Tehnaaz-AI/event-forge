@@ -64,7 +64,7 @@ export default function AppNavbar() {
         { label: 'Admin Console', path: '/dashboard/admin', icon: <ShieldAlert size={14} className="text-rose-600" /> },
         { label: 'Conferences', path: '/dashboard/organizer/events' },
         { label: 'Speakers', path: '/dashboard/organizer/speakers' },
-        { label: 'Inbound Inquiries', path: '/dashboard/admin' }
+        { label: 'Inbound Inquiries', path: '/dashboard/admin/inquiries', icon: <MessageSquare size={14} className="text-[#B45309]" /> }
       ];
     }
 
