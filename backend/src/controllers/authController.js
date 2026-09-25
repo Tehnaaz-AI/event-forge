@@ -76,3 +76,25 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
+export const getSavedEvents = async (req, res, next) => {
+  try {
+    const events = await authService.getSavedEvents(req.user._id);
+    ok(res, events);
+  } catch (e) { next(e); }
+};
+
+export const toggleSavedEvent = async (req, res, next) => {
+  try {
+    const result = await authService.toggleSavedEvent(req.user._id, req.params.eventId);
+    ok(res, result, result.saved ? 'Event bookmarked' : 'Bookmark removed');
+  } catch (e) { next(e); }
+};
+
+export const removeSavedEvent = async (req, res, next) => {
+  try {
+    const result = await authService.removeSavedEvent(req.user._id, req.params.eventId);
+    ok(res, result, 'Bookmark removed');
+  } catch (e) { next(e); }
+};
+
+

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import AppNavbar from '../components/common/AppNavbar';
 import AppFooter from '../components/common/AppFooter';
+import AmbientLiveBackground from '../components/common/AmbientLiveBackground';
 
 export default function DashboardLayout() {
   const location = useLocation();
@@ -36,8 +37,11 @@ export default function DashboardLayout() {
   const headerContext = getHeaderContext();
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans selection:bg-[#B45309] selection:text-white">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121110] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative transition-colors duration-300">
       
+      {/* Live Moving Ambient Dynamic Background */}
+      <AmbientLiveBackground />
+
       {/* Curved Floating Navbar with Role-Differentiated Links */}
       <AppNavbar />
 

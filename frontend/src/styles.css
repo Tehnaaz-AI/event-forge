@@ -53,6 +53,108 @@
   }
 }
 
+/* ========================================================
+   GLOBAL LUXURY BEIGE SCROLLBAR (LIGHT & DARK THEMES)
+   ======================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #D4B996 #FAF8F5;
+}
+
+.dark * {
+  scrollbar-color: #C2A884 #141210;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF8F5;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #141210;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4B996;
+  border-radius: 9999px;
+  border: 2px solid #FAF8F5;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #C2A884;
+  border-radius: 9999px;
+  border: 2px solid #141210;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B45309;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #F59E0B;
+}
+
+.scrollbar-beige {
+  scrollbar-width: thin;
+  scrollbar-color: #D4B996 transparent;
+}
+.dark .scrollbar-beige {
+  scrollbar-color: #C2A884 transparent;
+}
+.scrollbar-beige::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+.scrollbar-beige::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-beige::-webkit-scrollbar-thumb {
+  background: #D4B996;
+  border-radius: 9999px;
+}
+.dark .scrollbar-beige::-webkit-scrollbar-thumb {
+  background: #C2A884;
+}
+
+/* ========================================================
+   LIVE MOVING AMBIENT BACKGROUND
+   ======================================================== */
+@keyframes ambientDriftOne {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(40px, -60px) scale(1.12); }
+  66% { transform: translate(-30px, 30px) scale(0.92); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes ambientDriftTwo {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(-50px, 40px) scale(0.95); }
+  66% { transform: translate(35px, -45px) scale(1.08); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes ambientDriftThree {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 0.35; }
+  50% { transform: translate(25px, 35px) scale(1.15); opacity: 0.65; }
+  100% { transform: translate(0px, 0px) scale(1); opacity: 0.35; }
+}
+
+.animate-ambient-1 {
+  animation: ambientDriftOne 24s ease-in-out infinite alternate;
+}
+
+.animate-ambient-2 {
+  animation: ambientDriftTwo 30s ease-in-out infinite alternate;
+}
+
+.animate-ambient-3 {
+  animation: ambientDriftThree 20s ease-in-out infinite alternate;
+}
+
 /* Unified Expressive Cursive Script for Logos, Masterpiece, and Accent Headings */
 .logo-cursive,
 .cursive-masterpiece,

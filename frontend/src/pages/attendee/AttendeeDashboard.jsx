@@ -53,24 +53,22 @@ export default function AttendeeDashboard() {
     refetchOnWindowFocus: true
   });
 
-  const { data: allEvents } = useQuery({
-    queryKey: ['all-events-for-bookmarks'],
-    queryFn: () => api.get('/events')
+  const { data: savedEvents = [], refetch: refetchSaved } = useQuery({
+    queryKey: ['saved-events'],
+    queryFn: () => api.get('/auth/saved-events')
   });
 
   const [activeTab, setActiveTab] = useState('tickets'); // 'tickets' | 'saved' | 'ai-concierge'
-  const [savedEventIds, setSavedEventIds] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('eventforge_saved_events') || '[]');
-    } catch {
-      return [];
+  
+  const removeSavedMutation = useMutation({
+    mutationFn: (eventId) => api.delete(`/auth/saved-events/${eventId}`),
+    onSuccess: () => {
+      refetchSaved();
     }
   });
 
   const handleRemoveSavedEvent = (eventId) => {
-    const updated = savedEventIds.filter(id => id !== eventId);
-    setSavedEventIds(updated);
-    localStorage.setItem('eventforge_saved_events', JSON.stringify(updated));
+    removeSavedMutation.mutate(eventId);
   };
   const [activeBadgeTicket, setActiveBadgeTicket] = useState(null);
   const [feedbackData, setFeedbackData] = useState({ eventId: '', rating: 5, comments: '' });
@@ -157,7 +155,7 @@ export default function AttendeeDashboard() {
                   : 'bg-white/10 text-white hover:bg-white/20'
               }`}
             >
-              <Bookmark size={15} /> Bookmarked ({savedEventIds.length})
+              <Bookmark size={15} /> Bookmarked ({savedEvents?.length || 0})
             </button>
             <button
               onClick={() => setActiveTab('ai-concierge')}
@@ -300,8 +298,8 @@ export default function AttendeeDashboard() {
       {activeTab === 'saved' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-extrabold text-stone-900 flex items-center gap-2 tracking-tight">
-              <Bookmark className="text-[#B45309]" size={22} /> Bookmarked Conferences ({savedEventIds.length})
+            <h2 className="text-xl font-extrabold text-stone-900 dark:text-[#F5F2EB] flex items-center gap-2 tracking-tight">
+              <Bookmark className="text-[#B45309]" size={22} /> Bookmarked Conferences ({savedEvents?.length || 0})
             </h2>
             <Link 
               to="/explore" 
@@ -311,78 +309,71 @@ export default function AttendeeDashboard() {
             </Link>
           </div>
 
-          {(() => {
-            const savedList = (allEvents || []).filter(e => savedEventIds.includes(e._id));
-            if (savedList.length === 0) {
-              return (
-                <div className="bg-white p-12 text-center rounded-3xl border border-dashed border-[#EFE8DA] text-stone-500 space-y-3">
-                  <Bookmark size={40} className="mx-auto text-stone-300" />
-                  <h3 className="text-base font-bold text-stone-900">No Bookmarked Conferences Yet</h3>
-                  <p className="text-xs text-stone-500">Bookmark conferences you are interested in exploring or attending later.</p>
-                  <Link 
-                    to="/explore" 
-                    className="inline-block bg-[#B45309] hover:bg-[#92400E] text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition-colors"
-                  >
-                    Explore Conferences &rarr;
-                  </Link>
-                </div>
-              );
-            }
-
-            return (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {savedList.map(event => (
-                  <div key={event._id} className="bg-white rounded-3xl border border-[#EFE8DA] p-6 shadow-sm flex flex-col justify-between space-y-4 hover:border-[#B45309]/30 transition-all">
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-start">
-                        <span className="px-3 py-1 bg-amber-50 text-[#B45309] rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-[#EFE8DA]">
-                          {event.category || 'Conference'}
-                        </span>
-                        <button
-                          onClick={() => handleRemoveSavedEvent(event._id)}
-                          title="Remove bookmark"
-                          className="text-stone-400 hover:text-rose-600 p-1 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <h3 className="text-lg font-bold text-stone-900 leading-snug">{event.title}</h3>
-                      <p className="text-xs text-stone-500 line-clamp-2">{event.description}</p>
-                    </div>
-
-                    <div className="space-y-1.5 text-xs text-stone-600 font-medium border-t border-[#EFE8DA] pt-3">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={14} className="text-[#B45309]" />
-                        <span>{new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</span>
-                      </div>
-                      {event.venue?.name && (
-                        <div className="flex items-center gap-2">
-                          <MapPin size={14} className="text-[#B45309]" />
-                          <span>{event.venue.name}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-2">
-                      <Link
-                        to={`/e/${event.slug}`}
-                        className="bg-[#FAF8F5] hover:bg-stone-100 text-stone-800 border border-[#EFE8DA] text-center font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 transition-colors"
+          {(!savedEvents || savedEvents.length === 0) ? (
+            <div className="bg-white dark:bg-[#171614] p-12 text-center rounded-3xl border border-dashed border-[#EFE8DA] dark:border-stone-800 text-stone-500 space-y-3">
+              <Bookmark size={40} className="mx-auto text-stone-300 dark:text-stone-600" />
+              <h3 className="text-base font-bold text-stone-900 dark:text-[#F5F2EB]">No Bookmarked Conferences Yet</h3>
+              <p className="text-xs text-stone-500 dark:text-stone-400">Bookmark conferences you are interested in exploring or attending later.</p>
+              <Link 
+                to="/explore" 
+                className="inline-block bg-[#B45309] hover:bg-[#92400E] text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition-colors"
+              >
+                Explore Conferences &rarr;
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {savedEvents.map(event => (
+                <div key={event._id} className="bg-white dark:bg-[#171614] rounded-3xl border border-[#EFE8DA] dark:border-stone-800 p-6 shadow-sm flex flex-col justify-between space-y-4 hover:border-[#B45309]/30 transition-all">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <span className="px-3 py-1 bg-amber-50 dark:bg-amber-950/40 text-[#B45309] dark:text-amber-300 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-[#EFE8DA] dark:border-stone-700">
+                        {event.category || 'Conference'}
+                      </span>
+                      <button
+                        onClick={() => handleRemoveSavedEvent(event._id)}
+                        title="Remove bookmark"
+                        className="text-stone-400 hover:text-rose-600 p-1 transition-colors cursor-pointer"
                       >
-                        <Eye size={13} /> View Agenda
-                      </Link>
-                      <Link
-                        to={`/e/${event.slug}`}
-                        className="bg-[#B45309] hover:bg-[#92400E] text-white text-center font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 transition-colors shadow-xs"
-                      >
-                        <span>Register Pass</span>
-                        <ArrowRight size={13} />
-                      </Link>
+                        <Trash2 size={16} />
+                      </button>
                     </div>
+                    <h3 className="text-lg font-bold text-stone-900 dark:text-[#F5F2EB] leading-snug">{event.title}</h3>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2">{event.description}</p>
                   </div>
-                ))}
-              </div>
-            );
-          })()}
+
+                  <div className="space-y-1.5 text-xs text-stone-600 dark:text-stone-400 font-medium border-t border-[#EFE8DA] dark:border-stone-800 pt-3">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={14} className="text-[#B45309]" />
+                      <span>{new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</span>
+                    </div>
+                    {event.venue?.name && (
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-[#B45309]" />
+                        <span>{event.venue.name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <Link
+                      to={event.slug ? `/conferences/${event.slug}` : `/explore`}
+                      className="w-full bg-[#FAF8F5] dark:bg-[#24211D] hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 border border-[#EFE8DA] dark:border-stone-700 text-xs font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1"
+                    >
+                      <span>Event Info</span>
+                    </Link>
+                    <Link
+                      to={`/explore`}
+                      className="w-full bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-1 shadow-xs"
+                    >
+                      <span>Secure Passes</span>
+                      <ArrowRight size={13} />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -435,64 +426,65 @@ export default function AttendeeDashboard() {
 
       {/* Printable Conference Badge Modal in Luxury Beige */}
       {activeBadgeTicket && (
-        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#FAF8F5] border border-[#EFE8DA] rounded-3xl p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative animate-in fade-in">
+        <div className="fixed inset-0 bg-stone-900/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#FAF8F5] dark:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative animate-in fade-in">
             <button 
               onClick={() => setActiveBadgeTicket(null)}
-              className="no-print absolute top-4 right-4 text-stone-400 hover:text-stone-700 font-bold text-xl"
+              className="no-print absolute top-4 right-4 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 font-bold text-xl cursor-pointer"
             >
               &times;
             </button>
 
             {/* Visual Lanyard Badge Card */}
-            <div id="printable-badge" className="bg-[#1C1917] text-[#FDFAF5] rounded-2xl p-6 relative overflow-hidden border border-stone-800 shadow-xl space-y-4">
+            <div id="printable-badge" className="bg-gradient-to-b from-[#1C1917] to-[#121110] text-[#FDFAF5] rounded-3xl p-6 relative overflow-hidden border border-stone-800 shadow-2xl space-y-4">
               {/* Lanyard Cutout Slot */}
               <div className="w-12 h-2 bg-stone-800 border border-stone-700 rounded-full mx-auto -mt-2"></div>
 
-              <div className="pt-2">
-                <span className="px-3 py-0.5 bg-[#B45309] text-white rounded-full text-[9px] font-extrabold uppercase tracking-widest">
+              <div className="pt-1">
+                <span className="px-3 py-1 bg-[#B45309] text-white rounded-full text-[9px] font-extrabold uppercase tracking-widest inline-block shadow-xs">
                   {activeBadgeTicket.reg?.ticketCategory?.name || 'VIP ALL ACCESS'}
                 </span>
-                <h3 className="text-xl font-extrabold mt-2 tracking-tight">
+                <h3 className="text-xl font-extrabold mt-2 tracking-tight text-white">
                   {activeBadgeTicket.event?.title || 'EventForge Summit'}
                 </h3>
-                <p className="text-[10px] text-stone-400">
-                  {activeBadgeTicket.event?.venue?.name || 'Palace Hall'}
+                <p className="text-[11px] text-stone-400 mt-0.5">
+                  {activeBadgeTicket.event?.venue?.name || 'Main Convention Hall'}
                 </p>
               </div>
 
               {/* Attendee Info */}
-              <div className="py-3 border-y border-white/10 bg-white/5 rounded-xl">
-                <h4 className="text-xl font-extrabold text-white tracking-tight">{user.name}</h4>
-                <p className="text-[10px] text-[#C28E27] font-bold uppercase">{user.role || 'ATTENDEE'}</p>
-                <p className="text-[10px] text-stone-400 font-mono">{user.email}</p>
+              <div className="py-3 border-y border-stone-800 bg-[#24211D]/60 rounded-2xl">
+                <h4 className="text-lg font-extrabold text-white tracking-tight">{user.name}</h4>
+                <p className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">{user.role || 'ATTENDEE'}</p>
+                <p className="text-[10px] text-stone-400 font-mono mt-0.5">{user.email}</p>
               </div>
 
               {/* QR Entry Code */}
-              <div className="p-3 bg-white rounded-xl inline-block shadow-md">
+              <div className="p-3 bg-white rounded-2xl inline-block shadow-lg">
                 {activeBadgeTicket.qrCode ? (
-                  <img src={activeBadgeTicket.qrCode} alt="QR Badge" className="w-36 h-36 mx-auto" />
+                  <img src={activeBadgeTicket.qrCode} alt="QR Badge" className="w-36 h-36 mx-auto rounded-lg" />
                 ) : (
                   <QrCode size={100} className="mx-auto text-stone-900" />
                 )}
               </div>
 
-              <p className="text-xs font-mono font-bold text-[#C28E27] bg-white/5 py-1.5 px-3 rounded-lg border border-white/5">
+              {/* Badge Token Footer */}
+              <div className="bg-[#24211D] text-amber-300 font-mono font-bold text-xs py-2 px-3 rounded-xl border border-stone-800">
                 {activeBadgeTicket.ticketNumber}
-              </p>
+              </div>
             </div>
 
             {/* Modal Actions */}
             <div className="no-print flex gap-3">
               <button 
                 onClick={() => window.print()}
-                className="flex-1 bg-[#B45309] hover:bg-[#92400E] text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md uppercase tracking-wider"
+                className="flex-1 bg-[#B45309] hover:bg-[#92400E] text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md uppercase tracking-wider cursor-pointer"
               >
                 <Printer size={15} /> Print Badge (PDF)
               </button>
               <button 
                 onClick={() => setActiveBadgeTicket(null)}
-                className="px-5 bg-white border border-[#EFE8DA] text-stone-700 font-bold py-3 rounded-xl text-xs hover:bg-stone-100"
+                className="px-5 bg-white dark:bg-[#292524] border border-[#EFE8DA] dark:border-stone-700 text-stone-700 dark:text-stone-300 font-bold py-3 rounded-xl text-xs hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
               >
                 Close
               </button>

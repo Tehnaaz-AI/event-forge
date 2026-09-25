@@ -8,6 +8,7 @@ import {
   Upload, Image, Check
 } from 'lucide-react';
 import AppNavbar from '../../components/common/AppNavbar';
+import AmbientLiveBackground from '../../components/common/AmbientLiveBackground';
 
 const AVATAR_PRESETS = [
   { id: '1', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200', label: 'Executive Ivory' },
@@ -174,25 +175,29 @@ export default function Profile() {
   const RoleIcon = roleInfo.icon;
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 font-sans selection:bg-[#B45309] selection:text-white flex flex-col">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121110] text-stone-900 dark:text-stone-100 font-sans selection:bg-[#B45309] selection:text-white flex flex-col relative transition-colors duration-300">
+      
+      {/* Live Moving Ambient Dynamic Background */}
+      <AmbientLiveBackground />
+
       {/* Floating Curved Navbar */}
       <AppNavbar />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 relative z-10">
         
         {/* Breadcrumb Header */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => navigate(-1)} 
-              className="w-9 h-9 rounded-full bg-white border border-[#EFE8DA] flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-colors shadow-xs"
+              className="w-9 h-9 rounded-full bg-white dark:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-xs cursor-pointer"
               title="Go back"
             >
               <ArrowLeft size={16} />
             </button>
             <div>
               <span className="text-[10px] font-bold text-[#B45309] uppercase tracking-wider block">Identity & Preferences</span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">Executive Profile Studio</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-[#F5F2EB] tracking-tight">Executive Profile Studio</h1>
             </div>
           </div>
 
@@ -228,25 +233,25 @@ export default function Profile() {
           
           {/* Left Column: Avatar & Summary Card */}
           <div className="space-y-6">
-            <div className="bg-white border border-[#EFE8DA] rounded-3xl p-6 shadow-md text-center space-y-4 relative overflow-hidden">
+            <div className="bg-white dark:bg-[#171614] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 shadow-md text-center space-y-4 relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-[#B45309]/10 to-transparent pointer-events-none"></div>
               
               <div className="relative inline-block pt-2">
                 <img 
                   src={avatar || AVATAR_PRESETS[0].url} 
                   alt={user?.name || 'User Avatar'} 
-                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white shadow-lg mx-auto"
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white dark:border-stone-700 shadow-lg mx-auto"
                 />
-                <span className="absolute bottom-1 right-1 w-7 h-7 bg-[#B45309] text-white rounded-full flex items-center justify-center border-2 border-white shadow-xs">
+                <span className="absolute bottom-1 right-1 w-7 h-7 bg-[#B45309] text-white rounded-full flex items-center justify-center border-2 border-white dark:border-stone-800 shadow-xs">
                   <Sparkles size={13} />
                 </span>
               </div>
 
               <div>
-                <h2 className="text-xl font-extrabold text-stone-900">{name || 'EventForge Member'}</h2>
-                <p className="text-xs text-stone-500">{email}</p>
+                <h2 className="text-xl font-extrabold text-stone-900 dark:text-[#F5F2EB]">{name || 'EventForge Member'}</h2>
+                <p className="text-xs text-stone-500 dark:text-stone-400">{email}</p>
                 {user?.organization?.name && (
-                  <p className="text-xs font-bold text-stone-700 mt-1 flex items-center justify-center gap-1">
+                  <p className="text-xs font-bold text-stone-700 dark:text-stone-300 mt-1 flex items-center justify-center gap-1">
                     <Building size={12} className="text-[#B45309]" /> {user.organization.name}
                   </p>
                 )}
@@ -261,15 +266,15 @@ export default function Profile() {
 
               {/* Bio snippet */}
               {bio && (
-                <p className="text-xs text-stone-600 bg-[#FAF8F5] p-3 rounded-2xl border border-[#EFE8DA] italic text-left">
+                <p className="text-xs text-stone-600 dark:text-stone-300 bg-[#FAF8F5] dark:bg-[#1C1917] p-3 rounded-2xl border border-[#EFE8DA] dark:border-stone-800 italic text-left">
                   "{bio}"
                 </p>
               )}
             </div>
 
             {/* Avatar Preset Selector */}
-            <div className="bg-white border border-[#EFE8DA] rounded-3xl p-6 shadow-md space-y-4">
-              <h3 className="text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-2">
+            <div className="bg-white dark:bg-[#171614] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 shadow-md space-y-4">
+              <h3 className="text-xs font-bold text-stone-800 dark:text-stone-200 uppercase tracking-wider flex items-center gap-2">
                 <Camera size={14} className="text-[#B45309]" /> Choose Signature Portrait
               </h3>
               
@@ -355,22 +360,22 @@ export default function Profile() {
           <div className="lg:col-span-2 space-y-6">
             
             {/* General Profile Settings */}
-            <div className="bg-white border border-[#EFE8DA] rounded-3xl p-6 sm:p-8 shadow-md space-y-6">
+            <div className="bg-white dark:bg-[#171614] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 sm:p-8 shadow-md space-y-6">
               <div>
-                <h2 className="text-lg font-extrabold text-stone-900 tracking-tight">Personal & Professional Details</h2>
-                <p className="text-xs text-stone-500">Update how other organizers, attendees, and staff see your profile.</p>
+                <h2 className="text-lg font-extrabold text-stone-900 dark:text-[#F5F2EB] tracking-tight">Personal & Professional Details</h2>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Update how other organizers, attendees, and staff see your profile.</p>
               </div>
 
               {successMsg && (
-                <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs flex items-center gap-2">
-                  <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+                <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-2xl text-xs flex items-center gap-2">
+                  <CheckCircle2 size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
                   <span>{successMsg}</span>
                 </div>
               )}
 
               {errorMsg && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs flex items-center gap-2">
-                  <AlertCircle size={16} className="shrink-0 text-rose-600" />
+                <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 rounded-2xl text-xs flex items-center gap-2">
+                  <AlertCircle size={16} className="shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{errorMsg}</span>
                 </div>
               )}
@@ -378,7 +383,7 @@ export default function Profile() {
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                       <User size={13} className="text-[#B45309]" /> Full Name
                     </label>
                     <input 
@@ -387,26 +392,26 @@ export default function Profile() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your full name"
-                      className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900"
+                      className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#24211D] border border-[#EFE8DA] dark:border-stone-700 rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900 dark:text-white"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                       <Mail size={13} className="text-stone-400" /> Primary Email (Locked)
                     </label>
                     <input 
                       type="email"
                       disabled
                       value={email}
-                      className="w-full text-xs font-medium px-4 py-2.5 bg-stone-100 border border-[#EFE8DA] rounded-xl text-stone-500 cursor-not-allowed"
+                      className="w-full text-xs font-medium px-4 py-2.5 bg-stone-100 dark:bg-stone-800 border border-[#EFE8DA] dark:border-stone-700 rounded-xl text-stone-500 dark:text-stone-400 cursor-not-allowed"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                       <Phone size={13} className="text-[#B45309]" /> Direct Contact / Phone
                     </label>
                     <input 
@@ -414,31 +419,31 @@ export default function Profile() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+1 (555) 000-0000"
-                      className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900"
+                      className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#24211D] border border-[#EFE8DA] dark:border-stone-700 rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900 dark:text-white"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
                       <Shield size={13} className="text-[#B45309]" /> Platform Authority
                     </label>
                     <input 
                       type="text"
                       disabled
                       value={roleInfo.label}
-                      className="w-full text-xs font-medium px-4 py-2.5 bg-stone-100 border border-[#EFE8DA] rounded-xl text-stone-600 cursor-not-allowed"
+                      className="w-full text-xs font-medium px-4 py-2.5 bg-stone-100 dark:bg-stone-800 border border-[#EFE8DA] dark:border-stone-700 rounded-xl text-stone-600 dark:text-stone-300 cursor-not-allowed"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700">Executive Bio & Expertise</label>
+                  <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Executive Bio & Expertise</label>
                   <textarea 
                     rows={3}
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Short summary of your background, corporate credentials, or keynote topics..."
-                    className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900 resize-none"
+                    className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#24211D] border border-[#EFE8DA] dark:border-stone-700 rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900 dark:text-white resize-none"
                   />
                 </div>
 
@@ -446,7 +451,7 @@ export default function Profile() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="inline-flex items-center gap-2 bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-md shadow-[#B45309]/20 transition-all disabled:opacity-50"
+                    className="inline-flex items-center gap-2 bg-[#B45309] hover:bg-[#92400E] text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-md shadow-[#B45309]/20 transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {loading ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
                     {loading ? 'Saving Profile...' : 'Save Profile Changes'}
@@ -456,36 +461,36 @@ export default function Profile() {
             </div>
 
             {/* Security & Password Studio */}
-            <div className="bg-white border border-[#EFE8DA] rounded-3xl p-6 sm:p-8 shadow-md space-y-6">
+            <div className="bg-white dark:bg-[#171614] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 sm:p-8 shadow-md space-y-6">
               <div>
-                <h2 className="text-lg font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
+                <h2 className="text-lg font-extrabold text-stone-900 dark:text-[#F5F2EB] tracking-tight flex items-center gap-2">
                   <KeyRound size={18} className="text-[#B45309]" /> Security & Password
                 </h2>
-                <p className="text-xs text-stone-500">Update your account login password.</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Update your account login password.</p>
               </div>
 
               {pwdSuccessMsg && (
-                <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs flex items-center gap-2">
-                  <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+                <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-2xl text-xs flex items-center gap-2">
+                  <CheckCircle2 size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
                   <span>{pwdSuccessMsg}</span>
                 </div>
               )}
 
               {pwdErrorMsg && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs flex items-center gap-2">
-                  <AlertCircle size={16} className="shrink-0 text-rose-600" />
+                <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 rounded-2xl text-xs flex items-center gap-2">
+                  <AlertCircle size={16} className="shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{pwdErrorMsg}</span>
                 </div>
               )}
 
               <form onSubmit={handleChangePassword} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 flex items-center justify-between">
+                  <label className="text-xs font-bold text-stone-700 dark:text-stone-300 flex items-center justify-between">
                     <span>Current Password</span>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-[10px] text-stone-500 hover:text-stone-900 flex items-center gap-1 font-normal"
+                      className="text-[10px] text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white flex items-center gap-1 font-normal cursor-pointer"
                     >
                       {showPassword ? <EyeOff size={11} /> : <Eye size={11} />}
                       {showPassword ? 'Hide' : 'Show'}
@@ -497,32 +502,32 @@ export default function Profile() {
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900"
+                    className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#24211D] border border-[#EFE8DA] dark:border-stone-700 rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900 dark:text-white"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700">New Password</label>
+                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">New Password</label>
                     <input 
                       type={showPassword ? 'text' : 'password'}
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Minimum 6 characters"
-                      className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900"
+                      className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#24211D] border border-[#EFE8DA] dark:border-stone-700 rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900 dark:text-white"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700">Confirm New Password</label>
+                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Confirm New Password</label>
                     <input 
                       type={showPassword ? 'text' : 'password'}
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm new password"
-                      className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900"
+                      className="w-full text-xs font-medium px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#24211D] border border-[#EFE8DA] dark:border-stone-700 rounded-xl focus:outline-none focus:border-[#B45309] text-stone-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -531,7 +536,7 @@ export default function Profile() {
                   <button
                     type="submit"
                     disabled={pwdLoading || !currentPassword || !newPassword}
-                    className="inline-flex items-center gap-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-md transition-all disabled:opacity-50"
+                    className="inline-flex items-center gap-2 bg-stone-900 hover:bg-stone-800 dark:bg-stone-800 dark:hover:bg-stone-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-md transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {pwdLoading ? <RefreshCw size={14} className="animate-spin" /> : <Lock size={14} />}
                     {pwdLoading ? 'Updating Password...' : 'Update Password'}

@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
 import eventRoutes from './routes/events.js';
 import speakerRoutes from './routes/speakers.js';
+import sessionRoutes from './routes/sessions.js';
 import sponsorRoutes from './routes/sponsors.js';
 import feedbackRoutes from './routes/feedback.js';
 import aiRoutes from './routes/ai.js';
@@ -136,6 +137,7 @@ app.use('/api/events/:eventId/announcements', announcementRoutes);
 app.use('/api/events/:eventId/analytics', analyticsRoutes);
 app.use('/api/events/:eventId/feedback', feedbackRoutes);
 app.use('/api/speakers', speakerRoutes);
+app.use('/api/sessions', sessionRoutes);
 
 // Global Error Handler with Standardized Error Contract
 app.use((err, req, res, next) => {

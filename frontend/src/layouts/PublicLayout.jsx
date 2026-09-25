@@ -6,6 +6,7 @@ import useSiteAnalytics from '../components/common/useSiteAnalytics';
 import ScrollProgressBar from '../components/common/ScrollProgressBar';
 import FloatingJourneyDock from '../components/common/FloatingJourneyDock';
 import AppFooter from '../components/common/AppFooter';
+import AmbientLiveBackground from '../components/common/AmbientLiveBackground';
 import { Calendar, CheckCircle2, LayoutDashboard, Ticket, Shield, ShieldAlert, User, LogOut } from 'lucide-react';
 
 export default function PublicLayout() {
@@ -45,8 +46,11 @@ export default function PublicLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#121110] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative transition-colors duration-300">
       
+      {/* Live Moving Ambient Dynamic Background */}
+      <AmbientLiveBackground />
+
       {/* Scroll Physics Progress Bar */}
       <ScrollProgressBar />
 

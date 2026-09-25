@@ -14,5 +14,6 @@ export const User = model('User', new Schema({
   phone: String,
   avatar: String,
   bio: String, // Added for speakers
+  savedEvents: [{ type: Schema.Types.ObjectId, ref: 'Event' }],
   status: { type: String, default: 'ACTIVE' }
 }, { timestamps: true }));

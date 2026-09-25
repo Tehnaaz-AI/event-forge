@@ -17,28 +17,28 @@ export default function ExploreEvents() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [quickPeekEvent, setQuickPeekEvent] = useState(null);
-  const [savedEventIds, setSavedEventIds] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('eventforge_saved_events') || '[]');
-    } catch {
-      return [];
-    }
+  const currentUser = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
+
+  const { data: savedEvents = [], refetch: refetchSaved } = useQuery({
+    queryKey: ['saved-events'],
+    queryFn: () => api.get('/auth/saved-events'),
+    enabled: Boolean(currentUser)
   });
 
-  const toggleSaveEvent = (e, event) => {
+  const savedEventIds = Array.isArray(savedEvents) ? savedEvents.map(e => typeof e === 'object' ? e._id : e) : [];
+
+  const toggleSaveEvent = async (e, event) => {
     e.stopPropagation();
     e.preventDefault();
-    let updated;
-    if (savedEventIds.includes(event._id)) {
-      updated = savedEventIds.filter(id => id !== event._id);
-    } else {
-      updated = [...savedEventIds, event._id];
+    if (currentUser) {
+      try {
+        await api.post(`/auth/saved-events/${event._id}`);
+        refetchSaved();
+      } catch (err) {
+        console.warn('Bookmark sync failed:', err);
+      }
     }
-    setSavedEventIds(updated);
-    localStorage.setItem('eventforge_saved_events', JSON.stringify(updated));
   };
-
-  const currentUser = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['explore-events-list'],

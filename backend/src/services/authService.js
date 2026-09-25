@@ -83,3 +83,40 @@ export const changeUserPassword = async (userId, { currentPassword, newPassword 
   await user.save();
   return { success: true, message: 'Password updated successfully' };
 };
+
+export const getSavedEvents = async (userId) => {
+  const user = await User.findById(userId).populate({
+    path: 'savedEvents',
+    populate: { path: 'organization', select: 'name logo' }
+  });
+  return user?.savedEvents || [];
+};
+
+export const toggleSavedEvent = async (userId, eventId) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+  
+  const idStr = eventId.toString();
+  const exists = user.savedEvents?.some(id => id.toString() === idStr);
+  
+  if (exists) {
+    user.savedEvents = user.savedEvents.filter(id => id.toString() !== idStr);
+  } else {
+    user.savedEvents = user.savedEvents || [];
+    user.savedEvents.push(eventId);
+  }
+  
+  await user.save();
+  return { saved: !exists, savedEvents: user.savedEvents };
+};
+
+export const removeSavedEvent = async (userId, eventId) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+  
+  const idStr = eventId.toString();
+  user.savedEvents = (user.savedEvents || []).filter(id => id.toString() !== idStr);
+  await user.save();
+  return { savedEvents: user.savedEvents };
+};
+

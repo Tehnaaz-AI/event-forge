@@ -332,10 +332,10 @@ export default function OrganizerOverview() {
                   <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : singleConferenceAnalytics?.timelineData?.length > 0 ? (
-                <div className="w-full overflow-x-auto overflow-y-auto max-h-[450px] pt-2 pb-2 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210]">
-                  <div className="min-w-[620px] sm:min-w-[700px] h-72 sm:h-80 w-full px-2">
+                <div className="w-full overflow-x-auto overflow-y-auto max-h-[460px] pt-2 pb-3 rounded-2xl border border-[#EFE8DA]/60 dark:border-stone-800/60 bg-[#FAF8F5]/50 dark:bg-[#141210] scrollbar-beige">
+                  <div className="min-w-[720px] sm:min-w-[800px] h-72 sm:h-84 w-full px-3">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 15, right: 30, left: 5, bottom: 30 }}>
+                      <AreaChart data={singleConferenceAnalytics.timelineData} margin={{ top: 20, right: 35, left: 10, bottom: 30 }}>
                         <defs>
                           <linearGradient id="singleRevGlow" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#B45309" stopOpacity={0.35}/>
@@ -359,26 +359,43 @@ export default function OrganizerOverview() {
                           axisLine={{ stroke: '#2E2A24', strokeOpacity: 0.15 }}
                           interval={0}
                         />
+                        {/* Primary Y-Axis: No. of Registrations (Passes) */}
                         <YAxis 
-                          stroke="#78716C" 
+                          yAxisId="regAxis"
+                          stroke="#10B981" 
                           fontSize={11} 
                           fontWeight={700} 
                           tickLine={false} 
                           tickMargin={6}
                           axisLine={false}
                           allowDecimals={false}
-                          width={35}
+                          width={40}
+                          label={{ value: 'No. of Registrations', angle: -90, position: 'insideLeft', fill: '#10B981', fontSize: 10, fontWeight: 700, dy: 50, dx: 0 }}
+                        />
+                        {/* Secondary Y-Axis: Revenue ($) */}
+                        <YAxis 
+                          yAxisId="revAxis"
+                          orientation="right"
+                          stroke="#B45309" 
+                          fontSize={11} 
+                          fontWeight={700} 
+                          tickLine={false} 
+                          tickMargin={6}
+                          axisLine={false}
+                          allowDecimals={false}
+                          width={45}
+                          tickFormatter={(val) => `$${val}`}
                         />
                         <Tooltip 
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               const d = payload[0].payload;
                               return (
-                                <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1.5 min-w-[150px]">
+                                <div className="bg-[#1C1917] text-[#FDFAF5] p-3.5 rounded-2xl shadow-2xl border border-stone-800 text-xs font-sans space-y-1.5 min-w-[170px]">
                                   <p className="font-black text-[#F59E0B] text-xs border-b border-stone-800 pb-1">{d.day || d.date}</p>
                                   <div className="space-y-1 text-stone-300 font-mono text-[11px]">
-                                    <p className="flex justify-between"><span>Passes:</span> <strong className="text-emerald-400 font-bold">{d.registrations}</strong></p>
-                                    <p className="flex justify-between"><span>Revenue:</span> <strong className="text-amber-300 font-bold">${d.revenue}</strong></p>
+                                    <p className="flex justify-between"><span>Registrations:</span> <strong className="text-emerald-400 font-bold">{d.registrations} passes</strong></p>
+                                    <p className="flex justify-between"><span>Gross Revenue:</span> <strong className="text-amber-300 font-bold">${d.revenue.toLocaleString()}</strong></p>
                                   </div>
                                 </div>
                               );
@@ -387,6 +404,7 @@ export default function OrganizerOverview() {
                           }}
                         />
                         <Area 
+                          yAxisId="regAxis"
                           type="monotone" 
                           dataKey="registrations" 
                           stroke="#10B981" 
@@ -396,6 +414,7 @@ export default function OrganizerOverview() {
                           name="Daily Registrations"
                         />
                         <Area 
+                          yAxisId="revAxis"
                           type="monotone" 
                           dataKey="revenue" 
                           stroke="#B45309" 
@@ -559,7 +578,8 @@ export default function OrganizerOverview() {
         ) : viewMode === 'grid' ? (
           
           /* 🌟 1. LUXURY VISUAL CARD SHOWCASE GRID 🌟 */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="max-h-[640px] overflow-y-auto overflow-x-hidden pr-2 pb-2 scrollbar-beige">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event, idx) => {
               const hasBanner = Boolean(event.bannerImage);
               const cardBg = event.cardColor || LUXURY_PALETTES[idx % LUXURY_PALETTES.length].bg;
@@ -685,6 +705,7 @@ export default function OrganizerOverview() {
               );
             })}
           </div>
+        </div>
 
         ) : (
           
