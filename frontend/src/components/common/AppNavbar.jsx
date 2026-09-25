@@ -99,7 +99,7 @@ export default function AppNavbar() {
 
   return (
     <header className="sticky top-3 sm:top-4 z-50 w-full px-3 sm:px-6 pointer-events-none transition-all duration-200">
-      <div className="max-w-6xl mx-auto curved-navbar px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between pointer-events-auto shadow-md">
+      <div className="max-w-6xl mx-auto curved-navbar px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between pointer-events-auto shadow-lg border-2 border-[#C4A47C] dark:border-stone-800">
         
         {/* Brand Logo with Cursive "Event" and Bold "FORGE" - Clean Typography without icon */}
         <BrandLogo to="/" size="default" showIcon={false} />

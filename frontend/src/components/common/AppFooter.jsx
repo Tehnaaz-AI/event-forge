@@ -34,7 +34,7 @@ export default function AppFooter() {
   };
 
   return (
-    <footer className="bg-[#FAF7F2] dark:bg-[#141210] border-t border-[#E5DAC6] dark:border-stone-800 text-stone-600 dark:text-stone-400 pt-14 pb-10 mt-auto relative z-10 transition-colors">
+    <footer className="bg-[#FAF7F2] dark:bg-[#141210] border-t-2 border-[#C4A47C] dark:border-stone-800 text-stone-600 dark:text-stone-400 pt-14 pb-10 mt-auto relative z-10 transition-colors">
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
         
         {/* Brand Column */}
