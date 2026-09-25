@@ -8,12 +8,26 @@ import {
 } from 'lucide-react';
 import { api } from '../../services/api';
 
-// Web Audio API Audio Cues for Stage Producer
+// Web Audio API Audio Cues for Stage Producer with safe lifecycle cleanup
+let activeAudioCtx = null;
+
+function stopAllStageAudio() {
+  try {
+    if (activeAudioCtx && activeAudioCtx.state !== 'closed') {
+      activeAudioCtx.close();
+    }
+  } catch (e) {}
+  activeAudioCtx = null;
+}
+
 function playStageChime(type = 'bell') {
   try {
+    stopAllStageAudio();
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
     const ctx = new AudioContext();
+    activeAudioCtx = ctx;
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
@@ -25,28 +39,34 @@ function playStageChime(type = 'bell') {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(440, ctx.currentTime);
       osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.35, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.6);
+      osc.stop(ctx.currentTime + 0.4);
     } else if (type === 'overtime') {
-      // Warning buzzer
+      // Short Warning buzzer (played once)
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(220, ctx.currentTime);
-      osc.frequency.setValueAtTime(180, ctx.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc.frequency.setValueAtTime(180, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.5);
+      osc.stop(ctx.currentTime + 0.35);
     } else {
       // Clean Start Bell
       osc.type = 'sine';
       osc.frequency.setValueAtTime(880, ctx.currentTime);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.8);
+      osc.stop(ctx.currentTime + 0.5);
     }
+
+    setTimeout(() => {
+      try {
+        if (ctx.state !== 'closed') ctx.close();
+      } catch (e) {}
+    }, 600);
   } catch (e) {
     // Audio context unavailable
   }
@@ -61,7 +81,7 @@ export default function StageRunOfShow({ eventId }) {
   const [activeSessionIndex, setActiveSessionIndex] = useState(0);
   const [secondsRemaining, setSecondsRemaining] = useState(15 * 60);
   const [timerRunning, setTimerRunning] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [audioEnabled, setAudioEnabled] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
   const [cueNotes, setCueNotes] = useState(
     '1. Remind attendees about interactive live Q&A via mobile.\n2. Key sponsor mention: Platinum AI Partner booth in Hall B.\n3. Wrap up precisely on time for the 15-minute networking break.'
@@ -82,7 +102,7 @@ export default function StageRunOfShow({ eventId }) {
     }
   }, [activeSessionIndex, sessions]);
 
-  // Countdown Loop
+  // Countdown Loop - stops cleanly at 0 without infinite audio loops
   useEffect(() => {
     let interval = null;
     if (timerRunning) {
@@ -90,6 +110,7 @@ export default function StageRunOfShow({ eventId }) {
         setSecondsRemaining(prev => {
           if (prev <= 1) {
             if (audioEnabled) playStageChime('overtime');
+            setTimerRunning(false);
             return 0;
           }
           if (prev === 61 && audioEnabled) {
@@ -99,8 +120,20 @@ export default function StageRunOfShow({ eventId }) {
         });
       }, 1000);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [timerRunning, audioEnabled]);
+
+  // Clean up audio on unmount or mute
+  useEffect(() => {
+    if (!audioEnabled) {
+      stopAllStageAudio();
+    }
+    return () => {
+      stopAllStageAudio();
+    };
+  }, [audioEnabled]);
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
