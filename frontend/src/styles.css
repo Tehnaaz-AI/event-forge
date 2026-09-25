@@ -232,26 +232,26 @@
 /* Floating Curved Navbar */
 .curved-navbar {
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(239, 232, 218, 0.95);
-  box-shadow: 0 10px 30px -5px rgba(44, 37, 28, 0.06), 0 4px 10px -2px rgba(44, 37, 28, 0.03);
+  border: 1px solid #E5DAC6;
+  box-shadow: 0 10px 30px -5px rgba(44, 37, 28, 0.07), 0 4px 10px -2px rgba(44, 37, 28, 0.03);
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-/* Warm Beige Glassmorphism */
+/* Warm Beige Glassmorphism & Structured Cards */
 .beige-card {
   background-color: #FFFFFF;
-  border: 1px solid #EFE8DA;
-  box-shadow: 0 4px 20px -2px rgba(44, 37, 28, 0.04), 0 2px 6px -1px rgba(44, 37, 28, 0.02);
+  border: 1px solid #E5DAC6;
+  box-shadow: 0 4px 20px -2px rgba(44, 37, 28, 0.05), 0 2px 6px -1px rgba(44, 37, 28, 0.03);
 }
 
 .beige-glass {
-  background: rgba(253, 250, 245, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(239, 232, 218, 0.9);
+  border: 1px solid #E5DAC6;
 }
 
 .glow-warm {
@@ -267,52 +267,6 @@
 
 .scanner-laser {
   animation: scanline 2.2s ease-in-out infinite;
-}
-
-/* Warm Beige Slim Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #FAF8F5;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #EFE8DA;
-  border-radius: 9999px;
-  transition: background 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #B45309;
-}
-
-/* Custom Scrollbar Utility */
-.scrollbar-beige {
-  scrollbar-width: thin;
-  scrollbar-color: #E2D7C3 #FAF8F5;
-}
-
-.scrollbar-beige::-webkit-scrollbar {
-  height: 5px;
-  width: 5px;
-}
-
-.scrollbar-beige::-webkit-scrollbar-track {
-  background: #FAF8F5;
-  border-radius: 9999px;
-}
-
-.scrollbar-beige::-webkit-scrollbar-thumb {
-  background: #E2D7C3;
-  border-radius: 9999px;
-}
-
-.scrollbar-beige::-webkit-scrollbar-thumb:hover {
-  background: #B45309;
 }
 
 /* ==========================================================================
