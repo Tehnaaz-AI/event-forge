@@ -1,22 +1,82 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import { 
   User, Mail, Phone, Building, Shield, KeyRound, 
   CheckCircle2, AlertCircle, Camera, Sparkles, ArrowLeft,
   Save, Eye, EyeOff, Award, Briefcase, RefreshCw, Lock,
-  Upload, Image, Check
+  Upload, Image, Check, Bookmark, Calendar, MapPin, Ticket,
+  Trash2, ExternalLink
 } from 'lucide-react';
 import AppNavbar from '../../components/common/AppNavbar';
 import AmbientLiveBackground from '../../components/common/AmbientLiveBackground';
 
+const createSvgAvatar = (bg1, bg2, accent, glyph) => `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${bg1}" />
+      <stop offset="100%" stop-color="${bg2}" />
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="36" fill="url(#g)" />
+  <circle cx="60" cy="60" r="46" fill="none" stroke="${accent}" stroke-width="2" stroke-opacity="0.25" />
+  ${glyph}
+</svg>
+`)}`;
+
 const AVATAR_PRESETS = [
-  { id: '1', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200', label: 'Executive Ivory' },
-  { id: '2', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200', label: 'Director Sand' },
-  { id: '3', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200', label: 'Leader Gold' },
-  { id: '4', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200', label: 'Strategist Bronze' },
-  { id: '5', url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200', label: 'Ambassador Warm' },
-  { id: '6', url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200', label: 'Architect Stone' },
+  { 
+    id: '1', 
+    label: 'Amber Forge', 
+    url: createSvgAvatar('#78350F', '#B45309', '#FDE68A', `
+      <path d="M40 45H80V52H40V45Z" fill="#FEF3C7" />
+      <path d="M46 52H74C74 52 70 70 60 76C50 70 46 52 46 52Z" fill="#FDE68A" />
+      <rect x="42" y="78" width="36" height="6" rx="3" fill="#FEF3C7" />
+      <circle cx="60" cy="62" r="3" fill="#B45309" />
+    `)
+  },
+  { 
+    id: '2', 
+    label: 'Obsidian Star', 
+    url: createSvgAvatar('#1C1917', '#292524', '#FCD34D', `
+      <path d="M60 36L65 52L81 57L65 62L60 78L55 62L39 57L55 52L60 36Z" fill="#FCD34D" />
+      <circle cx="60" cy="57" r="4" fill="#1C1917" />
+    `)
+  },
+  { 
+    id: '3', 
+    label: 'Emerald Tech', 
+    url: createSvgAvatar('#064E3B', '#065F46', '#6EE7B7', `
+      <polygon points="60,34 82,47 82,73 60,86 38,73 38,47" fill="none" stroke="#A7F3D0" stroke-width="4" />
+      <circle cx="60" cy="60" r="8" fill="#34D399" />
+    `)
+  },
+  { 
+    id: '4', 
+    label: 'Royal Cobalt', 
+    url: createSvgAvatar('#0F172A', '#1E3A8A', '#93C5FD', `
+      <circle cx="60" cy="48" r="14" fill="#BFDBFE" />
+      <path d="M38 84C38 72 48 68 60 68C72 68 82 72 82 84" fill="#93C5FD" />
+    `)
+  },
+  { 
+    id: '5', 
+    label: 'Amethyst Spark', 
+    url: createSvgAvatar('#4C1D95', '#6D28D9', '#C4B5FD', `
+      <polygon points="60,34 78,50 72,76 48,76 42,50" fill="#DDD6FE" />
+      <circle cx="60" cy="58" r="5" fill="#5B21B6" />
+    `)
+  },
+  { 
+    id: '6', 
+    label: 'Copper Star', 
+    url: createSvgAvatar('#831843', '#9D174D', '#FBCFE8', `
+      <path d="M60 34C48 34 38 44 38 56C38 70 60 86 60 86C60 86 82 70 82 56C82 44 72 34 60 34Z" fill="#FBCFE8" />
+      <circle cx="60" cy="54" r="7" fill="#831843" />
+    `)
+  }
 ];
 
 export default function Profile() {
@@ -24,6 +84,7 @@ export default function Profile() {
   const fileInputRef = useRef(null);
   const cachedUser = JSON.parse(localStorage.getItem('eventforge_user') || 'null');
 
+  const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'saved'
   const [user, setUser] = useState(cachedUser);
   const [name, setName] = useState(cachedUser?.name || '');
   const [email] = useState(cachedUser?.email || '');
@@ -32,6 +93,20 @@ export default function Profile() {
   const [avatar, setAvatar] = useState(cachedUser?.avatar || AVATAR_PRESETS[0].url);
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  // Saved Events Query
+  const { data: savedEvents = [], refetch: refetchSaved, isLoading: isSavedLoading } = useQuery({
+    queryKey: ['saved-events'],
+    queryFn: () => api.get('/auth/saved-events'),
+    enabled: Boolean(cachedUser)
+  });
+
+  const removeSavedMutation = useMutation({
+    mutationFn: (eventId) => api.delete(`/auth/saved-events/${eventId}`),
+    onSuccess: () => {
+      refetchSaved();
+    }
+  });
   
   // Password State
   const [currentPassword, setCurrentPassword] = useState('');
@@ -356,22 +431,155 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Right Column: Edit Details & Password */}
+          {/* Right Column: Edit Details & Password OR Saved Conferences */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* General Profile Settings */}
-            <div className="bg-white dark:bg-[#171614] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 sm:p-8 shadow-md space-y-6">
-              <div>
-                <h2 className="text-lg font-extrabold text-stone-900 dark:text-[#F5F2EB] tracking-tight">Personal & Professional Details</h2>
-                <p className="text-xs text-stone-500 dark:text-stone-400">Update how other organizers, attendees, and staff see your profile.</p>
-              </div>
+            {/* Top View Selector Tabs */}
+            <div className="flex items-center gap-3 bg-white dark:bg-[#171614] p-1.5 rounded-2xl border border-[#EFE8DA] dark:border-stone-800 shadow-xs">
+              <button
+                type="button"
+                onClick={() => setActiveTab('settings')}
+                className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  activeTab === 'settings'
+                    ? 'bg-[#B45309] text-white shadow-xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-800'
+                }`}
+              >
+                <User size={15} />
+                <span>Profile &amp; Credentials</span>
+              </button>
 
-              {successMsg && (
-                <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-2xl text-xs flex items-center gap-2">
-                  <CheckCircle2 size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
-                  <span>{successMsg}</span>
+              <button
+                type="button"
+                onClick={() => setActiveTab('saved')}
+                className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  activeTab === 'saved'
+                    ? 'bg-[#B45309] text-white shadow-xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-50 dark:hover:bg-stone-800'
+                }`}
+              >
+                <Bookmark size={15} className={savedEvents?.length > 0 ? "fill-current" : ""} />
+                <span>Saved Summits ({savedEvents?.length || 0})</span>
+              </button>
+            </div>
+
+            {activeTab === 'saved' ? (
+              /* Saved Events Portfolio */
+              <div className="bg-white dark:bg-[#171614] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 sm:p-8 shadow-md space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-stone-900 dark:text-[#F5F2EB] tracking-tight flex items-center gap-2">
+                      <Bookmark size={18} className="text-[#B45309] fill-[#B45309]" /> Saved &amp; Bookmarked Summits
+                    </h2>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
+                      Conferences you've bookmarked for agenda tracking and priority pass access.
+                    </p>
+                  </div>
+                  <Link
+                    to="/explore"
+                    className="text-xs font-bold text-[#B45309] hover:underline flex items-center gap-1"
+                  >
+                    <span>Browse More</span>
+                    <ExternalLink size={12} />
+                  </Link>
                 </div>
-              )}
+
+                {isSavedLoading ? (
+                  <div className="py-12 text-center text-stone-500">
+                    <div className="w-8 h-8 border-4 border-[#B45309] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-xs">Loading saved summits...</p>
+                  </div>
+                ) : savedEvents?.length === 0 ? (
+                  <div className="text-center py-12 px-4 rounded-2xl bg-[#FAF8F5] dark:bg-[#1C1917] border border-dashed border-[#EFE8DA] dark:border-stone-800 space-y-3">
+                    <Bookmark size={32} className="mx-auto text-stone-400" />
+                    <h3 className="font-extrabold text-sm text-stone-800 dark:text-stone-200">No Saved Conferences Yet</h3>
+                    <p className="text-xs text-stone-500 max-w-sm mx-auto">
+                      Explore our directory of upcoming enterprise summits and bookmark the ones you wish to attend or track.
+                    </p>
+                    <Link
+                      to="/explore"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#B45309] hover:bg-[#92400E] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+                    >
+                      <Ticket size={13} />
+                      <span>Explore Summits</span>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1 scrollbar-beige">
+                    {savedEvents.map((evt) => {
+                      if (!evt) return null;
+                      return (
+                        <div
+                          key={evt._id}
+                          className="bg-[#FAF8F5] dark:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#B45309]/50 transition-all group"
+                        >
+                          <div className="space-y-1.5 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-amber-950/60 text-[#B45309] dark:text-amber-400 border border-amber-200 dark:border-amber-900/60 uppercase tracking-wider">
+                                {evt.category || 'Executive'}
+                              </span>
+                              <span className="text-[10px] font-mono text-stone-500">
+                                {evt.status || 'PUBLISHED'}
+                              </span>
+                            </div>
+                            <h4 className="font-black text-stone-900 dark:text-[#F5F2EB] text-base group-hover:text-[#B45309] transition-colors">
+                              {evt.title}
+                            </h4>
+                            <div className="flex items-center gap-4 text-xs text-stone-600 dark:text-stone-400 font-medium pt-1">
+                              {evt.startDate && (
+                                <span className="flex items-center gap-1.5">
+                                  <Calendar size={13} className="text-[#B45309]" />
+                                  {new Date(evt.startDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </span>
+                              )}
+                              {evt.venue?.name && (
+                                <span className="flex items-center gap-1.5 truncate max-w-[200px]">
+                                  <MapPin size={13} className="text-stone-400" />
+                                  {evt.venue.name}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#EFE8DA] dark:border-stone-800">
+                            <Link
+                              to={`/e/${evt.slug}`}
+                              className="px-4 py-2 bg-[#B45309] hover:bg-[#92400E] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                            >
+                              <Ticket size={13} />
+                              <span>View Passes</span>
+                            </Link>
+
+                            <button
+                              type="button"
+                              onClick={() => removeSavedMutation.mutate(evt._id)}
+                              title="Remove from saved"
+                              className="p-2 rounded-xl bg-white dark:bg-[#292524] border border-[#EFE8DA] dark:border-stone-700 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* General Profile Settings */}
+                <div className="bg-white dark:bg-[#171614] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 sm:p-8 shadow-md space-y-6">
+                <div>
+                  <h2 className="text-lg font-extrabold text-stone-900 dark:text-[#F5F2EB] tracking-tight">Personal &amp; Professional Details</h2>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">Update how other organizers, attendees, and staff see your profile.</p>
+                </div>
+
+                {successMsg && (
+                  <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-2xl text-xs flex items-center gap-2">
+                    <CheckCircle2 size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <span>{successMsg}</span>
+                  </div>
+                )}
 
               {errorMsg && (
                 <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 rounded-2xl text-xs flex items-center gap-2">
@@ -544,6 +752,8 @@ export default function Profile() {
                 </div>
               </form>
             </div>
+          </>
+          )}
 
           </div>
         </div>

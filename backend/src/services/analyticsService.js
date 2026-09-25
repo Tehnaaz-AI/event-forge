@@ -50,7 +50,7 @@ export const getEventAnalytics = async (eventId) => {
     statusCounts[stat._id] = stat.count;
   });
 
-  // Construct a continuous 7-day rolling chronological time series for smooth, dynamic telemetry
+  // Construct a continuous 14-day rolling chronological time series for smooth, dynamic telemetry
   const timelineMap = {};
   timelineAgg.forEach(t => {
     timelineMap[t._id] = { registrations: t.registrations || 0, revenue: t.revenue || 0 };
@@ -59,7 +59,7 @@ export const getEventAnalytics = async (eventId) => {
   const timelineData = [];
   const today = new Date();
   
-  for (let i = 6; i >= 0; i--) {
+  for (let i = 13; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dateKey = d.toISOString().split('T')[0];

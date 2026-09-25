@@ -426,11 +426,11 @@ export default function AttendeeDashboard() {
 
       {/* Printable Conference Badge Modal in Luxury Beige */}
       {activeBadgeTicket && (
-        <div className="fixed inset-0 bg-stone-900/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-[#FAF8F5] dark:bg-[#1C1917] border border-[#EFE8DA] dark:border-stone-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative animate-in fade-in">
+        <div className="fixed inset-0 w-screen h-screen min-h-screen z-[999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#1C1917] border border-stone-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative animate-in fade-in my-auto">
             <button 
               onClick={() => setActiveBadgeTicket(null)}
-              className="no-print absolute top-4 right-4 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 font-bold text-xl cursor-pointer"
+              className="no-print absolute top-4 right-4 text-stone-400 hover:text-white font-bold text-xl cursor-pointer transition-colors"
             >
               &times;
             </button>
@@ -478,13 +478,13 @@ export default function AttendeeDashboard() {
             <div className="no-print flex gap-3">
               <button 
                 onClick={() => window.print()}
-                className="flex-1 bg-[#B45309] hover:bg-[#92400E] text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md uppercase tracking-wider cursor-pointer"
+                className="flex-1 bg-[#B45309] hover:bg-[#92400E] text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md uppercase tracking-wider cursor-pointer transition-all"
               >
                 <Printer size={15} /> Print Badge (PDF)
               </button>
               <button 
                 onClick={() => setActiveBadgeTicket(null)}
-                className="px-5 bg-white dark:bg-[#292524] border border-[#EFE8DA] dark:border-stone-700 text-stone-700 dark:text-stone-300 font-bold py-3 rounded-xl text-xs hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                className="px-5 bg-[#292524] border border-stone-700 text-stone-300 hover:text-white font-bold py-3 rounded-xl text-xs hover:bg-stone-800 cursor-pointer transition-all"
               >
                 Close
               </button>

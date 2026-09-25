@@ -14,6 +14,7 @@ import useDocumentTitle from '../components/common/useDocumentTitle';
 import FAQSection from '../components/common/FAQSection';
 import TestimonialsSection from '../components/common/TestimonialsSection';
 import BrandLogo from '../components/common/BrandLogo';
+import AmbientLiveBackground from '../components/common/AmbientLiveBackground';
 
 export default function Home() {
   useDocumentTitle(
@@ -109,10 +110,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans selection:bg-[#B45309] selection:text-white">
+    <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans selection:bg-[#B45309] selection:text-white relative">
       
+      {/* Live Moving Ambient Dynamic Background */}
+      <AmbientLiveBackground />
+
       {/* Editorial Luxury Hero Section */}
-      <section className="relative pt-16 pb-28 px-6 overflow-hidden border-b border-[#EFE8DA] bg-gradient-to-b from-[#FDFAF5] via-[#FAF8F5] to-[#F5F2EB]">
+      <section className="relative pt-16 pb-28 px-6 overflow-hidden border-b border-[#EFE8DA] bg-gradient-to-b from-[#FDFAF5]/80 via-[#FAF8F5]/80 to-[#F5F2EB]/80">
         
         {/* Ambient Warm Floating Glow */}
         <motion.div 

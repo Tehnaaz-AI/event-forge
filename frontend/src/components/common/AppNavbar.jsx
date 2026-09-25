@@ -101,8 +101,8 @@ export default function AppNavbar() {
     <header className="sticky top-3 sm:top-4 z-50 w-full px-3 sm:px-6 pointer-events-none transition-all duration-200">
       <div className="max-w-6xl mx-auto curved-navbar px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between pointer-events-auto shadow-md">
         
-        {/* Brand Logo with Cursive "Event" and Bold "FORGE" */}
-        <BrandLogo to="/" size="default" />
+        {/* Brand Logo with Cursive "Event" and Bold "FORGE" - Clean Typography without icon */}
+        <BrandLogo to="/" size="default" showIcon={false} />
 
         {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-5 text-xs font-bold text-stone-600">
@@ -198,6 +198,13 @@ export default function AppNavbar() {
                         className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-700 hover:bg-[#B45309]/10 hover:text-[#B45309] rounded-xl transition-colors"
                       >
                         <LayoutDashboard size={14} /> Executive Dashboard
+                      </Link>
+                      <Link
+                        to="/dashboard/attendee"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-stone-700 hover:bg-[#B45309]/10 hover:text-[#B45309] rounded-xl transition-colors"
+                      >
+                        <Ticket size={14} /> My Secured Passes &amp; Badges
                       </Link>
                       <Link
                         to="/dashboard/organizer/events/new"

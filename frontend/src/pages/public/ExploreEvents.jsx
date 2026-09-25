@@ -165,6 +165,12 @@ export default function ExploreEvents() {
                   (currentUser?.organization && String(event.organization?._id || event.organization) === String(currentUser?.organization?._id || currentUser?.organization))
                 );
 
+                const cardBgStyle = event.bannerImage 
+                  ? { backgroundImage: `url(${event.bannerImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                  : event.cardColor && event.cardColor !== '#1C1917' 
+                    ? { backgroundColor: event.cardColor }
+                    : null;
+
                 return (
                   <motion.div
                     layout
@@ -173,63 +179,94 @@ export default function ExploreEvents() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                    className="bg-white rounded-3xl border border-[#EFE8DA] overflow-hidden shadow-xs hover:shadow-xl hover:border-[#B45309]/40 transition-all flex flex-col justify-between group"
+                    className="bg-white dark:bg-[#171614] rounded-3xl border border-[#EFE8DA] dark:border-stone-800 overflow-hidden shadow-xs hover:shadow-2xl hover:border-[#B45309]/50 transition-all flex flex-col justify-between group"
                   >
-                    <div className="p-8 bg-gradient-to-br from-[#FDFAF5] to-[#F5F2EB] border-b border-[#EFE8DA] space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="px-3.5 py-1.5 bg-white text-[#B45309] border border-[#EFE8DA] rounded-full text-xs font-extrabold uppercase tracking-wider shadow-xs">
-                          {event.category || 'Executive'}
-                        </span>
+                    {/* Dynamic Card Header Banner */}
+                    <div 
+                      style={cardBgStyle}
+                      className="relative p-6 sm:p-7 min-h-[190px] flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1C1917] via-[#292524] to-[#171614] text-white"
+                    >
+                      {/* Gradient Protection Layer */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none"></div>
+
+                      {/* Top Badges Row */}
+                      <div className="relative z-10 flex justify-between items-start gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-3 py-1 bg-black/50 backdrop-blur-md text-[#F59E0B] border border-white/15 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs">
+                            {event.category || 'Conference'}
+                          </span>
+                          {event.status === 'LIVE' && (
+                            <span className="px-2.5 py-1 bg-emerald-500/80 backdrop-blur-md text-white rounded-full text-[9px] font-black uppercase tracking-wider animate-pulse flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-white"></span> LIVE
+                            </span>
+                          )}
+                        </div>
                         
                         <div className="flex items-center gap-1.5">
                           <button
+                            type="button"
                             onClick={(e) => toggleSaveEvent(e, event)}
                             title={savedEventIds.includes(event._id) ? "Remove Bookmark" : "Save Conference"}
-                            className={`p-1.5 rounded-full border transition-colors ${
+                            className={`p-2 rounded-full backdrop-blur-md border transition-all cursor-pointer ${
                               savedEventIds.includes(event._id)
-                                ? 'bg-amber-100 text-[#B45309] border-[#B45309]'
-                                : 'bg-white text-stone-500 hover:text-[#B45309] border-[#EFE8DA]'
+                                ? 'bg-[#B45309] text-white border-[#B45309] shadow-sm'
+                                : 'bg-black/40 text-stone-300 hover:text-white border-white/20 hover:bg-black/60'
                             }`}
                           >
-                            <Bookmark size={14} className={savedEventIds.includes(event._id) ? "fill-[#B45309]" : ""} />
+                            <Bookmark size={14} className={savedEventIds.includes(event._id) ? "fill-white" : ""} />
                           </button>
 
                           <button
+                            type="button"
                             onClick={() => setQuickPeekEvent(event)}
-                            className="px-2.5 py-1 rounded-full bg-white hover:bg-[#B45309]/10 text-stone-600 hover:text-[#B45309] border border-[#EFE8DA] text-xs font-bold transition-colors flex items-center gap-1"
+                            className="px-2.5 py-1.5 rounded-full bg-black/40 hover:bg-black/70 text-stone-200 hover:text-white border border-white/20 text-xs font-bold transition-colors flex items-center gap-1 backdrop-blur-md cursor-pointer"
                           >
-                            <Eye size={13} /> Quick Peek
+                            <Eye size={13} />
+                            <span className="hidden sm:inline">Peek</span>
                           </button>
                         </div>
                       </div>
 
-                      <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 line-clamp-2 leading-snug group-hover:text-[#B45309] transition-colors">
-                        {event.title}
-                      </h3>
-
-                      <p className="text-sm text-stone-600 line-clamp-3 leading-relaxed">
-                        {event.description}
-                      </p>
-                    </div>
-
-                    <div className="p-6 space-y-5">
-                      <div className="space-y-2.5 text-sm font-semibold text-stone-700">
-                        <div className="flex items-center gap-2.5">
-                          <Calendar className="text-[#B45309]" size={17} />
-                          <span>{new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                        </div>
-                        {event.venue?.name && (
-                          <div className="flex items-center gap-2.5">
-                            <MapPin className="text-amber-700" size={17} />
-                            <span className="truncate">{event.venue.name}</span>
-                          </div>
+                      {/* Title & Tagline in Header */}
+                      <div className="relative z-10 pt-4 space-y-1">
+                        <h3 className="text-xl sm:text-2xl font-black text-white line-clamp-2 leading-snug group-hover:text-[#FCD34D] transition-colors drop-shadow-md">
+                          {event.title}
+                        </h3>
+                        {event.tagline && (
+                          <p className="text-xs text-stone-300 line-clamp-1 font-medium drop-shadow-xs">
+                            {event.tagline}
+                          </p>
                         )}
                       </div>
+                    </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                    {/* Card Body & Details */}
+                    <div className="p-6 space-y-5 flex-1 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <p className="text-xs text-stone-600 dark:text-stone-300 line-clamp-2 leading-relaxed">
+                          {event.shortDescription || event.description || 'Enterprise leadership summit with curated keynotes and technical breakout tracks.'}
+                        </p>
+
+                        <div className="pt-2 border-t border-[#EFE8DA] dark:border-stone-800 space-y-2 text-xs font-semibold text-stone-700 dark:text-stone-300">
+                          <div className="flex items-center gap-2.5">
+                            <Calendar className="text-[#B45309] shrink-0" size={15} />
+                            <span>{new Date(event.startDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                          </div>
+                          {event.venue?.name && (
+                            <div className="flex items-center gap-2.5">
+                              <MapPin className="text-amber-700 dark:text-amber-500 shrink-0" size={15} />
+                              <span className="truncate">{event.venue.name}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action Buttons Row */}
+                      <div className="grid grid-cols-2 gap-2 pt-2">
                         <button
+                          type="button"
                           onClick={() => setQuickPeekEvent(event)}
-                          className="w-full bg-white hover:bg-stone-50 text-stone-800 border border-[#EFE8DA] text-center font-bold py-3.5 rounded-2xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                          className="w-full bg-[#FAF8F5] dark:bg-[#1C1917] hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 border border-[#EFE8DA] dark:border-stone-800 text-center font-bold py-3 rounded-2xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                         >
                           <Eye size={14} className="text-[#B45309]" />
                           <span>Preview</span>
@@ -238,18 +275,18 @@ export default function ExploreEvents() {
                         {isEventOwner ? (
                           <Link 
                             to={`/dashboard/organizer/events/${event._id}`}
-                            className="w-full bg-stone-900 hover:bg-stone-800 text-white text-center font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider shadow-sm"
+                            className="w-full bg-stone-900 hover:bg-stone-800 text-white text-center font-black py-3 rounded-2xl transition-all flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider shadow-sm"
                           >
-                            <Building size={14} className="text-[#C28E27]" />
-                            <span>Manage Event</span>
+                            <Building size={14} className="text-[#FCD34D]" />
+                            <span>Manage</span>
                           </Link>
                         ) : (
                           <Link 
                             to={`/e/${event.slug}`}
-                            className="w-full bg-[#B45309] hover:bg-[#92400E] text-white text-center font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider shadow-sm shadow-[#B45309]/20"
+                            className="w-full bg-[#B45309] hover:bg-[#92400E] text-white text-center font-black py-3 rounded-2xl transition-all flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider shadow-md shadow-[#B45309]/20 cursor-pointer"
                           >
                             <Ticket size={14} />
-                            <span>Passes</span>
+                            <span>Secure Pass</span>
                           </Link>
                         )}
                       </div>

@@ -47,13 +47,13 @@ export default function BrandLogo({
     hero: 'text-3xl sm:text-4xl'
   };
 
-  // Light theme: Event in warm amber copper (#B45309), FORGE in deep obsidian (#1C1917)
-  // Dark theme: Event in elegant warm BEIGE (#F5EBE0), FORGE in crisp white (#FFFFFF)
+  // Light theme: Event in warm beige/amber-copper (#D4B996 / #B45309), FORGE in deep obsidian (#1C1917)
+  // Dark theme: Event in signature warm BEIGE (#D4B996 / #E5D2B8), FORGE in crisp white (#FFFFFF)
   const isDarkEffective = variant === 'onDark' || isDark;
 
   const eventTextColor = isDarkEffective 
-    ? 'text-[#F5EBE0]' // Warm elegant beige
-    : 'text-[#B45309]'; // Amber copper
+    ? 'text-[#D4B996]' // Warm signature beige matching light theme
+    : 'text-[#B45309]'; // Amber copper beige
 
   const forgeTextColor = isDarkEffective 
     ? 'text-white' 

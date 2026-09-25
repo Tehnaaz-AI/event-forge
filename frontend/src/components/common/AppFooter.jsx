@@ -39,7 +39,7 @@ export default function AppFooter() {
         
         {/* Brand Column */}
         <div className="md:col-span-2 space-y-4">
-          <BrandLogo to="/" size="large" variant="onDark" />
+          <BrandLogo to="/" size="large" variant="onDark" showIcon={false} />
           <p className="text-xs text-stone-400 max-w-sm leading-relaxed">
             The AI-enabled corporate event operating system. Transactional registrations, conflict-free multi-track agendas, sponsor deliverables, and instant door validation.
           </p>

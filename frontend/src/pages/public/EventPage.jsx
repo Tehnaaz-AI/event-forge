@@ -41,7 +41,7 @@ export default function EventPage() {
   const { data: userTickets } = useQuery({
     queryKey: ['my-tickets'],
     queryFn: () => api.get('/events/attendee/my-tickets'),
-    enabled: Boolean(user && user.role === 'ATTENDEE')
+    enabled: Boolean(user && (user.role === 'ATTENDEE' || user.role === 'ORGANIZER'))
   });
 
   const hasSecuredPass = Boolean(
