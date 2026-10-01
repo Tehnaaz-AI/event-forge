@@ -380,102 +380,103 @@ export default function SponsorManager({ eventId }) {
         </div>
       )}
 
-      {/* 💼 SPONSOR BOOTH LEAD CAPTURE & ROI STUDIO 💼 */}
+      {/* 💼 SPONSOR ROI & BOOTH OPERATIONS STUDIO 💼 */}
       <div className="bg-white rounded-3xl border border-[#EFE8DA] p-6 sm:p-8 space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DA] pb-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-md text-[10px] font-black uppercase">
-                Enterprise ROI Module
+                Sponsor Operations
               </span>
-              <h3 className="font-extrabold text-stone-900 text-lg">Sponsor Booth Lead Capture Studio</h3>
+              <h3 className="font-extrabold text-stone-900 text-lg">Sponsor Partnership &amp; Booth Studio</h3>
             </div>
             <p className="text-xs text-stone-500 mt-0.5">
-              Simulate brand booth badge scans, qualify attendee leads, and export lead sheets.
+              Track brand partnerships, deliverables fulfillment, and booth telemetry for this conference.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
-                const sampleLeads = [
-                  { name: 'Dr. Sarah Chen', title: 'VP of AI Systems', company: 'Apex Dynamics', email: 'sarah.c@apex.ai', grade: 'HOT', notes: 'Interested in $50k enterprise pilot.' },
-                  { name: 'Marcus Vance', title: 'Director of Infrastructure', company: 'CloudScale Inc', email: 'm.vance@cloudscale.io', grade: 'HOT', notes: 'Schedule product demo next Tuesday.' },
-                  { name: 'Elena Rostova', title: 'Senior Product Manager', company: 'FinTech Global', email: 'elena@fintech.org', grade: 'WARM', notes: 'Evaluate API specs with engineering lead.' },
-                  { name: 'David Kim', title: 'Lead Architect', company: 'Horizon Labs', email: 'dkim@horizon.dev', grade: 'COLD', notes: 'General interest in newsletter updates.' }
-                ];
-                const csvHeader = 'Name,Title,Company,Email,Lead Grade,Notes\n';
-                const csvRows = sampleLeads.map(l => `"${l.name}","${l.title}","${l.company}","${l.email}","${l.grade}","${l.notes}"`).join('\n');
+                if (sponsors.length === 0) {
+                  alert('No active sponsors registered yet for this summit.');
+                  return;
+                }
+                const csvHeader = 'Company,Tier,Package Price,Contact Email,Status\n';
+                const csvRows = sponsors.map(s => `"${s.organization?.name || 'Sponsor Partner'}","${s.package?.name || 'Standard'}","${s.package?.price || 0}","${s.organization?.contactEmail || ''}","${s.status}"`).join('\n');
                 const blob = new Blob([csvHeader + csvRows], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.setAttribute('download', 'EventForge_Sponsor_Leads.csv');
+                link.setAttribute('download', `${event.slug || 'EventForge'}_Sponsors_Roster.csv`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
               }}
               className="px-4 py-2 bg-[#FAF8F5] hover:bg-[#B45309] hover:text-white border border-[#EFE8DA] text-stone-700 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
             >
-              <ExternalLink size={13} /> Export Leads CSV
+              <ExternalLink size={13} /> Export Sponsors Roster
             </button>
           </div>
         </div>
 
-        {/* Lead ROI Metrics */}
+        {/* Real Partnership ROI Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl">
-            <span className="text-[10px] font-bold text-stone-400 uppercase">Total Scanned Leads</span>
-            <p className="text-2xl font-black text-stone-900 mt-1">24 Leads</p>
-            <span className="text-[10px] text-emerald-600 font-bold">+18% vs avg summit</span>
+            <span className="text-[10px] font-bold text-stone-400 uppercase">Confirmed Sponsors</span>
+            <p className="text-2xl font-black text-stone-900 mt-1">{sponsors.length} Partners</p>
+            <span className="text-[10px] text-emerald-600 font-bold">{packages.length} Available Tiers</span>
           </div>
 
           <div className="p-4 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl">
-            <span className="text-[10px] font-bold text-stone-400 uppercase">Hot Decision Makers</span>
-            <p className="text-2xl font-black text-[#B45309] mt-1">11 CXO / VP</p>
-            <span className="text-[10px] text-[#B45309] font-bold">45.8% Conversion Target</span>
+            <span className="text-[10px] font-bold text-stone-400 uppercase">Total Contracted Revenue</span>
+            <p className="text-2xl font-black text-[#B45309] mt-1">
+              ${sponsors.reduce((sum, s) => sum + (Number(s.package?.price) || 0), 0).toLocaleString()}
+            </p>
+            <span className="text-[10px] text-stone-500 font-medium">Across all sponsorship packages</span>
           </div>
 
           <div className="p-4 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl">
-            <span className="text-[10px] font-bold text-stone-400 uppercase">Estimated Pipeline Value</span>
-            <p className="text-2xl font-black text-emerald-700 mt-1">$420,000</p>
-            <span className="text-[10px] text-stone-500 font-medium">8 Enterprise Opportunities</span>
+            <span className="text-[10px] font-bold text-stone-400 uppercase">Active Brand Deliverables</span>
+            <p className="text-2xl font-black text-stone-900 mt-1">
+              {deliverables.filter(d => d.status === 'APPROVED').length} / {deliverables.length} Approved
+            </p>
+            <span className="text-[10px] text-emerald-700 font-bold">Deliverable compliance tracker</span>
           </div>
         </div>
 
-        {/* Verified Lead Stream */}
+        {/* Real Verified Sponsor Partnerships */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-stone-600 uppercase tracking-wider">Recent Sponsor Booth Interactions</h4>
+          <h4 className="text-xs font-bold text-stone-600 uppercase tracking-wider">Active Partner Roster</h4>
           
-          <div className="space-y-2">
-            {[
-              { name: 'Dr. Sarah Chen', title: 'VP of AI Systems', company: 'Apex Dynamics', email: 'sarah.c@apex.ai', grade: 'HOT', notes: 'Interested in $50k enterprise pilot.' },
-              { name: 'Marcus Vance', title: 'Director of Infrastructure', company: 'CloudScale Inc', email: 'm.vance@cloudscale.io', grade: 'HOT', notes: 'Schedule product demo next Tuesday.' },
-              { name: 'Elena Rostova', title: 'Senior Product Manager', company: 'FinTech Global', email: 'elena@fintech.org', grade: 'WARM', notes: 'Evaluate API specs with engineering lead.' }
-            ].map((lead, idx) => (
-              <div key={idx} className="p-3.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-stone-900">{lead.name}</span>
-                    <span className="text-stone-400">•</span>
-                    <span className="text-stone-600 font-medium">{lead.title} at {lead.company}</span>
+          {sponsors.length === 0 ? (
+            <div className="p-6 text-center text-xs text-stone-400 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl">
+              No sponsor partnerships added yet. Click &quot;Add Brand Sponsor&quot; to register conference partners.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {sponsors.map((s) => (
+                <div key={s._id} className="p-3.5 bg-[#FAF8F5] border border-[#EFE8DA] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-stone-900">{s.organization?.name || 'Brand Sponsor'}</span>
+                      <span className="text-stone-400">•</span>
+                      <span className="text-stone-600 font-medium">{s.package?.name || 'Sponsorship Package'} (${Number(s.package?.price || 0).toLocaleString()})</span>
+                    </div>
+                    <p className="text-[11px] text-stone-500 mt-0.5">{s.organization?.contactEmail || 'No contact email recorded'}</p>
                   </div>
-                  <p className="text-[11px] text-stone-500 mt-0.5">{lead.notes}</p>
-                </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                    lead.grade === 'HOT' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
-                  }`}>
-                    {lead.grade} LEAD
-                  </span>
-                  <span className="text-[11px] font-mono text-stone-400">{lead.email}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">
+                      {s.status || 'ACTIVE'}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-
       </div>
+
 
       {/* MODAL: Add Event Sponsor */}
       {sponsorModalOpen && (

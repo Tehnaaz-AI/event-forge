@@ -11,9 +11,14 @@ const eventTelemetrySchema = new Schema({
   source: { type: String, default: 'SYSTEM' },
   value: { type: Schema.Types.Mixed, required: true },
   metadata: { type: Schema.Types.Mixed, default: {} },
-  timestamp: { type: Date, default: Date.now, index: true }
+  timestamp: { type: Date, default: Date.now }
 }, { timestamps: true });
 
+// Compound query index for live dashboard and telemetry analytics
 eventTelemetrySchema.index({ event: 1, type: 1, timestamp: -1 });
 
+// MongoDB TTL Index: Retain raw high-volume operational telemetry for 90 days (7,776,000 seconds)
+eventTelemetrySchema.index({ timestamp: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
+
 export const EventTelemetry = model('EventTelemetry', eventTelemetrySchema);
+

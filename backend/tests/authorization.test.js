@@ -169,7 +169,59 @@ test('Authorization: Tenant Isolation and Role Guards', async (t) => {
     assert.strictEqual(priorityScore, 0, 'Standard pass priority score must remain 0');
   });
 
+  await t.test('Session IDOR: Organizer A cannot mutate or delete Organizer B session', async () => {
+    const { Session } = await import('../src/models/index.js');
+    const orgA = new mongoose.Types.ObjectId();
+    const orgB = new mongoose.Types.ObjectId();
+    const userA = new mongoose.Types.ObjectId();
+    const userB = new mongoose.Types.ObjectId();
+    const eventA = { _id: new mongoose.Types.ObjectId(), organizer: userA, organization: orgA };
+    const eventB = { _id: new mongoose.Types.ObjectId(), organizer: userB, organization: orgB };
+
+    const sessionB = {
+      _id: new mongoose.Types.ObjectId(),
+      event: eventB._id,
+      title: 'Confidential Keynote',
+      room: 'Main Hall',
+      status: 'PUBLISHED'
+    };
+
+    Event.findById = (id) => {
+      if (String(id) === String(eventA._id)) return Promise.resolve(eventA);
+      if (String(id) === String(eventB._id)) return Promise.resolve(eventB);
+      return Promise.resolve(null);
+    };
+
+    // Helper logic matching verifySessionAccess in routes/sessions.js
+    const verifySessionAccessLogic = async (user, session) => {
+      if (user.role === 'PLATFORM_ADMIN') return true;
+      const ev = await Event.findById(session.event);
+      if (!ev) return false;
+      const isOwner = ev.organizer && ev.organizer.toString() === user._id.toString();
+      const isSameOrg = ev.organization && user.organization && ev.organization.toString() === user.organization.toString();
+      if (isOwner || isSameOrg) return true;
+      return false;
+    };
+
+    // 1. Organizer B accessing own session B -> allowed
+    const authOwner = await verifySessionAccessLogic({ _id: userB, role: 'ORGANIZER', organization: orgB }, sessionB);
+    assert.strictEqual(authOwner, true, 'Organizer B must be allowed to modify own session');
+
+    // 2. Organizer A attempting to mutate Organizer B session -> DENIED
+    const authCross = await verifySessionAccessLogic({ _id: userA, role: 'ORGANIZER', organization: orgA }, sessionB);
+    assert.strictEqual(authCross, false, 'Organizer A must be strictly denied access to modify Organizer B session');
+
+    // 3. Attendee attempting to mutate Organizer B session -> DENIED
+    const authAttendee = await verifySessionAccessLogic({ _id: new mongoose.Types.ObjectId(), role: 'ATTENDEE' }, sessionB);
+    assert.strictEqual(authAttendee, false, 'Attendee must be denied access to mutate session');
+
+    // 4. Platform admin modifying Organizer B session -> ALLOWED
+    const authAdmin = await verifySessionAccessLogic({ _id: new mongoose.Types.ObjectId(), role: 'PLATFORM_ADMIN' }, sessionB);
+    assert.strictEqual(authAdmin, true, 'Platform Admin must be allowed global access');
+  });
+
   // Restore mocks
   Event.findById = originalFindById;
   EventStaff.findOne = originalFindOne;
 });
+

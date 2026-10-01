@@ -116,8 +116,9 @@ flowchart TB
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/auth/register` | Register new user (Attendee or Organizer) | Public |
 | `POST` | `/api/auth/login` | Authenticate and receive JWT | Public |
-| `GET` | `/api/auth/me` | Fetch current session profile | Authenticated |
-| `GET` | `/api/auth/users` | List system users (audits & staff assignment) | Admin / Organizer |
+| `GET` | `/api/auth/profile` | Fetch current session profile | Authenticated |
+| `PATCH` | `/api/auth/profile` | Update current user profile | Authenticated |
+| `GET` | `/api/admin/users` | List system users (audits & staff assignment) | Platform Admin |
 
 ### Events & Multi-Track Conferences
 | Method | Endpoint | Description | Access |
@@ -127,29 +128,35 @@ flowchart TB
 | `GET` | `/api/events/:id` | Get event details with tracks and tickets | Public |
 | `PUT` | `/api/events/:id` | Update conference details and schedule | Event Owner / Admin |
 | `DELETE` | `/api/events/:id` | Delete or archive conference | Event Owner / Admin |
+| `GET` | `/api/events/:eventId/sessions` | List sessions for an event | Public |
+| `PATCH`| `/api/sessions/:id` | Update session details (tenant-guarded) | Event Owner / Admin |
+| `DELETE`| `/api/sessions/:id` | Delete session (tenant-guarded) | Event Owner / Admin |
 
 ### Registrations & Badges
 | Method | Endpoint | Description | Access |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/events/:id/register` | Secure passes (atomic category decrement) | Authenticated |
-| `GET` | `/api/events/:id/attendees` | List registered attendees and check-in states | Event Owner / Staff |
-| `POST` | `/api/events/:id/check-in` | Check in attendee by QR badge token | Door Staff / Organizer |
-| `POST` | `/api/events/:id/waitlist/join`| Join category waitlist when sold out | Authenticated |
+| `POST` | `/api/events/:eventId/register` | Secure passes (atomic category decrement & coupon discount) | Authenticated |
+| `GET` | `/api/events/:eventId/registrations` | List registered delegates and check-in states | Event Owner / Staff |
+| `POST` | `/api/events/:eventId/check-in` | Check in attendee by QR badge token | Door Staff / Organizer |
+| `POST` | `/api/events/:eventId/waitlist/join` | Join VIP or Standard waitlist when sold out | Authenticated |
+| `POST` | `/api/events/:eventId/registrations/:registrationId/cancel` | Cancel pass & trigger auto-promotion | Attendee / Owner |
 
 ### Real-Time Intelligence & AI
 | Method | Endpoint | Description | Access |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/events/:id/intelligence/stream` | Server-Sent Events live telemetry stream | Event Owner / Staff |
-| `GET` | `/api/events/:id/intelligence/health` | Calculate 0-100 real-time health score | Event Owner / Staff |
-| `POST` | `/api/events/:id/intelligence/copilot`| Query live event AI Copilot | Event Owner / Admin |
-| `POST` | `/api/events/:id/actions/:actionId/execute` | Approve & execute AI mitigation | Event Owner / Admin |
+| `POST` | `/api/events/:eventId/intelligence/stream-token` | Generate short-lived scoped SSE stream token | Event Owner / Staff |
+| `GET` | `/api/events/:eventId/intelligence/stream` | Server-Sent Events live telemetry stream | Token Authenticated |
+| `GET` | `/api/events/:eventId/intelligence/pulse` | Calculate 0-100 real-time health score | Event Owner / Staff |
+| `POST` | `/api/events/:eventId/intelligence/copilot` | Query live event AI Copilot | Event Owner / Admin |
+| `POST` | `/api/events/:eventId/intelligence/actions/execute` | Approve & execute AI operational mitigation | Event Owner / Admin |
 
 ### Inquiries & CRM
 | Method | Endpoint | Description | Access |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/inquiries` | Submit public enterprise contact form | Public |
-| `GET` | `/api/inquiries` | List enterprise inbound leads | Platform Admin |
-| `PATCH` | `/api/inquiries/:id` | Update inquiry status (`REVIEWED`, `RESOLVED`)| Platform Admin |
+| `POST` | `/api/contact` | Submit public enterprise contact form | Public |
+| `GET` | `/api/admin/inquiries` | List enterprise inbound leads | Platform Admin |
+| `PATCH` | `/api/admin/inquiries/:id` | Update inquiry status (`IN_REVIEW`, `RESOLVED`)| Platform Admin |
+
 
 ---
 

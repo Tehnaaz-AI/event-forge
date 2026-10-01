@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
-export const Session = model('Session', new Schema({
+const sessionSchema = new Schema({
   event: { type: Schema.Types.ObjectId, ref: 'Event', required: true, index: true },
   title: { type: String, required: true },
   description: String,
@@ -17,4 +17,9 @@ export const Session = model('Session', new Schema({
   },
   category: String,
   tags: [String]
-}, { timestamps: true }));
+}, { timestamps: true });
+
+sessionSchema.index({ event: 1, room: 1, startTime: 1, endTime: 1 });
+
+export const Session = model('Session', sessionSchema);
+

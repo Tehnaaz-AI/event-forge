@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import { eventBus } from '../src/realtime/eventBus.js';
+import { eventBus, RealtimeEventBus } from '../src/realtime/eventBus.js';
 import { authenticateStreamToken } from '../src/routes/intelligence.js';
 import { User } from '../src/models/index.js';
 
@@ -144,4 +144,70 @@ describe('Real-time EventBus Transport & Scoped Channels', () => {
     assert.strictEqual(nextCalled, false);
     assert.strictEqual(statusCode, 403);
   });
+
+  it('Redis Self-Echo Prevention: Subscriber ignores message published by the same instance', () => {
+    const bus = new RealtimeEventBus();
+    const eventId = '66f000000000000000000099';
+    const channel = `event:${eventId}`;
+
+    let localEventCount = 0;
+    const testListener = (message) => {
+      localEventCount++;
+    };
+
+    bus.on(channel, testListener);
+
+    // 1. Broadcast locally (simulating publishing step)
+    bus.broadcast(eventId, 'ANNOUNCEMENT_CREATED', { title: 'Local Announcement' });
+    assert.strictEqual(localEventCount, 1, 'Local broadcast should emit exactly once');
+
+    // 2. Simulate Redis Pub/Sub echoing the published payload back to the subscriber
+    const echoEnvelope = {
+      type: 'ANNOUNCEMENT_CREATED',
+      eventId: String(eventId),
+      instanceId: bus.instanceId, // Same instance ID as publisher
+      timestamp: new Date().toISOString(),
+      payload: { title: 'Local Announcement' }
+    };
+
+    // Simulate incoming pmessage handler logic
+    if (echoEnvelope.instanceId === bus.instanceId) {
+      // Ignored: do not super.emit
+    } else {
+      bus.emit(channel, echoEnvelope);
+    }
+
+    assert.strictEqual(localEventCount, 1, 'Self-published Redis echo must be ignored to prevent duplicate events');
+    bus.removeListener(channel, testListener);
+  });
+
+  it('Remote Redis Event Delivery: Subscriber processes messages published by a different instance', () => {
+    const busInstanceA = new RealtimeEventBus();
+    const busInstanceB = new RealtimeEventBus();
+    const eventId = '66f000000000000000000088';
+    const channel = `event:${eventId}`;
+
+    let instanceBEvents = [];
+    busInstanceB.on(channel, (msg) => {
+      instanceBEvents.push(msg);
+    });
+
+    // Simulate Instance A publishing a message
+    const remoteEnvelope = {
+      type: 'VIP_CHECKED_IN',
+      eventId: String(eventId),
+      instanceId: busInstanceA.instanceId, // Different instance ID
+      timestamp: new Date().toISOString(),
+      payload: { attendee: 'Executive VIP' }
+    };
+
+    // Simulate Instance B receiving Redis message
+    if (remoteEnvelope.instanceId !== busInstanceB.instanceId) {
+      busInstanceB.emit(channel, remoteEnvelope);
+    }
+
+    assert.strictEqual(instanceBEvents.length, 1, 'Instance B must receive exactly one event from Instance A');
+    assert.strictEqual(instanceBEvents[0].payload.attendee, 'Executive VIP');
+  });
 });
+

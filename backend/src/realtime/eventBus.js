@@ -1,9 +1,11 @@
 import EventEmitter from 'events';
+import crypto from 'crypto';
 
-class RealtimeEventBus extends EventEmitter {
+export class RealtimeEventBus extends EventEmitter {
   constructor() {
     super();
     this.setMaxListeners(200);
+    this.instanceId = crypto.randomUUID();
     this.redisUrl = process.env.REDIS_URL || null;
     this.mode = this.redisUrl ? 'DISTRIBUTED_REDIS' : 'SINGLE_INSTANCE_MEMORY';
     this.redisClient = null;
@@ -40,7 +42,12 @@ class RealtimeEventBus extends EventEmitter {
       this.redisSub.on('pmessage', (pattern, channel, rawMsg) => {
         try {
           const parsed = JSON.parse(rawMsg);
+          // Prevent duplicate self-echo on publishing instance
+          if (parsed.instanceId && parsed.instanceId === this.instanceId) {
+            return;
+          }
           super.emit(channel, parsed);
+          super.emit('global', parsed);
         } catch {}
       });
 
@@ -63,6 +70,7 @@ class RealtimeEventBus extends EventEmitter {
     const message = {
       type,
       eventId: String(eventId),
+      instanceId: this.instanceId,
       timestamp: new Date().toISOString(),
       payload
     };
@@ -85,6 +93,7 @@ class RealtimeEventBus extends EventEmitter {
 
   getTransportInfo() {
     return {
+      instanceId: this.instanceId,
       mode: this.mode,
       isDistributed: this.mode === 'DISTRIBUTED_REDIS',
       redisConfigured: Boolean(this.redisUrl)
@@ -93,3 +102,4 @@ class RealtimeEventBus extends EventEmitter {
 }
 
 export const eventBus = new RealtimeEventBus();
+

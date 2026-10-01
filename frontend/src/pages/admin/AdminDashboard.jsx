@@ -589,9 +589,10 @@ export default function AdminDashboard() {
                     ) : (
                       filteredEvents.map((ev) => {
                         const statusClass = getStatusBadge(ev.status);
-                        const regCount = ev.registrationCount ?? 15;
+                        const regCount = ev.registrationCount ?? 0;
                         const capacity = ev.capacity || 200;
                         const pct = Math.min(100, Math.round((regCount / capacity) * 100));
+
 
                         return (
                           <tr key={ev._id} className="hover:bg-stone-50/70 transition-colors">

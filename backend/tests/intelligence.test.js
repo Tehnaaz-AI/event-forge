@@ -82,4 +82,20 @@ test('Event Intelligence Layer & Operational Health Indicators', async (t) => {
     assert.ok(alert.evidence[0].includes('282'));
     assert.ok(alert.recommendedAction.length > 0);
   });
+
+  await t.test('EventTelemetry Schema has timestamp and 90-day TTL retention index', () => {
+    const schema = EventTelemetry.schema;
+    assert.ok(schema.paths.timestamp, 'timestamp field must exist on EventTelemetry schema');
+
+    const indexes = schema.indexes();
+    // Look for TTL index on timestamp
+    const ttlIndex = indexes.find(idx => idx[0]?.timestamp === 1 && idx[1]?.expireAfterSeconds !== undefined);
+    assert.ok(ttlIndex, 'TTL index on timestamp must exist');
+    assert.strictEqual(ttlIndex[1].expireAfterSeconds, 90 * 24 * 60 * 60, 'TTL retention must be configured to 90 days (7,776,000s)');
+
+    // Look for compound analytics index
+    const compoundIndex = indexes.find(idx => idx[0]?.event === 1 && idx[0]?.type === 1 && idx[0]?.timestamp === -1);
+    assert.ok(compoundIndex, 'Compound query index on event, type, and timestamp must exist');
+  });
 });
+

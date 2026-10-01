@@ -14,7 +14,8 @@ import {
   EventStaff, 
   Sponsor, 
   SponsorshipPackage,
-  Inquiry
+  Inquiry,
+  Coupon
 } from '../src/models/index.js';
 
 export async function seedDevelopmentData() {
@@ -37,9 +38,11 @@ export async function seedDevelopmentData() {
       EventStaff.deleteMany({}),
       Sponsor.deleteMany({}),
       SponsorshipPackage.deleteMany({}),
+      Coupon.deleteMany({}),
       Inquiry ? Inquiry.deleteMany({}) : Promise.resolve()
     ]);
     console.log('✓ All collections cleanly wiped.');
+
 
     const defaultPassword = process.env.DEV_SEED_PASSWORD || 'Password123!';
     const passwordHash = await bcrypt.hash(defaultPassword, 12);
@@ -308,8 +311,19 @@ export async function seedDevelopmentData() {
       status: 'ACTIVE'
     });
 
+    // Seed Event Coupons
+    await Coupon.create([
+      { event: event1._id, code: 'SAVE20', discountType: 'PERCENTAGE', discountValue: 20, maxUses: 100, currentUses: 0, isActive: true },
+      { event: event1._id, code: 'EARLYBIRD', discountType: 'PERCENTAGE', discountValue: 15, maxUses: 100, currentUses: 0, isActive: true },
+      { event: event1._id, code: 'WELCOME10', discountType: 'PERCENTAGE', discountValue: 10, maxUses: 500, currentUses: 0, isActive: true },
+      { event: event1._id, code: 'VIP50', discountType: 'FIXED', discountValue: 50, maxUses: 50, currentUses: 0, isActive: true },
+      { event: event2._id, code: 'SAVE20', discountType: 'PERCENTAGE', discountValue: 20, maxUses: 100, currentUses: 0, isActive: true },
+      { event: event2._id, code: 'EARLYBIRD', discountType: 'PERCENTAGE', discountValue: 15, maxUses: 100, currentUses: 0, isActive: true }
+    ]);
+
     // Add Inbound Contact Inquiries for Admin CRM
     if (Inquiry) {
+
       await Inquiry.create([
         {
           name: 'Chief Information Officer, AlphaCorp',

@@ -1,9 +1,10 @@
-import { Event, Session, TicketCategory, Registration, Ticket, Announcement, User, EventStaff, Organization } from '../models/index.js';
+import { Event, Session, TicketCategory, Registration, Ticket, Announcement, User, EventStaff, Organization, Coupon } from '../models/index.js';
 import mongoose from 'mongoose';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { eventBus } from '../realtime/eventBus.js';
+
 
 export const getEvents = async (req, res) => {
   const q = req.query.q ? { title: { $regex: req.query.q, $options: 'i' } } : {};
@@ -227,8 +228,10 @@ export const deleteSession = async (req, res) => {
   const { sessionId } = req.params;
   const session = await Session.findOneAndDelete({ _id: sessionId, event: req.event._id });
   if (!session) throw new Error('Session not found');
+  await mongoose.model('SessionRegistration').deleteMany({ session: sessionId });
   return { success: true, deletedSessionId: sessionId };
 };
+
 
 export const generateProposedSchedule = async (req, res) => {
   const { trackTitle, rooms, slots, durationMinutes } = req.body;
@@ -295,9 +298,32 @@ export const updateTicketCategory = async (req, res) => {
 
 export const deleteTicketCategory = async (req, res) => {
   const { categoryId } = req.params;
-  const deleted = await TicketCategory.findOneAndDelete({ _id: categoryId, event: req.event._id });
-  if (!deleted) throw new Error('Ticket category not found');
-  return deleted;
+  const cat = await TicketCategory.findOne({ _id: categoryId, event: req.event._id });
+  if (!cat) throw new Error('Ticket category not found');
+
+  // Check for active dependencies (registrations / tickets)
+  const hasDependencies = await Registration.exists({
+    ticketCategory: categoryId,
+    registrationStatus: { $in: ['CONFIRMED', 'WAITLISTED'] }
+  });
+
+  if (hasDependencies) {
+    // Database state must remain unchanged
+    const err = new Error('Ticket category cannot be deleted because it has existing registrations or tickets. Archive it instead.');
+    err.statusCode = 409;
+    err.code = 'CATEGORY_IN_USE';
+    throw err;
+  }
+
+  // If already archived, return idempotent success
+  if (cat.isActive === false) {
+    return { success: true, archived: true, message: 'Ticket category is already archived.', category: cat };
+  }
+
+  // Safely archive category to preserve historical configuration
+  cat.isActive = false;
+  await cat.save();
+  return { success: true, archived: true, message: 'Ticket category archived successfully.', category: cat };
 };
 
 export const registerAttendee = async (req, res) => {
@@ -335,7 +361,7 @@ export const registerAttendee = async (req, res) => {
   let targetCategoryId = req.body.ticketCategory;
   if (!targetCategoryId || !mongoose.Types.ObjectId.isValid(targetCategoryId)) {
     // Find first active category for event or create default
-    let defaultCat = await TicketCategory.findOne({ event: eventId });
+    let defaultCat = await TicketCategory.findOne({ event: eventId, isActive: { $ne: false } });
     if (!defaultCat) {
       defaultCat = await TicketCategory.create({
         event: event._id,
@@ -355,6 +381,10 @@ export const registerAttendee = async (req, res) => {
     throw new Error('Selected ticket category does not belong to this event');
   }
 
+  if (categoryCheck.isActive === false) {
+    throw new Error('Selected ticket category is archived and no longer available for purchase');
+  }
+
   // Check sale dates
   const now = new Date();
   if (categoryCheck.saleStart && now < new Date(categoryCheck.saleStart)) {
@@ -372,15 +402,31 @@ export const registerAttendee = async (req, res) => {
   );
 
   let finalAmount = categoryCheck.price || 0;
-  const code = (req.body.couponCode || '').trim().toUpperCase();
-  if (code === 'SAVE20') {
-    finalAmount = Math.round(finalAmount * 0.8);
-  } else if (code === 'EARLYBIRD') {
-    finalAmount = Math.round(finalAmount * 0.85);
-  } else if (code === 'WELCOME10') {
-    finalAmount = Math.round(finalAmount * 0.9);
-  } else if (code === 'VIP50') {
-    finalAmount = Math.max(0, finalAmount - 50);
+  let appliedCouponDoc = null;
+  const rawCode = (req.body.couponCode || '').trim().toUpperCase();
+
+  if (rawCode) {
+    const coupon = await Coupon.findOne({
+      event: event._id,
+      code: rawCode,
+      isActive: true
+    });
+
+    if (coupon) {
+      const nowTime = new Date();
+      const isValidDates = (!coupon.validFrom || nowTime >= new Date(coupon.validFrom)) &&
+                           (!coupon.validUntil || nowTime <= new Date(coupon.validUntil));
+      const hasUses = !coupon.maxUses || coupon.currentUses < coupon.maxUses;
+
+      if (isValidDates && hasUses) {
+        if (coupon.discountType === 'PERCENTAGE') {
+          finalAmount = Math.max(0, Math.round(finalAmount * (1 - (coupon.discountValue / 100))));
+        } else if (coupon.discountType === 'FIXED') {
+          finalAmount = Math.max(0, finalAmount - coupon.discountValue);
+        }
+        appliedCouponDoc = coupon;
+      }
+    }
   }
 
   // Determine VIP / Priority status (Server-authoritative domain model: based on explicit TicketCategory.isVipEligible or tier)
@@ -410,6 +456,10 @@ export const registerAttendee = async (req, res) => {
       waitlistPosition,
       amount: finalAmount
     });
+
+    if (appliedCouponDoc) {
+      await Coupon.findByIdAndUpdate(appliedCouponDoc._id, { $inc: { currentUses: 1 } });
+    }
 
     eventBus.broadcast(String(event._id), 'WAITLIST_JOINED', {
       attendee: req.user.name || req.user.email,
@@ -442,6 +492,10 @@ export const registerAttendee = async (req, res) => {
       amount: finalAmount
     });
 
+    if (appliedCouponDoc) {
+      await Coupon.findByIdAndUpdate(appliedCouponDoc._id, { $inc: { currentUses: 1 } });
+    }
+
     const ticketNumber = `EF-${isVIPTier ? 'VIP-' : ''}${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
     const qrCode = await QRCode.toDataURL(JSON.stringify({ 
       registration: String(registration._id), 
@@ -473,6 +527,7 @@ export const registerAttendee = async (req, res) => {
     throw err;
   }
 };
+
 
 export const joinVipWaitlist = async (req, res) => {
   const eventId = req.params.eventId;

@@ -79,16 +79,33 @@ export const deleteUser = async (userId, currentAdminId) => {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
 
-  // Cascade delete associated tickets and registrations
-  const userRegs = await Registration.find({ attendee: userId }).distinct('_id');
-  await Promise.all([
-    Ticket.deleteMany({ registration: { $in: userRegs } }),
-    Registration.deleteMany({ attendee: userId }),
-    User.findByIdAndDelete(userId)
-  ]);
+  // Deactivate user to preserve historical referential integrity and audit logs
+  user.status = 'DEACTIVATED';
+  await user.save();
 
-  return { success: true, deletedUserId: userId };
+  // For active/confirmed registrations, cancel them and safely restore inventory on the respective TicketCategory
+  const activeRegs = await Registration.find({
+    attendee: userId,
+    registrationStatus: { $in: ['CONFIRMED', 'WAITLISTED'] }
+  });
+
+  for (const reg of activeRegs) {
+    if (reg.registrationStatus === 'CONFIRMED') {
+      const cat = await TicketCategory.findById(reg.ticketCategory);
+      if (cat && cat.availableQuantity < cat.capacity) {
+        await TicketCategory.findByIdAndUpdate(cat._id, { $inc: { availableQuantity: 1 } });
+      }
+    }
+    reg.registrationStatus = 'CANCELLED';
+    reg.cancelledAt = new Date();
+    await reg.save();
+
+    await Ticket.findOneAndUpdate({ registration: reg._id }, { status: 'CANCELLED' });
+  }
+
+  return { success: true, deletedUserId: userId, status: 'DEACTIVATED' };
 };
+
 
 export const getAllEventsPlatformWide = async (filters = {}) => {
   const query = {};
